@@ -1,0 +1,248 @@
+// Sistema de idioma ES/EN para la interfaz del Configurador MEPLHAA.
+// El contenido de referencia muy denso (descripciones del catálogo de
+// dispositivos y las tablas "qué se puede configurar" por tipo) permanece
+// en español por ahora; el resto de la interfaz es totalmente bilingüe.
+
+let currentLang = "es";
+
+const T = {
+  es: {
+    appTitle: "Configurador MEPLHAA",
+    appSubtitle: 'Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"',
+    modeWizard: "🧙 Ir al asistente",
+    modeAdvanced: "🛠 Ir al formulario avanzado",
+    devicePickerTitle: "Selector de dispositivos y funciones",
+    devicePickerHint: 'Opcional: elige un dispositivo real como punto de partida, o usa "Personalizado" para configurar todo tú mismo con el asistente o el formulario avanzado de más abajo.',
+    useDeviceBtn: "Usar esta configuración",
+
+    generalConfigTitle: "Configuración General",
+    hostnameLabel: "Nombre de host (hostname)",
+    hostnamePlaceholder: "ej: cocina-interruptor",
+    logTypeLabel: "Tipo de salida de log",
+    logOff: "Desactivado",
+    ledGpioLabel: "GPIO del LED de estado",
+    ledInvertLabel: "Invertir señal del LED",
+    setupButtonsLabel: "Botón(es) de modo configuración (GPIO:tipo, coma)",
+    rawExtraGeneralLabel: 'JSON avanzado general (I2C "ic", expansores "mc", UART "r", horarios "tt", acciones de sistema...)',
+
+    ioTitle: 'GPIOs ("io")',
+    addIoBtn: "+ Añadir grupo GPIO",
+    ioHint: 'Desde HAA v12 Merlin, cada GPIO usado debe declararse aquí primero (modo, pull-up, valor inicial...). Los accesorios luego referencian estos GPIOs.',
+    gpiosLabel: "GPIOs (separados por coma)",
+    modeLabel: "Modo",
+    pullLabel: "Pull-up/down",
+    paramsLabel: "Parámetros",
+    removeBtn: "Quitar",
+    roleRelay: "Relé",
+    roleLed: "LED",
+    roleButton: "Botón",
+
+    accessoriesTitle: "Accesorios",
+    addAccessoryBtn: "+ Añadir accesorio",
+    typeLabel: "Tipo",
+    nameLabel: "Nombre (opcional)",
+    namePlaceholder: "ej: Luz salón",
+    relayGpioLabel: "GPIO del relé",
+    manualTypeOption: "Otro (número manual)",
+    numericTypeLabel: 'Tipo numérico ("t")',
+    buttonsLabel: "Botones (GPIO:tipo, separados por coma)",
+    rawExtraLabel: "JSON avanzado (se combina con el resto del accesorio, y puede sobrescribir los campos de arriba)",
+    rawExtraFriendlyHint: '— este dispositivo tiene datos que no caben en los campos simples (multi-relé, servicios extra...); se conservan aquí',
+    rawExtraTypeFieldsHint: '— para servicios extra ("es"), calibraciones u otros campos no cubiertos arriba',
+    rawExtraGenericHint: '— este tipo de accesorio aún no tiene formulario dedicado; añade aquí sus campos específicos (consulta la wiki de HAA "Service-Types")',
+    splitEsHint: "Este accesorio agrupa {n} servicio(s) extra dentro del JSON avanzado — no se pueden editar por separado tal como están.",
+    splitEsBtn: "🔓 Separar en accesorios independientes",
+    typeInfoSummary: "ℹ️ Ver qué se puede configurar en este tipo",
+    typeInfoNoData: "Aún no hay referencia rápida para este tipo aquí.",
+    typeInfoKeyCol: "Clave",
+    typeInfoDescCol: "Qué controla",
+    typeInfoSource: "Fuente",
+
+    jsonOutputTitle: "JSON generado",
+    hideDefaultsBtn: "Ocultar valores por defecto",
+    showDefaultsBtn: "Mostrar valores por defecto",
+    oneLineBtn: "Una sola línea",
+    multiLineBtn: "Formato legible",
+    copyBtn: "Copiar",
+
+    pasteJsonTitle: "Pegar JSON existente",
+    pasteJsonHint: 'Pega aquí una configuración MEPLHAA y pulsa "Cargar" para rellenar el formulario con sus valores.',
+    loadJsonBtn: "Cargar en el formulario",
+    loadJsonOk: "Configuración cargada correctamente en el formulario.",
+    loadJsonInvalid: "JSON inválido",
+
+    wizStepIntro: "Datos generales",
+    wizStepAccType: "Tipo de accesorio",
+    wizStepAccName: "Nombre",
+    wizStepAccOutput: "GPIO de salida",
+    wizStepTypeFields: "Configuración del tipo",
+    wizStepAccButton: "Botón físico",
+    wizStepAccCustom: "Tipo personalizado",
+    wizStepAccConfirm: "Accesorio configurado",
+    wizStepSummary: "Resumen",
+    wizAccessoryLabel: "Accesorio",
+
+    wizIntroH3: "¿Cómo se llamará el dispositivo?",
+    wizIntroLedCheckbox: "Tiene LED de estado",
+    wizIntroLedInvert: "Invertir señal",
+    wizIntroNextHint: '👉 Pulsa "Siguiente" para elegir el tipo de accesorio (Interruptor, Enchufe, Personalizado...).',
+
+    wizAccTypeH3: "¿Qué tipo de accesorio quieres configurar?",
+    wizAccTypeLabel: "Tipo de accesorio",
+    wizAccTypeHint: 'Interruptor y Enchufe tienen formulario guiado completo (GPIO de relé). Los demás tipos (Cerradura, Sensores, Termómetro, Bombilla...) tienen campos dedicados cuando existen, y si no, se configuran en el paso siguiente con el editor "JSON avanzado".',
+
+    wizAccNameH3: "¿Quieres ponerle un nombre? (opcional)",
+    wizAccNameLabel: "Nombre del accesorio",
+
+    wizAccOutputH3: "¿A qué GPIO está conectado el relé/salida?",
+    wizAccOutputLabel: "GPIO de salida",
+    wizAccOutputHint: 'Se declarará automáticamente como Salida en "io".',
+
+    wizTypeFieldsHint: "Podrás añadir campos adicionales (servicios extra, calibraciones...) más tarde desde el formulario avanzado.",
+
+    wizAccCustomLabel: 'Número de tipo ("t") — consulta la wiki de HAA "Service-Types" para el valor exacto',
+    wizAccCustomJsonLabel: "JSON adicional (opcional, se combina con el resto del accesorio)",
+    wizAccCustomDefaultTitle: "Tipo personalizado",
+
+    wizAccButtonH3: "¿Tiene un botón físico para controlarlo manualmente?",
+    wizAccButtonCheckbox: "Sí, tiene botón",
+    wizAccButtonGpioLabel: "GPIO del botón",
+
+    wizConfirmH3: "Accesorio configurado ✅",
+    wizConfirmNoName: "(sin nombre)",
+    wizConfirmNoButton: "Sin botón físico",
+    wizConfirmButtonOn: "Botón físico en GPIO",
+    wizConfirmAsk: "¿Quieres añadir otro accesorio?",
+    wizAddAnotherBtn: "+ Añadir otro accesorio",
+    wizFinishBtn: "Terminar y ver el JSON",
+
+    wizSummaryH3: "¡Configuración completa! 🎉",
+    wizSummaryText: 'Revisa el JSON generado a la derecha. Puedes copiarlo, pegarlo para editarlo más tarde, o pasar al formulario avanzado para ajustes finos (I2C, UART, infrarrojos...).',
+    wizRestartBtn: "Empezar de nuevo",
+
+    backBtn: "Atrás",
+    nextBtn: "Siguiente",
+  },
+
+  en: {
+    appTitle: "MEPLHAA Configurator",
+    appSubtitle: 'Generate the JSON configuration (MEPLHAA script) for devices running HAA v12 "Merlin" firmware',
+    modeWizard: "🧙 Go to wizard",
+    modeAdvanced: "🛠 Go to advanced form",
+    devicePickerTitle: "Device & feature picker",
+    devicePickerHint: 'Optional: pick a real device as a starting point, or use "Custom" to configure everything yourself with the wizard or the advanced form below.',
+    useDeviceBtn: "Use this configuration",
+
+    generalConfigTitle: "General Configuration",
+    hostnameLabel: "Hostname",
+    hostnamePlaceholder: "e.g.: kitchen-switch",
+    logTypeLabel: "Log output type",
+    logOff: "Disabled",
+    ledGpioLabel: "Status LED GPIO",
+    ledInvertLabel: "Invert LED signal",
+    setupButtonsLabel: "Setup mode button(s) (GPIO:type, comma)",
+    rawExtraGeneralLabel: 'Advanced general JSON (I2C "ic", expanders "mc", UART "r", timetables "tt", system actions...)',
+
+    ioTitle: 'GPIOs ("io")',
+    addIoBtn: "+ Add GPIO group",
+    ioHint: 'Since HAA v12 Merlin, every GPIO used must be declared here first (mode, pull-up, initial value...). Accessories then reference these GPIOs.',
+    gpiosLabel: "GPIOs (comma-separated)",
+    modeLabel: "Mode",
+    pullLabel: "Pull-up/down",
+    paramsLabel: "Parameters",
+    removeBtn: "Remove",
+    roleRelay: "Relay",
+    roleLed: "LED",
+    roleButton: "Button",
+
+    accessoriesTitle: "Accessories",
+    addAccessoryBtn: "+ Add accessory",
+    typeLabel: "Type",
+    nameLabel: "Name (optional)",
+    namePlaceholder: "e.g.: Living room light",
+    relayGpioLabel: "Relay GPIO",
+    manualTypeOption: "Other (manual number)",
+    numericTypeLabel: 'Numeric type ("t")',
+    buttonsLabel: "Buttons (GPIO:type, comma-separated)",
+    rawExtraLabel: "Advanced JSON (merged with the rest of the accessory, can override the fields above)",
+    rawExtraFriendlyHint: "— this device has data that doesn't fit the simple fields (multi-relay, extra services...); it's preserved here",
+    rawExtraTypeFieldsHint: '— for extra services ("es"), calibration, or other fields not covered above',
+    rawExtraGenericHint: '— this accessory type doesn\'t have a dedicated form yet; add its specific fields here (check the HAA wiki "Service-Types")',
+    splitEsHint: "This accessory bundles {n} extra service(s) inside the advanced JSON — they can't be edited separately as they are.",
+    splitEsBtn: "🔓 Split into independent accessories",
+    typeInfoSummary: "ℹ️ See what can be configured for this type",
+    typeInfoNoData: "No quick reference for this type yet.",
+    typeInfoKeyCol: "Key",
+    typeInfoDescCol: "What it controls",
+    typeInfoSource: "Source",
+
+    jsonOutputTitle: "Generated JSON",
+    hideDefaultsBtn: "Hide default values",
+    showDefaultsBtn: "Show default values",
+    oneLineBtn: "Single line",
+    multiLineBtn: "Readable format",
+    copyBtn: "Copy",
+
+    pasteJsonTitle: "Paste existing JSON",
+    pasteJsonHint: 'Paste a MEPLHAA configuration here and press "Load" to fill the form with its values.',
+    loadJsonBtn: "Load into form",
+    loadJsonOk: "Configuration loaded successfully into the form.",
+    loadJsonInvalid: "Invalid JSON",
+
+    wizStepIntro: "General info",
+    wizStepAccType: "Accessory type",
+    wizStepAccName: "Name",
+    wizStepAccOutput: "Output GPIO",
+    wizStepTypeFields: "Type configuration",
+    wizStepAccButton: "Physical button",
+    wizStepAccCustom: "Custom type",
+    wizStepAccConfirm: "Accessory configured",
+    wizStepSummary: "Summary",
+    wizAccessoryLabel: "Accessory",
+
+    wizIntroH3: "What will the device be called?",
+    wizIntroLedCheckbox: "Has status LED",
+    wizIntroLedInvert: "Invert signal",
+    wizIntroNextHint: '👉 Press "Next" to choose the accessory type (Switch, Outlet, Custom...).',
+
+    wizAccTypeH3: "What type of accessory do you want to configure?",
+    wizAccTypeLabel: "Accessory type",
+    wizAccTypeHint: 'Switch and Outlet have a fully guided form (relay GPIO). Other types (Lock, Sensors, Thermometer, Lightbulb...) have dedicated fields when available, otherwise they are configured in the next step with the "Advanced JSON" editor.',
+
+    wizAccNameH3: "Want to give it a name? (optional)",
+    wizAccNameLabel: "Accessory name",
+
+    wizAccOutputH3: "Which GPIO is the relay/output connected to?",
+    wizAccOutputLabel: "Output GPIO",
+    wizAccOutputHint: 'It will be automatically declared as Output in "io".',
+
+    wizTypeFieldsHint: "You can add extra fields (extra services, calibration...) later from the advanced form.",
+
+    wizAccCustomLabel: 'Type number ("t") — check the HAA "Service-Types" wiki for the exact value',
+    wizAccCustomJsonLabel: "Additional JSON (optional, merged with the rest of the accessory)",
+    wizAccCustomDefaultTitle: "Custom type",
+
+    wizAccButtonH3: "Does it have a physical button to control it manually?",
+    wizAccButtonCheckbox: "Yes, it has a button",
+    wizAccButtonGpioLabel: "Button GPIO",
+
+    wizConfirmH3: "Accessory configured ✅",
+    wizConfirmNoName: "(no name)",
+    wizConfirmNoButton: "No physical button",
+    wizConfirmButtonOn: "Physical button on GPIO",
+    wizConfirmAsk: "Do you want to add another accessory?",
+    wizAddAnotherBtn: "+ Add another accessory",
+    wizFinishBtn: "Finish and view JSON",
+
+    wizSummaryH3: "Configuration complete! 🎉",
+    wizSummaryText: "Review the generated JSON on the right. You can copy it, paste it later to edit it, or switch to the advanced form for fine-tuning (I2C, UART, infrared...).",
+    wizRestartBtn: "Start over",
+
+    backBtn: "Back",
+    nextBtn: "Next",
+  },
+};
+
+function t(key) {
+  return (T[currentLang] && T[currentLang][key]) || T.es[key] || key;
+}

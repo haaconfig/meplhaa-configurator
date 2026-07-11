@@ -1,0 +1,66 @@
+Configurador MEPLHAA — v1.7
+Fecha: 2026-07-11
+
+Cambios desde v1.6:
+- Añadido README.md con instrucciones de uso completas (cómo arrancarla,
+  qué hace cada sección, estructura del proyecto y referencias). No hay
+  cambios funcionales en la app respecto a v1.6 (pasada de QA completa
+  sin encontrar fallos: regresión de las 187 configuraciones del catálogo,
+  auto-separación de servicios extra, asistente, vista móvil e idioma
+  ES/EN, todo correcto).
+
+Cambios desde v1.5:
+- Al cargar un dispositivo (o pegar un JSON) que agrupa varios relés/válvulas
+  como servicios extra ("es"), ahora se SEPARAN AUTOMÁTICAMENTE en tarjetas
+  de accesorio independientes desde el primer momento — ya no hace falta
+  pulsar ningún botón. "Sonoff 4CH — Riego" ahora muestra directamente sus
+  4 válvulas, cada una con su propio GPIO editable.
+  El botón "🔓 Separar en accesorios independientes" se mantiene como
+  respaldo para cuando pegues o edites tú mismo un JSON con "es" a mano.
+  Nota: esto significa que esos accesorios pasan a mostrarse como tarjetas
+  independientes en la app Home (antes compartían una sola tarjeta).
+
+Cambios desde v1.4:
+- Corregido: la detección de "Relé"/"Botón" solo miraba el accesorio
+  principal y no los servicios extra ("es") agrupados dentro de él. Ahora
+  se recorre TODO el JSON del accesorio, así que si un dispositivo tiene
+  4 relés (o más) agrupados, los 4 se marcan correctamente como "Relé".
+
+Cambios desde v1.3:
+- (Sustituido por el cambio automático de v1.6 — el botón manual se
+  mantiene disponible para ediciones futuras).
+
+Cambios desde v1.2:
+- Cada fila de "GPIOs (io)" muestra una etiqueta automática (Relé/LED/Botón).
+
+Cambios desde v1.1:
+- Una fila por GPIO en vez de agrupados por coma.
+
+Cambios desde v1.0:
+- Botón "Una sola línea" para el JSON compacto.
+- Corregido el texto de los botones-interruptor al cambiar de idioma.
+
+Resumen general (acumulado):
+- Formulario avanzado: Configuración General, GPIOs ("io") con modo + pull-up/down
+  + parámetros (una fila por GPIO, con etiqueta Relé/LED/Botón), Accesorios
+  con campos dedicados para Interruptor/Enchufe, Botón sin estado, Cerradura,
+  Válvula de agua, Termómetro/Humedad, Bombilla — los servicios extra
+  agrupados se separan automáticamente en tarjetas editables individuales
+  al cargar cualquier dispositivo o JSON pegado.
+- Panel "¿Qué se puede configurar en este tipo?" por tipo de accesorio (34 tipos).
+- Asistente guiado paso a paso (mismo motor que el formulario avanzado).
+- Selector de dispositivos en 3 niveles: Fabricante -> Modelo -> Ejemplo/función,
+  con categoría "Personalizado" que además permite explorar TODOS los ejemplos
+  del catálogo en un único desplegable y autocompleta fabricante/modelo al elegir uno.
+- Catálogo de 187 configuraciones: dispositivos oficiales de la wiki de RavenSystem
+  (Shelly, Sonoff, Otros) + 120 migrados automáticamente de v11 a v12 desde el
+  issue #689 de GitHub (community collection).
+- Selector de idioma ES/EN para toda la interfaz interactiva.
+- Pegar JSON existente para rellenar el formulario.
+- JSON generado en vivo (legible o en una línea), con avisos de validación.
+
+Cómo usarla:
+1. Descomprime el zip.
+2. Abre una terminal en esa carpeta y ejecuta: python -m http.server 8096
+3. Abre http://localhost:8096 en el navegador.
+(O usa cualquier otro servidor estático; son ficheros HTML/CSS/JS puros, sin build).

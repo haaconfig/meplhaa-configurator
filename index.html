@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configurador MEPLHAA</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+<header>
+  <div class="header-row">
+    <h1 data-i18n="appTitle">Configurador MEPLHAA</h1>
+    <div class="lang-toggle">
+      <button id="lang-es" class="lang-btn">🇪🇸 ES</button>
+      <button id="lang-en" class="lang-btn">🇬🇧 EN</button>
+    </div>
+  </div>
+  <span class="badge">v12</span>
+  <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
+</header>
+
+<div class="mode-toggle">
+  <button id="mode-wizard" class="mode-btn" data-i18n="modeWizard">🧙 Ir al asistente</button>
+  <button id="mode-advanced" class="mode-btn" data-i18n="modeAdvanced">🛠 Ir al formulario avanzado</button>
+</div>
+
+<div class="device-picker card">
+  <h2 data-i18n="devicePickerTitle">Selector de dispositivos y funciones</h2>
+  <p class="hint" data-i18n="devicePickerHint">Elige el fabricante, el modelo y el ejemplo/función concreta, y pulsa "Usar esta configuración" para cargarla en el formulario.</p>
+  <div class="device-picker-row">
+    <select id="device-category"></select>
+    <select id="device-model"></select>
+    <select id="device-example"></select>
+    <button class="btn-primary" id="btn-use-device" data-i18n="useDeviceBtn">Usar esta configuración</button>
+  </div>
+  <p id="device-description" class="hint"></p>
+</div>
+
+<main class="layout">
+  <section class="panel form-panel">
+
+    <div id="wizard-panel" class="card">
+      <div class="wizard-progress" id="wizard-progress"></div>
+      <div id="wizard-step-content"></div>
+      <div class="wizard-nav" id="wizard-nav">
+        <button id="wizard-back" class="btn-secondary" data-i18n="backBtn">Atrás</button>
+        <button id="wizard-next" class="btn-primary" data-i18n="nextBtn">Siguiente</button>
+      </div>
+    </div>
+
+    <div id="advanced-form">
+
+    <div class="card">
+      <h2 data-i18n="generalConfigTitle">Configuración General</h2>
+      <div class="grid2">
+        <label data-i18n="hostnameLabel">Nombre de host (hostname)
+          <input type="text" id="gen-hostname" data-i18n-placeholder="hostnamePlaceholder" placeholder="ej: cocina-interruptor">
+        </label>
+        <label data-i18n="logTypeLabel">Tipo de salida de log
+          <select id="gen-log">
+            <option value="0" data-i18n="logOff">Desactivado</option>
+            <option value="1">UART0</option>
+            <option value="2">UART1</option>
+            <option value="4">UART2 (ESP32)</option>
+            <option value="5">Network</option>
+          </select>
+        </label>
+        <label data-i18n="ledGpioLabel">GPIO del LED de estado
+          <input type="number" id="gen-led-gpio" placeholder="ej: 13">
+        </label>
+        <label class="checkbox-label"><input type="checkbox" id="gen-led-invert" checked> <span data-i18n="ledInvertLabel">Invertir señal del LED</span></label>
+        <label data-i18n="setupButtonsLabel">Botón(es) de modo configuración (GPIO:tipo, coma) <span class="hint">ej: 0:5</span>
+          <input type="text" id="gen-setup-buttons" placeholder="ej: 0:5">
+        </label>
+      </div>
+      <label style="margin-top:10px" data-i18n="rawExtraGeneralLabel">JSON avanzado general (I2C "ic", expansores "mc", UART "r", horarios "tt", acciones de sistema...)
+        <textarea id="gen-raw-extra" placeholder='{"r":[{"n":10,"g":[6,7],"s":9600}]}'></textarea>
+      </label>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 data-i18n="ioTitle">GPIOs ("io")</h2>
+        <button class="btn-secondary" id="btn-add-io" data-i18n="addIoBtn">+ Añadir grupo GPIO</button>
+      </div>
+      <p class="hint" data-i18n="ioHint">Desde HAA v12 Merlin, cada GPIO usado debe declararse aquí primero (modo, pull-up, valor inicial...). Los accesorios luego referencian estos GPIOs.</p>
+      <div id="io-list"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 data-i18n="accessoriesTitle">Accesorios</h2>
+        <button class="btn-secondary" id="btn-add-accessory" data-i18n="addAccessoryBtn">+ Añadir accesorio</button>
+      </div>
+      <div id="accessory-list"></div>
+    </div>
+
+    </div>
+
+  </section>
+
+  <section class="panel json-panel">
+    <div class="card">
+      <div class="card-header">
+        <h2 data-i18n="jsonOutputTitle">JSON generado</h2>
+        <div class="btn-row">
+          <button class="btn-secondary" id="btn-simplify" data-i18n="hideDefaultsBtn">Ocultar valores por defecto</button>
+          <button class="btn-secondary" id="btn-oneline" data-i18n="oneLineBtn">Una sola línea</button>
+          <button class="btn-primary" id="btn-copy" data-i18n="copyBtn">Copiar</button>
+        </div>
+      </div>
+      <pre id="json-output" class="json-output"></pre>
+      <div id="warnings" class="warnings"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="pasteJsonTitle">Pegar JSON existente</h2>
+      <p class="hint" data-i18n="pasteJsonHint">Pega aquí una configuración MEPLHAA y pulsa "Cargar" para rellenar el formulario con sus valores.</p>
+      <textarea id="json-input" placeholder='{"c":{"io":[[[12,13],2]]},"a":[{"t":1}]}'></textarea>
+      <button class="btn-primary" id="btn-load-json" data-i18n="loadJsonBtn">Cargar en el formulario</button>
+      <div id="load-status"></div>
+    </div>
+  </section>
+</main>
+
+<script src="devices.js?v=9"></script>
+<script src="typeInfo.js?v=6"></script>
+<script src="i18n.js?v=5"></script>
+<script src="app.js?v=15"></script>
+</body>
+</html>

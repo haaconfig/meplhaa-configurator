@@ -1,5 +1,11 @@
-Configurador MEPLHAA — v1.8
-Fecha: 2026-07-14
+Configurador MEPLHAA — v1.9
+Fecha: 2026-07-16
+
+Cambios desde v1.8:
+- Añadida analítica de visitas con GoatCounter (script en index.html,
+  sitio "meplhaa.goatcounter.com"). No cambia nada visible ni de
+  comportamiento para el usuario; solo cuenta visitas de forma anónima
+  y sin cookies.
 
 Cambios desde v1.7:
 - Al pegar un JSON con errores de sintaxis (llave { o } de apertura/cierre

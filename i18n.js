@@ -73,6 +73,11 @@ const T = {
     jsonRepairHint: "🔧 Parece que falta algo (por ejemplo, una llave { o } de apertura/cierre, o sobra una coma). Esta es una posible corrección automática — revísala antes de aplicarla:",
     jsonRepairApplyBtn: "Usar esta corrección",
     jsonRepairDismissBtn: "Descartar",
+    deviceHintDetected: "Dispositivo detectado",
+    deviceHintDeclared: "Dispositivo indicado por ti",
+    deviceHintWikiLink: "Ver ficha/esquema en la wiki",
+    deviceHintAskLabel: "¿Sabes qué dispositivo es este? (opcional, solo para mostrarte el enlace a su ficha/esquema — no cambia tu configuración)",
+    deviceHintSaveBtn: "Guardar",
 
     wizStepIntro: "Datos generales",
     wizStepAccType: "Tipo de accesorio",
@@ -194,6 +199,11 @@ const T = {
     jsonRepairHint: "🔧 Something looks missing (e.g. an opening/closing { or }, or an extra trailing comma). Here's a possible automatic fix — review it before applying:",
     jsonRepairApplyBtn: "Use this fix",
     jsonRepairDismissBtn: "Dismiss",
+    deviceHintDetected: "Device detected",
+    deviceHintDeclared: "Device you specified",
+    deviceHintWikiLink: "See its page/schematic on the wiki",
+    deviceHintAskLabel: "Do you know which device this is? (optional, just to show you a link to its wiki page/schematic — doesn't change your config)",
+    deviceHintSaveBtn: "Save",
 
     wizStepIntro: "General info",
     wizStepAccType: "Accessory type",

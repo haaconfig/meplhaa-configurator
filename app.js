@@ -329,6 +329,7 @@ const state = {
     ledInvert: true,
     setupButtons: "",
     rawExtra: "",
+    deviceHint: null, // { source: "detected"|"declared", category, model, example? }
   },
   io: [{ id: nextId(), gpios: "12", mode: 2, pull: "0", params: "" }],
   accessories: [{ id: nextId(), t: 1, custom: false, nm: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }],
@@ -540,6 +541,7 @@ function render() {
   document.getElementById("gen-led-invert").checked = state.general.ledInvert;
   document.getElementById("gen-setup-buttons").value = state.general.setupButtons;
   document.getElementById("gen-raw-extra").value = state.general.rawExtra;
+  renderDeviceHint("device-hint-box");
   renderJson();
 }
 
@@ -937,6 +939,85 @@ function tryRepairJson(text) {
   return null;
 }
 
+// Páginas de la wiki de RavenSystem con fotos/pinout por fabricante
+// (Devices-Database es el fallback general si no hay página específica).
+const CATEGORY_WIKI_URL = {
+  Shelly: "https://github.com/RavenSystem/esp-homekit-devices/wiki/Shelly-Devices",
+  Sonoff: "https://github.com/RavenSystem/esp-homekit-devices/wiki/Sonoff-Devices",
+  Otros: "https://github.com/RavenSystem/esp-homekit-devices/wiki/Other-Devices",
+};
+
+// Quita los campos de texto libre (nombres) que no forman parte de la
+// identidad real del dispositivo, para poder comparar configuraciones
+// ignorando cómo las haya llamado cada usuario.
+function stripFreeTextFields(obj) {
+  if (Array.isArray(obj)) return obj.map(stripFreeTextFields);
+  if (obj && typeof obj === "object") {
+    const copy = {};
+    for (const k of Object.keys(obj)) {
+      if (k === "nm") continue;
+      copy[k] = stripFreeTextFields(obj[k]);
+    }
+    return copy;
+  }
+  return obj;
+}
+
+function canonicalConfigSignature(config) {
+  const c = { ...(config.c || {}) };
+  delete c.n; // hostname
+  const a = (config.a || []).map(stripFreeTextFields);
+  return JSON.stringify({ c: stripFreeTextFields(c), a });
+}
+
+// Compara el JSON cargado contra el catálogo (ignorando hostname/nombres)
+// para saber si coincide exactamente con un dispositivo conocido. Solo se
+// consideran coincidencias reales (mismo "c"/"a" salvo texto libre); no hay
+// coincidencia aproximada/parcial para evitar sugerir un dispositivo erróneo.
+function detectDeviceFromConfig(parsedJson) {
+  if (typeof DEVICE_CATALOG === "undefined") return null;
+  const sig = canonicalConfigSignature(parsedJson);
+  return DEVICE_CATALOG.find((d) => d.category !== "Personalizado" && canonicalConfigSignature(d.config) === sig) || null;
+}
+
+function renderDeviceHint(containerId) {
+  const box = document.getElementById(containerId);
+  if (!box) return;
+  const hint = state.general.deviceHint;
+  if (hint) {
+    const wikiUrl = CATEGORY_WIKI_URL[hint.category];
+    const modelLabel = hint.model.toLowerCase().startsWith(hint.category.toLowerCase()) ? hint.model : `${hint.category} ${hint.model}`;
+    const label = hint.example ? `${modelLabel} — ${hint.example}` : modelLabel;
+    const sourceMsg = hint.source === "detected" ? t("deviceHintDetected") : t("deviceHintDeclared");
+    box.innerHTML = `
+      <p class="hint">🔎 ${sourceMsg}: <strong>${label}</strong>${wikiUrl ? ` — <a href="${wikiUrl}" target="_blank" rel="noopener">${t("deviceHintWikiLink")} ↗</a>` : ""}</p>
+    `;
+    return;
+  }
+  const categories = [...new Set((typeof DEVICE_CATALOG !== "undefined" ? DEVICE_CATALOG : []).map((d) => d.category).filter((c) => c !== "Personalizado"))];
+  box.innerHTML = `
+    <p class="hint">${t("deviceHintAskLabel")}</p>
+    <div class="device-hint-ask-row">
+      <select class="dh-category">${categories.map((c) => `<option value="${c}">${c}</option>`).join("")}</select>
+      <select class="dh-model"></select>
+      <button class="btn-secondary dh-save">${t("deviceHintSaveBtn")}</button>
+    </div>
+  `;
+  const catSelect = box.querySelector(".dh-category");
+  const modelSelect = box.querySelector(".dh-model");
+  const fillModels = () => {
+    const models = [...new Set(DEVICE_CATALOG.filter((d) => d.category === catSelect.value).map((d) => d.model))];
+    modelSelect.innerHTML = models.map((m) => `<option value="${m}">${m}</option>`).join("");
+  };
+  fillModels();
+  catSelect.addEventListener("change", fillModels);
+  box.querySelector(".dh-save").addEventListener("click", () => {
+    state.general.deviceHint = { source: "declared", category: catSelect.value, model: modelSelect.value };
+    render();
+    renderWizard();
+  });
+}
+
 function hideJsonRepairSuggestion() {
   const box = document.getElementById("json-repair-box");
   box.innerHTML = "";
@@ -979,6 +1060,9 @@ function loadJsonIntoForm(text) {
     return;
   }
   hideJsonRepairSuggestion();
+
+  const detected = detectDeviceFromConfig(parsed);
+  state.general.deviceHint = detected ? { source: "detected", category: detected.category, model: detected.model, example: detected.example } : null;
 
   const c = parsed.c || {};
   state.general.hostname = c.n || "";
@@ -1172,8 +1256,10 @@ function renderWizard() {
         </label>
         <label class="checkbox-label"><input type="checkbox" id="w-led-invert" ${state.general.ledInvert ? "checked" : ""}> ${t("wizIntroLedInvert")}</label>
       </div>
+      <div id="wiz-device-hint-box" class="device-hint-box"></div>
       <p class="hint">${t("wizIntroNextHint")}</p>
     `;
+    renderDeviceHint("wiz-device-hint-box");
     document.getElementById("w-hostname").addEventListener("input", (e) => {
       state.general.hostname = e.target.value;
       renderJson();

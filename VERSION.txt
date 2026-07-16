@@ -1,5 +1,21 @@
-Configurador MEPLHAA — v1.10
+Configurador MEPLHAA — v1.12
 Fecha: 2026-07-16
+
+Cambios desde v1.11:
+- Al cargar o pegar un JSON, la web ahora intenta identificar de qué
+  dispositivo se trata comparándolo con el catálogo (ignorando hostname y
+  nombres libres). Si lo reconoce, muestra un aviso en "Configuración
+  General" con el dispositivo detectado y un enlace a su ficha en la wiki
+  de RavenSystem (fotos/pinout). Si no lo reconoce (dispositivo propio o
+  fuera del catálogo), aparece un selector opcional Fabricante→Modelo para
+  indicarlo tú mismo — no cambia la configuración, solo permite mostrar el
+  enlace correspondiente. Lo mismo está disponible en el primer paso del
+  asistente, sincronizado con el formulario avanzado.
+
+Cambios desde v1.10:
+- Añadido un pie de página visible en la propia web ("Configurador
+  MEPLHAA vX.X") para poder comprobar de un vistazo qué versión está
+  publicada, sin tener que mirar el código fuente ni el archivo de red.
 
 Cambios desde v1.9:
 - Corregido: la sugerencia de reparación automática de JSON (v1.8) no

@@ -401,3 +401,31 @@ button {
   border-radius: 4px;
   font-size: 12px;
 }
+
+.app-footer {
+  text-align: center;
+  color: var(--hint);
+  font-size: 12px;
+  padding: 16px 32px 32px;
+}
+
+.device-hint-box {
+  background: #f7f5fc;
+  border: 1px solid #e0d8f5;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+
+.device-hint-box .hint { margin: 0; }
+
+.device-hint-box a { color: var(--purple-dark); }
+
+.device-hint-ask-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.device-hint-ask-row select { min-width: 140px; }

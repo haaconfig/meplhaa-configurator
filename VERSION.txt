@@ -1,5 +1,14 @@
-Configurador MEPLHAA — v1.7
-Fecha: 2026-07-11
+Configurador MEPLHAA — v1.8
+Fecha: 2026-07-14
+
+Cambios desde v1.7:
+- Al pegar un JSON con errores de sintaxis (llave { o } de apertura/cierre
+  que falta, coma final sobrante...), la web ahora intenta detectar y
+  reparar el problema automáticamente. Si encuentra una corrección válida,
+  la muestra en una caja con vista previa y dos botones: "Usar esta
+  corrección" (la aplica y carga el formulario) o "Descartar". Si el JSON
+  está demasiado roto para repararlo automáticamente, se mantiene el
+  mensaje de error de siempre sin sugerir nada.
 
 Cambios desde v1.6:
 - Añadido README.md con instrucciones de uso completas (cómo arrancarla,

@@ -70,6 +70,9 @@ const T = {
     loadJsonBtn: "Cargar en el formulario",
     loadJsonOk: "Configuración cargada correctamente en el formulario.",
     loadJsonInvalid: "JSON inválido",
+    jsonRepairHint: "🔧 Parece que falta algo (por ejemplo, una llave { o } de apertura/cierre, o sobra una coma). Esta es una posible corrección automática — revísala antes de aplicarla:",
+    jsonRepairApplyBtn: "Usar esta corrección",
+    jsonRepairDismissBtn: "Descartar",
 
     wizStepIntro: "Datos generales",
     wizStepAccType: "Tipo de accesorio",
@@ -188,6 +191,9 @@ const T = {
     loadJsonBtn: "Load into form",
     loadJsonOk: "Configuration loaded successfully into the form.",
     loadJsonInvalid: "Invalid JSON",
+    jsonRepairHint: "🔧 Something looks missing (e.g. an opening/closing { or }, or an extra trailing comma). Here's a possible automatic fix — review it before applying:",
+    jsonRepairApplyBtn: "Use this fix",
+    jsonRepairDismissBtn: "Dismiss",
 
     wizStepIntro: "General info",
     wizStepAccType: "Accessory type",

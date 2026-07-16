@@ -228,6 +228,22 @@ button {
 #load-status.ok { color: #2e7d32; }
 #load-status.error { color: var(--danger); }
 
+.json-repair-box {
+  margin-top: 10px;
+  background: #f7f5fc;
+  border: 1px solid #e0d8f5;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.json-repair-box.hidden { display: none; }
+
+.json-repair-box pre {
+  max-height: 220px;
+  overflow: auto;
+  font-size: 12px;
+}
+
 .mode-toggle {
   display: flex;
   gap: 8px;

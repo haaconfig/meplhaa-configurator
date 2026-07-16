@@ -873,6 +873,55 @@ function renderJson() {
   warningsEl.innerHTML = warnings.map((w) => `<div class="warning-item">⚠ ${w}</div>`).join("");
 }
 
+function tryRepairJson(text) {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  const stripTrailingCommas = (s) => s.replace(/,(\s*[}\]])/g, "$1");
+  const needsOpen = !trimmed.startsWith("{");
+  const needsClose = !trimmed.endsWith("}");
+  const wrap = (s) => (needsOpen ? "{" : "") + s + (needsClose ? "}" : "");
+  const candidates = [];
+  if (needsOpen || needsClose) candidates.push(wrap(trimmed));
+  candidates.push(stripTrailingCommas(trimmed));
+  if (needsOpen || needsClose) candidates.push(stripTrailingCommas(wrap(trimmed)));
+  for (const candidate of candidates) {
+    try {
+      const parsed = JSON.parse(candidate);
+      if (parsed && typeof parsed === "object" && ("c" in parsed || "a" in parsed)) {
+        return { fixed: JSON.stringify(parsed, null, 2), parsed };
+      }
+    } catch (e) {
+      // sigue probando el siguiente candidato
+    }
+  }
+  return null;
+}
+
+function hideJsonRepairSuggestion() {
+  const box = document.getElementById("json-repair-box");
+  box.innerHTML = "";
+  box.className = "json-repair-box hidden";
+}
+
+function showJsonRepairSuggestion(fixedText) {
+  const box = document.getElementById("json-repair-box");
+  box.className = "json-repair-box";
+  box.innerHTML = `
+    <p class="hint">${t("jsonRepairHint")}</p>
+    <pre class="json-output">${fixedText.replace(/</g, "&lt;")}</pre>
+    <div class="btn-row">
+      <button class="btn-primary" id="btn-repair-apply">${t("jsonRepairApplyBtn")}</button>
+      <button class="btn-secondary" id="btn-repair-dismiss">${t("jsonRepairDismissBtn")}</button>
+    </div>
+  `;
+  document.getElementById("btn-repair-apply").addEventListener("click", () => {
+    document.getElementById("json-input").value = fixedText;
+    hideJsonRepairSuggestion();
+    loadJsonIntoForm(fixedText);
+  });
+  document.getElementById("btn-repair-dismiss").addEventListener("click", hideJsonRepairSuggestion);
+}
+
 function loadJsonIntoForm(text) {
   const statusEl = document.getElementById("load-status");
   let parsed;
@@ -881,8 +930,15 @@ function loadJsonIntoForm(text) {
   } catch (e) {
     statusEl.textContent = `${t("loadJsonInvalid")}: ${e.message}`;
     statusEl.className = "error";
+    const repair = tryRepairJson(text);
+    if (repair) {
+      showJsonRepairSuggestion(repair.fixed);
+    } else {
+      hideJsonRepairSuggestion();
+    }
     return;
   }
+  hideJsonRepairSuggestion();
 
   const c = parsed.c || {};
   state.general.hostname = c.n || "";

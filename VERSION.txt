@@ -1,5 +1,15 @@
-Configurador MEPLHAA — v1.15
+Configurador MEPLHAA — v1.16
 Fecha: 2026-07-16
+
+Cambios desde v1.15:
+- Añadido "Toldo/Persiana" para el Shelly Plus 2PM, marcado claramente
+  como ⚠ adaptación no oficial (la wiki de RavenSystem no lo documenta
+  todavía, solo dice "TO-DO"). Se ha construido reutilizando los GPIOs
+  reales de este modelo (ya verificados) y el mismo patrón de conmutación
+  con detección de cruce por cero que usan otros dispositivos con
+  persiana ya documentados oficialmente (Sonoff Dual R3), sin inventar
+  valores de calibración de medidor de potencia para este uso. Se avisa
+  en la descripción para que se pruebe con cuidado antes de confiar en él.
 
 Cambios desde v1.14:
 - Añadidos al catálogo, a petición de la comunidad (mcalve): Shelly Plus

@@ -980,6 +980,18 @@ function detectDeviceFromConfig(parsedJson) {
   return DEVICE_CATALOG.find((d) => d.category !== "Personalizado" && canonicalConfigSignature(d.config) === sig) || null;
 }
 
+// Blakadder (templates.blakadder.com) tiene la ficha de pinout/esquema por
+// modelo exacto que se pidió mostrar, pero no podemos garantizar la URL
+// exacta de cada modelo del catálogo sin comprobarlas una a una (los
+// nombres varían: Gen3, Mini, Plus, PM...). Para no enlazar nunca una
+// página equivocada, se usa un enlace de búsqueda dentro de ese sitio con
+// el nombre del modelo, que siempre lleva a la ficha correcta o a los
+// resultados más cercanos, en vez de adivinar el slug.
+function blakadderSearchUrl(hint) {
+  const query = hint.model.toLowerCase().startsWith(hint.category.toLowerCase()) ? hint.model : `${hint.category} ${hint.model}`;
+  return `https://www.google.com/search?q=${encodeURIComponent(`site:templates.blakadder.com ${query}`)}`;
+}
+
 function renderDeviceHint(containerId) {
   const box = document.getElementById(containerId);
   if (!box) return;
@@ -989,8 +1001,12 @@ function renderDeviceHint(containerId) {
     const modelLabel = hint.model.toLowerCase().startsWith(hint.category.toLowerCase()) ? hint.model : `${hint.category} ${hint.model}`;
     const label = hint.example ? `${modelLabel} — ${hint.example}` : modelLabel;
     const sourceMsg = hint.source === "detected" ? t("deviceHintDetected") : t("deviceHintDeclared");
+    const links = [
+      `<a href="${blakadderSearchUrl(hint)}" target="_blank" rel="noopener">${t("deviceHintSchemaLink")} ↗</a>`,
+      wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener">${t("deviceHintWikiLink")} ↗</a>` : null,
+    ].filter(Boolean);
     box.innerHTML = `
-      <p class="hint">🔎 ${sourceMsg}: <strong>${label}</strong>${wikiUrl ? ` — <a href="${wikiUrl}" target="_blank" rel="noopener">${t("deviceHintWikiLink")} ↗</a>` : ""}</p>
+      <p class="hint">🔎 ${sourceMsg}: <strong>${label}</strong> — ${links.join(" · ")}</p>
     `;
     return;
   }

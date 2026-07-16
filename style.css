@@ -62,6 +62,13 @@ header h1 {
   vertical-align: middle;
 }
 
+.app-version-badge {
+  font-size: 12px;
+  color: var(--hint);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
 .subtitle {
   color: var(--hint);
   margin-top: 4px;
@@ -400,13 +407,6 @@ button {
   padding: 1px 5px;
   border-radius: 4px;
   font-size: 12px;
-}
-
-.app-footer {
-  text-align: center;
-  color: var(--hint);
-  font-size: 12px;
-  padding: 16px 32px 32px;
 }
 
 .device-hint-box {

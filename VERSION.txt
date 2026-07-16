@@ -1,5 +1,29 @@
-Configurador MEPLHAA — v1.12
+Configurador MEPLHAA — v1.15
 Fecha: 2026-07-16
+
+Cambios desde v1.14:
+- Añadidos al catálogo, a petición de la comunidad (mcalve): Shelly Plus
+  2PM (2 interruptores con medidor de potencia y termómetro) y Sonoff
+  Dual R3 v1.6 (2 interruptores con medidor de potencia, y Toldo/Persiana
+  con medidor de potencia). Sacados literalmente de las páginas oficiales
+  de la wiki de RavenSystem para cada dispositivo, sin modificar. El
+  ejemplo de "Toldo/Persiana" del Shelly Plus 2PM no se incluye porque la
+  wiki lo marca como "TO-DO" (aún no documentado oficialmente).
+
+Cambios desde v1.13:
+- El aviso de "dispositivo detectado/indicado" ahora enlaza también a
+  Blakadder (templates.blakadder.com), que es donde está la ficha de
+  pinout/esquema por modelo exacto (foto + tabla de GPIOs). Como no se
+  puede garantizar la URL exacta de cada uno de los ~80 modelos del
+  catálogo sin comprobarlos uno a uno, se usa un enlace de búsqueda con el
+  nombre del modelo en vez de adivinar la dirección — así nunca lleva a
+  una página equivocada. El enlace a la wiki de RavenSystem se mantiene
+  como información adicional (documentación del propio firmware HAA).
+
+Cambios desde v1.12:
+- Corregido: el número de versión (footer) estaba al final del todo de la
+  página, había que hacer mucho scroll para verlo. Ahora se muestra junto
+  al título, arriba, visible sin hacer scroll.
 
 Cambios desde v1.11:
 - Al cargar o pegar un JSON, la web ahora intenta identificar de qué

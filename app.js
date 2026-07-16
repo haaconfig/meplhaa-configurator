@@ -873,17 +873,57 @@ function renderJson() {
   warningsEl.innerHTML = warnings.map((w) => `<div class="warning-item">⚠ ${w}</div>`).join("");
 }
 
+// Recorre el texto (ignorando el contenido de las cadenas) llevando una pila
+// de "{"/"[" abiertos, para saber exactamente qué apertura falta al principio
+// (cierres sin pareja) y qué cierre falta al final (aperturas sin pareja) —
+// en vez de solo mirar el primer y último carácter, que no detecta casos
+// como "termina en } pero le faltan ]} de otro nivel más arriba".
+function analyzeBrackets(text) {
+  const stack = [];
+  const missingOpens = [];
+  let inString = false;
+  let escape = false;
+  for (const ch of text) {
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (ch === "\\") {
+      if (inString) escape = true;
+      continue;
+    }
+    if (ch === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (ch === "{" || ch === "[") {
+      stack.push(ch);
+    } else if (ch === "}" || ch === "]") {
+      const top = stack[stack.length - 1];
+      if ((ch === "}" && top === "{") || (ch === "]" && top === "[")) {
+        stack.pop();
+      } else {
+        missingOpens.push(ch === "}" ? "{" : "[");
+      }
+    }
+  }
+  const prefix = missingOpens.join("");
+  const suffix = stack.map((open) => (open === "{" ? "}" : "]")).reverse().join("");
+  return { prefix, suffix };
+}
+
 function tryRepairJson(text) {
   const trimmed = text.trim();
   if (!trimmed) return null;
   const stripTrailingCommas = (s) => s.replace(/,(\s*[}\]])/g, "$1");
-  const needsOpen = !trimmed.startsWith("{");
-  const needsClose = !trimmed.endsWith("}");
-  const wrap = (s) => (needsOpen ? "{" : "") + s + (needsClose ? "}" : "");
+  const { prefix, suffix } = analyzeBrackets(trimmed);
+  const needsWrap = prefix || suffix;
+  const wrapped = prefix + trimmed + suffix;
   const candidates = [];
-  if (needsOpen || needsClose) candidates.push(wrap(trimmed));
+  if (needsWrap) candidates.push(wrapped);
   candidates.push(stripTrailingCommas(trimmed));
-  if (needsOpen || needsClose) candidates.push(stripTrailingCommas(wrap(trimmed)));
+  if (needsWrap) candidates.push(stripTrailingCommas(wrapped));
   for (const candidate of candidates) {
     try {
       const parsed = JSON.parse(candidate);

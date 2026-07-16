@@ -1,5 +1,16 @@
-Configurador MEPLHAA — v1.9
+Configurador MEPLHAA — v1.10
 Fecha: 2026-07-16
+
+Cambios desde v1.9:
+- Corregido: la sugerencia de reparación automática de JSON (v1.8) no
+  detectaba todos los casos de llaves/corchetes desbalanceados — solo
+  miraba si el texto empezaba por "{" y terminaba en "}", así que un JSON
+  al que le faltaran los cierres "]}" del final (aunque terminase en "}"
+  de un nivel más interno) no se reparaba. Ahora se analiza el balance
+  real de "{"/"}"/"["/"]" (ignorando el contenido de las cadenas) para
+  saber exactamente qué apertura falta al principio y qué cierre falta al
+  final, cubriendo casos más complejos como un dispositivo con varios
+  accesorios y servicios extra anidados al que le faltase el cierre final.
 
 Cambios desde v1.8:
 - Añadida analítica de visitas con GoatCounter (script en index.html,

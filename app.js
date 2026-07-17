@@ -498,7 +498,7 @@ function validate() {
 }
 
 let hideDefaults = false;
-let oneLine = false;
+let oneLine = true;
 
 function applyStaticTranslations() {
   document.documentElement.lang = currentLang;
@@ -1179,6 +1179,12 @@ document.getElementById("btn-oneline").addEventListener("click", (e) => {
 document.getElementById("btn-load-json").addEventListener("click", () => {
   const text = document.getElementById("json-input").value;
   loadJsonIntoForm(text);
+  // Si se cargó bien, muestra el formulario avanzado (donde se ve de golpe
+  // la lista de GPIOs y accesorios resultante) en vez de dejar la vista en
+  // el asistente, donde el resultado no se aprecia igual de claro.
+  if (document.getElementById("load-status").classList.contains("ok")) {
+    setMode("advanced");
+  }
 });
 
 // ---------- Modo Asistente (wizard) ----------
@@ -1638,6 +1644,8 @@ document.getElementById("btn-use-device").addEventListener("click", () => {
 });
 
 applyStaticTranslations();
+document.getElementById("btn-simplify").textContent = hideDefaults ? t("showDefaultsBtn") : t("hideDefaultsBtn");
+document.getElementById("btn-oneline").textContent = oneLine ? t("multiLineBtn") : t("oneLineBtn");
 populateDevicePicker();
 render();
 renderWizard();

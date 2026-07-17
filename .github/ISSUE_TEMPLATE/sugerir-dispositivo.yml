@@ -1,0 +1,65 @@
+name: "🔌 Sugerir un dispositivo"
+description: "Pide que se añada un dispositivo al catálogo del Configurador MEPLHAA"
+title: "[Dispositivo] "
+labels: ["dispositivo nuevo"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por ayudar a ampliar el catálogo. Cuanta más información des, más rápido y más fiable será añadirlo — evitamos así inventar GPIOs o valores que puedan dar una configuración incorrecta.
+
+  - type: input
+    id: marca
+    attributes:
+      label: Marca / fabricante
+      placeholder: "ej: Shelly, Sonoff, Athom, Gosund..."
+    validations:
+      required: true
+
+  - type: input
+    id: modelo
+    attributes:
+      label: Modelo exacto
+      placeholder: "ej: Plus 2PM, Dual R3 v1.6..."
+    validations:
+      required: true
+
+  - type: input
+    id: chip
+    attributes:
+      label: Chip (si lo sabes)
+      description: "HAA solo funciona en ESP8266, ESP8285 o ESP32 (y variantes ESP32-C3/S2/S3). Si es Tuya BK7231 u otro chip, no es compatible con HAA."
+      placeholder: "ej: ESP8266, ESP32-C3..."
+
+  - type: input
+    id: enlace
+    attributes:
+      label: Enlace a su ficha técnica
+      description: "Wiki de RavenSystem, templates.blakadder.com, o cualquier fuente donde se vea el pinout/GPIO real del dispositivo."
+      placeholder: "https://..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: gpios
+    attributes:
+      label: GPIOs conocidos (si los tienes)
+      description: "Qué GPIO es cada relé, botón/interruptor físico, LED, sensor, etc. Si no los sabes, déjalo en blanco — se puede investigar a partir del enlace de arriba."
+      placeholder: |
+        Relé 1: GPIO12
+        Botón: GPIO0
+        LED de estado: GPIO13
+
+  - type: textarea
+    id: uso
+    attributes:
+      label: Para qué lo usas / qué tipo de accesorio es
+      description: "Interruptor, enchufe, persiana/toldo, sensor, regleta con varios relés..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Cualquier otro detalle
+      description: "Si ya tienes una configuración JSON funcionando para este dispositivo (aunque sea en HAA v11 o distinta versión), pégala aquí — ayuda muchísimo."

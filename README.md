@@ -67,6 +67,26 @@ haa-web/
 
 No hay dependencias externas ni paso de build: todo es JS vanilla que se ejecuta tal cual en el navegador.
 
+## Cómo aportar un dispositivo al catálogo
+
+¿Tienes un dispositivo que no está en el catálogo? Hay dos formas de aportarlo, según tus conocimientos:
+
+**No sé programar — solo quiero sugerirlo**
+Abre un [issue en GitHub](https://github.com/haaconfig/meplhaa-configurator/issues/new/choose) con la plantilla "Sugerir un dispositivo". Cuenta más info (marca, modelo, enlace a su ficha en la wiki de RavenSystem o en [templates.blakadder.com](https://templates.blakadder.com/), y los GPIOs si los conoces), más fácil será añadirlo correctamente.
+
+**Sé programar — quiero añadirlo yo mismo**
+1. Abre [`devices.js`](devices.js) y busca la sección `Otros` (o la de tu fabricante).
+2. Añade una línea con este formato:
+   ```js
+   { category: "Otros", model: "Marca Modelo (chip)", example: "Descripción corta", description: "Descripción más larga si hace falta", config: cfg('{"c":{...},"a":[...]}') },
+   ```
+3. Reglas importantes (para no dar información incorrecta a otros usuarios):
+   - **No inventes GPIOs ni valores de calibración.** Usa solo datos que puedas verificar: la wiki de RavenSystem, la página del dispositivo en [templates.blakadder.com](https://templates.blakadder.com/) (para el pinout — ojo, ese sitio es de Tasmota, no de HAA, así que solo sirve para sacar los GPIOs, no la configuración HAA en sí), o tu propia prueba en hardware real.
+   - Si el chip de medidor de potencia no tiene calibración documentada para HAA, dilo en la `description` en vez de inventar cifras — puedes usar el valor de partida oficial `{"vf":0.1,"cf":0.1,"pf":1}` que indica la wiki (ver página "Power-Monitor"), dejando claro que hay que calibrarlo.
+   - Si algo es una adaptación tuya (no documentada oficialmente), márcalo con ⚠ en el nombre y explícalo en la descripción.
+   - Comprueba que el JSON es válido (pégalo en el propio configurador, en "Pegar JSON existente", y mira que no salgan errores ni avisos).
+4. Manda un Pull Request. Si puedes, indica de dónde sacaste los datos (enlace a la wiki/Blakadder) en la descripción del PR, así se puede verificar rápido.
+
 ## Referencias
 
 - [Wiki de RavenSystem esp-homekit-devices](https://github.com/RavenSystem/esp-homekit-devices/wiki) — documentación oficial del firmware HAA.

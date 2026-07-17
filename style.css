@@ -69,6 +69,20 @@ header h1 {
   vertical-align: middle;
 }
 
+.github-link {
+  margin: 6px 0 0;
+}
+
+.github-link a {
+  font-size: 13px;
+  color: var(--purple-dark);
+  text-decoration: none;
+}
+
+.github-link a:hover {
+  text-decoration: underline;
+}
+
 .subtitle {
   color: var(--hint);
   margin-top: 4px;

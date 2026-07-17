@@ -1,5 +1,61 @@
-Configurador MEPLHAA — v1.20
+Configurador MEPLHAA — v1.26
 Fecha: 2026-07-17
+
+Cambios desde v1.25:
+- Añadido un enlace visible en la cabecera de la web ("💡 Sugerencias y
+  errores: repositorio en GitHub"), a petición de RavenSystem, para que
+  cualquiera pueda encontrar fácilmente dónde reportar fallos o proponer
+  mejoras.
+
+Cambios desde v1.24:
+- Corregido: al pegar un JSON en el cuadro "Pegar JSON existente" estando
+  en modo Asistente, parecía que "no pasaba nada" — el JSON de la derecha
+  sí se actualizaba, pero la lista de GPIOs/accesorios resultante (en el
+  formulario avanzado) quedaba oculta. Ahora, igual que ya pasaba al
+  elegir un dispositivo del catálogo (v1.18), pegar un JSON válido cambia
+  automáticamente al formulario avanzado para que se vea el resultado de
+  golpe. Si el JSON no es válido, no cambia de modo.
+
+Cambios desde v1.23:
+- Actualizada la entrada "eWeLink EU 20A Plug AJW-02" con datos reales
+  aportados por un usuario: calibración auténtica del medidor de potencia
+  (antes tenía el valor de partida genérico sin calibrar) y el LED
+  (GPIO13) ahora sincronizado con el estado del relé, tipo de accesorio
+  correcto (Enchufe). Ya no lleva el aviso de "sin calibrar".
+
+Cambios desde v1.22:
+- Añadida una sección "Cómo aportar un dispositivo al catálogo" al
+  README, con instrucciones tanto para quien solo quiera sugerirlo (sin
+  programar) como para quien quiera añadirlo directamente por Pull
+  Request, incluyendo las reglas para no inventar GPIOs/calibraciones.
+- Añadida una plantilla de issue de GitHub ("🔌 Sugerir un dispositivo",
+  en .github/ISSUE_TEMPLATE/) con los campos necesarios (marca, modelo,
+  chip, enlace a la ficha técnica, GPIOs si se conocen, uso previsto).
+  No afecta a la web en sí, solo al repositorio de GitHub.
+
+Cambios desde v1.21:
+- El JSON generado se muestra ahora en una sola línea por defecto (ocupa
+  menos espacio en la vista principal); el botón para pasar a formato
+  legible sigue disponible.
+- Revisados los 18 dispositivos del primer lote de Blakadder: 11 tenían
+  algún GPIO real del dispositivo (normalmente un segundo LED indicador)
+  que no se había declarado. Se han añadido todos — Athom PG01V3 (GPIO20,
+  pin del medidor CSE7766, declarado como entrada aunque su protocolo no
+  está documentado para HAA), Athom SW011EU/SW031US, BlitzWolf SHP2/SHP6,
+  Gosund SW1/SW3, Teckin SR40 (2 LEDs), Nous L1T, LSC Smart Connect
+  3202087 y Avatto TS02-1 (2 LEDs). No cambia el número de dispositivos
+  del catálogo, solo se completan sus configuraciones.
+
+Cambios desde v1.20:
+- Corregido: 5 enchufes con chip de medidor de potencia BL0937 (BlitzWolf
+  SHP2/SHP6-15A, Gosund WP1, Nous A1T, LSC Smart Connect 3202087) y el
+  eWeLink AJW-02 se habían dejado sin el medidor configurado por no tener
+  valores de calibración documentados. Se ha encontrado que la wiki de
+  RavenSystem (página "Power-Monitor") sí publica un valor de partida
+  oficial antes de calibrar ({"vf":0.1,"cf":0.1,"pf":1}), así que ahora
+  los 6 sí incluyen el medidor de potencia (sin calibrar, con aviso en la
+  descripción de que hay que calibrarlo con una carga conocida para
+  lecturas exactas).
 
 Cambios desde v1.19:
 - 6 dispositivos eWeLink/EARU más al catálogo (ESP8266/ESP8285

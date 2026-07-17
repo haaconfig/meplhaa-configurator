@@ -190,6 +190,13 @@ button {
   background: #fafafa;
 }
 
+.accessory-heading {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--purple-dark);
+}
+
 .io-group-row, .accessory-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));

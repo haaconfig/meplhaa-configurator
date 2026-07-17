@@ -331,7 +331,7 @@ const state = {
     rawExtra: "",
     deviceHint: null, // { source: "detected"|"declared", category, model, example? }
   },
-  io: [{ id: nextId(), gpios: "12", mode: 2, pull: "0", params: "" }],
+  io: [],
   accessories: [{ id: nextId(), t: 1, custom: false, nm: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }],
 };
 
@@ -730,7 +730,10 @@ function renderAccessoryList() {
     const esCount = extraServicesCount(acc);
     const div = document.createElement("div");
     div.className = "accessory-item";
+    const typeInfo = ACCESSORY_TYPES.find((x) => x.id === Number(acc.t));
+    const typeLabelText = typeInfo ? `${acc.t} - ${currentLang === "en" ? typeInfo.labelEn : typeInfo.label}` : `${t("manualTypeOption")} (${acc.t})`;
     div.innerHTML = `
+      <h3 class="accessory-heading">${t("wizAccessoryLabel")} #${idx + 1} — ${typeLabelText}</h3>
       <div class="accessory-row">
         <label>${t("typeLabel")}
           <select data-field="t">
@@ -1189,7 +1192,17 @@ document.getElementById("btn-load-json").addEventListener("click", () => {
 
 // ---------- Modo Asistente (wizard) ----------
 
-function ensureIoDeclaration(gpio, mode) {
+// Declara (o corrige el modo de) un GPIO introducido en un campo del
+// asistente (LED, salida de un accesorio, botón...). Si se indica
+// "source" (un identificador único del campo que llama), primero se
+// quita cualquier fila que ese mismo campo hubiera añadido antes —
+// así, si cambias o borras el valor, no se queda un GPIO declarado
+// para siempre sin usarse (bug reportado por RavenSystem: escribir y
+// luego borrar/cambiar un GPIO en el asistente dejaba una fila fantasma).
+function ensureIoDeclaration(gpio, mode, source) {
+  if (source) {
+    state.io = state.io.filter((g) => g.autoSource !== source);
+  }
   if (gpio === null || gpio === "" || Number.isNaN(Number(gpio))) return;
   gpio = Number(gpio);
   state.io.forEach((g) => {
@@ -1203,7 +1216,7 @@ function ensureIoDeclaration(gpio, mode) {
   state.io = state.io.filter((g) => parseGpioList(g.gpios).length > 0);
   const already = state.io.some((g) => Number(g.mode) === mode && parseGpioList(g.gpios).includes(gpio));
   if (!already) {
-    state.io.push({ id: nextId(), gpios: String(gpio), mode, pull: "0", params: "" });
+    state.io.push({ id: nextId(), gpios: String(gpio), mode, pull: "0", params: "", autoSource: source });
   }
 }
 
@@ -1290,6 +1303,7 @@ function renderWizard() {
       document.getElementById("w-led-fields").style.display = e.target.checked ? "" : "none";
       if (!e.target.checked) {
         state.general.ledGpio = null;
+        ensureIoDeclaration(null, 2, "general.led");
       } else if (state.general.ledGpio === null || state.general.ledGpio === "") {
         state.general.ledGpio = "";
       }
@@ -1297,7 +1311,7 @@ function renderWizard() {
     });
     document.getElementById("w-led-gpio").addEventListener("input", (e) => {
       state.general.ledGpio = e.target.value;
-      ensureIoDeclaration(e.target.value, 2);
+      ensureIoDeclaration(e.target.value, 2, "general.led");
       renderJson();
     });
     document.getElementById("w-led-invert").addEventListener("change", (e) => {
@@ -1353,7 +1367,7 @@ function renderWizard() {
     `;
     document.getElementById("w-acc-gpio").addEventListener("input", (e) => {
       acc.relayGpio = e.target.value;
-      ensureIoDeclaration(e.target.value, 2);
+      ensureIoDeclaration(e.target.value, 2, `acc-${acc.id}-relay`);
       renderJson();
     });
   }
@@ -1387,8 +1401,8 @@ function renderWizard() {
         if (!acc.typeData) acc.typeData = {};
         acc.typeData[e.target.dataset.typefield] = e.target.value;
         if (e.target.dataset.typefield === "gpio") {
-          if (Number(acc.t) === 3) ensureIoDeclaration(e.target.value, 6);
-          if (Number(acc.t) === 4 || Number(acc.t) === 20) ensureIoDeclaration(e.target.value, 2);
+          if (Number(acc.t) === 3) ensureIoDeclaration(e.target.value, 6, `acc-${acc.id}-typefield-gpio`);
+          if (Number(acc.t) === 4 || Number(acc.t) === 20) ensureIoDeclaration(e.target.value, 2, `acc-${acc.id}-typefield-gpio`);
         }
         renderJson();
       };
@@ -1436,6 +1450,7 @@ function renderWizard() {
       document.getElementById("w-button-fields").style.display = e.target.checked ? "" : "none";
       if (!e.target.checked) {
         acc.buttons = [];
+        ensureIoDeclaration(null, 6, `acc-${acc.id}-button`);
       } else {
         acc.buttons = [{ gpio: "", type: 1 }];
       }
@@ -1443,7 +1458,7 @@ function renderWizard() {
     });
     document.getElementById("w-button-gpio").addEventListener("input", (e) => {
       acc.buttons = [{ gpio: e.target.value, type: 1 }];
-      ensureIoDeclaration(e.target.value, 6);
+      ensureIoDeclaration(e.target.value, 6, `acc-${acc.id}-button`);
       renderJson();
     });
   }

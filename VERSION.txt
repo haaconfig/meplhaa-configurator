@@ -1,5 +1,30 @@
-Configurador MEPLHAA — v1.26
+Configurador MEPLHAA — v1.29
 Fecha: 2026-07-17
+
+Cambios desde v1.28:
+- Corregidos dos bugs reportados por RavenSystem al crear un dispositivo
+  personalizado desde el asistente: (1) el estado inicial declaraba un
+  GPIO 12 de ejemplo desde el principio, sin usarse ni avisar — ahora
+  empieza vacío. (2) Escribir un GPIO en un campo del asistente (LED,
+  salida del relé, botón...) y luego borrarlo o cambiarlo dejaba el GPIO
+  anterior declarado para siempre como "fantasma", sin ningún accesorio
+  que lo usara. Ahora cada campo limpia su propia declaración anterior
+  antes de añadir la nueva, así que borrar/cambiar el valor no deja
+  restos.
+
+Cambios desde v1.27:
+- Cada tarjeta de accesorio en el formulario avanzado ahora tiene un
+  encabezado ("Accesorio #3 — 75 - Medidor de potencia") con su número y
+  tipo. Antes, al cargar una configuración con varios accesorios, había
+  que abrir el desplegable "Tipo" de cada tarjeta una a una para saber
+  cuál era cuál — por ejemplo, para encontrar el medidor de potencia
+  entre varios interruptores/sensores.
+
+Cambios desde v1.26:
+- Añadido un aviso de la comunidad (mcalve) en las 2 entradas del Shelly
+  Plus 2PM: hay muchas versiones de hardware distintas según el mes/año
+  de fabricación, así que conviene verificar que los GPIOs coinciden con
+  la unidad real antes de usar la configuración.
 
 Cambios desde v1.25:
 - Añadido un enlace visible en la cabecera de la web ("💡 Sugerencias y

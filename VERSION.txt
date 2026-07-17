@@ -1,5 +1,46 @@
-Configurador MEPLHAA — v1.16
-Fecha: 2026-07-16
+Configurador MEPLHAA — v1.20
+Fecha: 2026-07-17
+
+Cambios desde v1.19:
+- 6 dispositivos eWeLink/EARU más al catálogo (ESP8266/ESP8285
+  confirmado, GPIO real): interruptor 1 canal sin neutro, módulos de 3 y
+  4 relés (PSF-B04), enchufe 20A AJW-02 (sin medidor de potencia por no
+  haber calibración documentada), y 2 interruptores automáticos DIN
+  (RDCBC-1P/2P). Catálogo: 209 → 215 dispositivos.
+
+Cambios desde v1.18:
+- Primer lote de ampliación del catálogo desde templates.blakadder.com:
+  18 dispositivos nuevos en "Otros" (Athom, BlitzWolf, Gosund, Teckin,
+  Nous, LSC, Avatto), todos con chip ESP8266/ESP32 confirmado y tabla de
+  GPIO real verificada. Solo se configura relé+botón+LED (patrón ya
+  probado en el resto del catálogo); donde el dispositivo tiene chip de
+  medidor de potencia (BL0937/CSE7766) pero no hay valores de calibración
+  documentados para HAA, se deja sin configurar en vez de inventarlos —
+  se indica en la descripción de cada uno.
+  Descartados de este lote por riesgo real (no boletos a la ligera):
+  Teckin SP10 y SP22 (la propia página avisa de unidades con chip no-ESP
+  en producción reciente) y Nous B1T/B2T/A5T (los datos de GPIO extraídos
+  eran genéricos/no fiables, no específicos del dispositivo).
+  Catálogo: 191 → 209 dispositivos.
+
+Cambios desde v1.17:
+- Corregido: tras separar el asistente del formulario avanzado (v1.17), al
+  elegir un ejemplo del catálogo la web se quedaba en modo "asistente",
+  que solo pregunta paso a paso — así que la lista de GPIOs y accesorios
+  ya rellenados (en el formulario avanzado) quedaba oculta y parecía que
+  "la configuración de ejemplo había desaparecido". Ahora, al cargar un
+  ejemplo real del catálogo, se muestra directamente el formulario
+  avanzado (donde se ve todo de golpe). La opción "Personalizado (GPIOs
+  de este modelo...)" sigue llevando al asistente, ya que ahí no hay
+  accesorios predefinidos que mostrar.
+
+Cambios desde v1.16:
+- Cambio de comportamiento: el asistente y el formulario avanzado ya NO
+  se muestran juntos en la misma pantalla (esto generaba confusión). Al
+  elegir uno de los dos botones de arriba ("Ir al asistente" / "Ir al
+  formulario avanzado"), se oculta el otro por completo; el botón activo
+  queda resaltado. El estado sigue siendo el mismo en ambos modos: cambiar
+  de uno a otro no pierde nada de lo ya configurado.
 
 Cambios desde v1.15:
 - Añadido "Toldo/Persiana" para el Shelly Plus 2PM, marcado claramente

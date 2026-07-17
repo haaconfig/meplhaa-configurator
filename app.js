@@ -1519,12 +1519,28 @@ document.getElementById("wizard-next").addEventListener("click", () => {
 });
 document.getElementById("wizard-back").addEventListener("click", wizardBack);
 
-document.getElementById("mode-wizard").addEventListener("click", () => {
-  document.getElementById("wizard-panel").scrollIntoView({ behavior: "smooth", block: "start" });
-});
-document.getElementById("mode-advanced").addEventListener("click", () => {
-  document.getElementById("advanced-form").scrollIntoView({ behavior: "smooth", block: "start" });
-});
+let currentMode = "wizard";
+
+// Muestra solo el modo elegido (asistente o formulario avanzado) y oculta
+// el otro por completo, para no mezclar ambos en la misma pantalla.
+// El estado (state/wizard) es el mismo en los dos casos: cambiar de modo
+// no pierde nada de lo ya configurado.
+function setMode(mode) {
+  currentMode = mode;
+  document.getElementById("wizard-panel").classList.toggle("hidden", mode !== "wizard");
+  document.getElementById("advanced-form").classList.toggle("hidden", mode !== "advanced");
+  document.getElementById("mode-wizard").classList.toggle("active", mode === "wizard");
+  document.getElementById("mode-advanced").classList.toggle("active", mode === "advanced");
+  if (mode === "wizard") {
+    renderWizard();
+  } else {
+    render();
+  }
+  window.scrollTo({ top: document.getElementById("mode-wizard").getBoundingClientRect().top + window.scrollY - 10, behavior: "smooth" });
+}
+
+document.getElementById("mode-wizard").addEventListener("click", () => setMode("wizard"));
+document.getElementById("mode-advanced").addEventListener("click", () => setMode("advanced"));
 
 // ---------- Selector de dispositivos y funciones ----------
 
@@ -1600,7 +1616,7 @@ document.getElementById("btn-use-device").addEventListener("click", () => {
     if (!first) return;
     const customConfig = { c: JSON.parse(JSON.stringify(first.config.c || {})), a: [] };
     loadJsonIntoForm(JSON.stringify(customConfig));
-    document.getElementById("wizard-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+    setMode("wizard");
     return;
   }
   const idx = Number(select.value);
@@ -1618,10 +1634,11 @@ document.getElementById("btn-use-device").addEventListener("click", () => {
     document.getElementById("device-example").value = String(idx);
     updateDeviceDescription();
   }
-  document.getElementById("wizard-panel").scrollIntoView({ behavior: "smooth", block: "start" });
+  setMode("advanced");
 });
 
 applyStaticTranslations();
 populateDevicePicker();
 render();
 renderWizard();
+setMode("wizard");

@@ -1047,7 +1047,7 @@ function renderDeviceHint(containerId) {
   box.innerHTML = `
     <p class="hint">${t("deviceHintAskLabel")}</p>
     <div class="device-hint-ask-row">
-      <select class="dh-category">${categories.map((c) => `<option value="${c}">${c}</option>`).join("")}</select>
+      <select class="dh-category"><option value="" selected>${t("deviceHintCategoryPlaceholder")}</option>${categories.map((c) => `<option value="${c}">${c}</option>`).join("")}</select>
       <select class="dh-model"></select>
       <button class="btn-secondary dh-save">${t("deviceHintSaveBtn")}</button>
     </div>
@@ -1055,12 +1055,17 @@ function renderDeviceHint(containerId) {
   const catSelect = box.querySelector(".dh-category");
   const modelSelect = box.querySelector(".dh-model");
   const fillModels = () => {
+    if (!catSelect.value) {
+      modelSelect.innerHTML = `<option value="">${t("deviceHintModelPlaceholder")}</option>`;
+      return;
+    }
     const models = [...new Set(DEVICE_CATALOG.filter((d) => d.category === catSelect.value).map((d) => d.model))];
     modelSelect.innerHTML = models.map((m) => `<option value="${m}">${m}</option>`).join("");
   };
   fillModels();
   catSelect.addEventListener("change", fillModels);
   box.querySelector(".dh-save").addEventListener("click", () => {
+    if (!catSelect.value || !modelSelect.value) return;
     state.general.deviceHint = { source: "declared", category: catSelect.value, model: modelSelect.value };
     render();
     renderWizard();

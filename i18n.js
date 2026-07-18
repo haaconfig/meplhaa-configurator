@@ -109,6 +109,8 @@ const T = {
     deviceHintSchemaLink: "Ver esquema/pinout en Blakadder",
     deviceHintWikiLink: "Más info en la wiki de HAA",
     deviceHintAskLabel: "¿Sabes qué dispositivo es este? (opcional, solo para mostrarte el enlace a su ficha/esquema — no cambia tu configuración)",
+    deviceHintCategoryPlaceholder: "— Elige una marca —",
+    deviceHintModelPlaceholder: "— Elige primero una marca —",
     deviceHintSaveBtn: "Guardar",
 
     wizStepIntro: "Datos generales",
@@ -267,6 +269,8 @@ const T = {
     deviceHintSchemaLink: "See schematic/pinout on Blakadder",
     deviceHintWikiLink: "More info on the HAA wiki",
     deviceHintAskLabel: "Do you know which device this is? (optional, just to show you a link to its wiki page/schematic — doesn't change your config)",
+    deviceHintCategoryPlaceholder: "— Choose a brand —",
+    deviceHintModelPlaceholder: "— Choose a brand first —",
     deviceHintSaveBtn: "Save",
 
     wizStepIntro: "General info",

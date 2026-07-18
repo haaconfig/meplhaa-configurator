@@ -1,5 +1,15 @@
-Configurador MEPLHAA — v1.46
+Configurador MEPLHAA — v1.47
 Fecha: 2026-07-18
+
+Cambios desde v1.46:
+- Arreglo: el selector "¿Sabes qué dispositivo es este?" de Configuración
+  General arrancaba con la primera marca (Shelly) preseleccionada, lo que
+  daba a entender que la web "creía" que el dispositivo era un Shelly.
+  Ahora arranca sin marca ("— Elige una marca —") y el usuario la elige;
+  hasta que no se elige marca, el desplegable de modelo muestra "— Elige
+  primero una marca —" y el botón Guardar no hace nada. No afecta a la
+  configuración (ese selector solo muestra el enlace a ficha/esquema).
+  Bilingüe ES/EN. Ficheros: app.js, i18n.js.
 
 Cambios desde v1.45:
 - Compartir con la comunidad: cada configuración guardada tiene ahora un

@@ -1,5 +1,15 @@
-Configurador MEPLHAA — v1.30
+Configurador MEPLHAA — v1.31
 Fecha: 2026-07-17
+
+Cambios desde v1.30:
+- Añadido segundo ejemplo de comunidad para el Shelly EM (rodolfo_homekit):
+  medidor de doble canal con historial diario, alerta de consumo a 4400W
+  vía sensor de contacto, y reinicio mensual del contador. El JSON
+  original no incluía el array "io" — se completó cruzando dos fuentes
+  independientes (los datos de rodolfo y la ficha de Blakadder para el
+  Shelly EM clásico), y coincide exactamente con el "io" del ejemplo
+  básico que ya teníamos en el catálogo (sourced de la wiki oficial),
+  lo que confirma que es correcto. Catálogo: 216 → 217 dispositivos.
 
 Cambios desde v1.29:
 - Añadido al catálogo un ejemplo aportado por la comunidad (rodolfo_homekit):

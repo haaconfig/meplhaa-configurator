@@ -1,5 +1,65 @@
-Configurador MEPLHAA — v1.34
+Configurador MEPLHAA — v1.37
 Fecha: 2026-07-18
+
+Cambios desde v1.36:
+- Nuevo dispositivo aportado por la comunidad vía Discord
+  (#meplhaa-configurator-es), catálogo ahora con 223 entradas:
+  · "Kincony KC868-A4 (ESP32)" (Otros): placa de relés para piscina —
+    4 electroválvulas de agua (t:20, relés GPIO 15/2/5/4, máx. 4 h),
+    2 termómetros DS18B20 en el mismo bus (GPIO 13, el 2º con u:2),
+    sensor de puerta (GPIO 27) y sensor de nivel de agua (GPIO 36) que
+    acciona la válvula del relé 5 (llenado). Config ya en formato array
+    v12, usada tal cual. ⚠ La KC868-A4 tiene varias versiones de
+    hardware (algunas con expansor I2C): se marca en el nombre y en la
+    descripción que hay que verificar los GPIOs de la unidad concreta.
+    Nota: el JSON trae "n":"Piscina" a nivel raíz (etiqueta no estándar
+    que el configurador ignora/descarta al regenerar).
+
+Cambios desde v1.35:
+- Tres dispositivos nuevos aportados por la comunidad vía Discord
+  (#meplhaa-configurator-es), catálogo ahora con 222 entradas:
+  · "Sonoff T2 EU" (Sonoff): interruptor táctil de pared 2 canales usado
+    como persiana/toldo (relés GPIO 12/5, botones 0/9, LED en drenaje
+    abierto GPIO 13). Mismo mapa de GPIOs que el Sonoff 2CH.
+  · "Sonoff Dual R3 v1.6" → nuevo ejemplo "Toldo/Persiana con
+    interruptores externos y protección 1A" (junto al ejemplo de persiana
+    Dual R3 que ya existía, no lo reemplaza): interruptores externos GPIO
+    32/33, medidor de potencia, protección por sobrecorriente ~1 A,
+    cruce por cero en GPIO 4, UART a 4800. Alternativa más simple a la
+    versión con la init completa del CSE7761.
+  · "Eachen IR DC6" (Otros): controlador IR para aire acondicionado LG
+    como HeaterCooler (t:25) con códigos IR aprendidos + termómetro
+    (t:24). ⚠ Los códigos IR son específicos de ese equipo/mando; el
+    accesorio IR se carga en el campo JSON avanzado (t:25 sin formulario
+    dedicado).
+- Se descartó una cuarta aportación ("Sonoff Dual persianas") por ser
+  idéntica a la entrada Sonoff 2CH → Toldo/Persiana ya existente salvo
+  los tiempos (decisión del mantenedor).
+- El T2 EU y el Dual R3 "actual" ya venían en formato array v12, se
+  usaron tal cual. La notación objeto {"g":..} solo estaba en la
+  aportación descartada (Sonoff Dual) y en una acción del Eachen IR, que
+  se conservó verbatim al ser IR (sin formulario dedicado).
+
+Cambios desde v1.34:
+- Nuevo dispositivo en el catálogo (219 entradas): "eWeLink RMC021"
+  (categoría Otros), aportado por la comunidad vía Discord
+  (#meplhaa-configurator-es). Enchufe/relé con medición de consumo para
+  lavadora y lavavajillas que detecta el fin del ciclo por la caída de
+  potencia y lo refleja en un sensor de contacto (relé biestable en GPIO
+  13/14, botón en GPIO 3, medidor en dt:[5,4,12] con calibración
+  vf/cf/pf). El pinout de medida y los factores cf/pf coinciden con los
+  del Gosund SP111 (hardware muy similar), lo que cross-valida el medidor.
+- La config aportada venía con las acciones de relé/botón en notación
+  objeto {"g":..,"v":..} (estilo v11 "Peregrine"); el firmware v12 la
+  puede aceptar, pero el formulario del configurador solo reconoce relés
+  y botones en formato array (app.js: Array.isArray). Se ha convertido a
+  formato array v12 ([14],[13,1],[3,5]...) conservando exactamente los
+  mismos GPIOs y valores, para que el formulario se rellene bien.
+- Nota de honestidad de datos: los GPIOs y la calibración provienen de
+  una config real de un usuario, no de la documentación oficial de
+  RavenSystem; "RMC021" es el nombre indicado por quien la aportó, y la
+  calibración vf/cf/pf es específica de cada unidad (recalibrar por
+  aparato). Todo ello queda explicado en la descripción bilingüe.
 
 Cambios desde v1.33:
 - Catálogo bilingüe completo: las 218 entradas (nombre de ejemplo y

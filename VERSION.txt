@@ -1,5 +1,19 @@
-Configurador MEPLHAA — v1.45
+Configurador MEPLHAA — v1.46
 Fecha: 2026-07-18
+
+Cambios desde v1.45:
+- Compartir con la comunidad: cada configuración guardada tiene ahora un
+  botón "Compartir" que abre una propuesta (issue) pre-rellenada en el
+  repositorio de GitHub (haaconfig/meplhaa-configurator), con marca,
+  dispositivo, función, descripción, autor y el JSON. Así cualquiera puede
+  proponer su MEPLHAA para incorporarlo al catálogo oficial, que ve toda
+  la comunidad (tras revisarlo). La configuración se sigue guardando en el
+  navegador (localStorage); "Compartir" es el puente hacia el catálogo
+  común, manteniendo la web estática (sin servidor) y con control de
+  calidad. Bilingüe ES/EN.
+- Ficheros: app.js (shareToGithub + botón), i18n.js (textos), style.css
+  (la fila de acciones puede envolver con 3 botones). Catálogo sin
+  cambios (234).
 
 Cambios desde v1.44:
 - "Mis configuraciones guardadas" rediseñado: ahora se guarda como una

@@ -479,8 +479,8 @@ button {
 #saved-status.ok { color: #2e7d32; }
 #saved-status.error { color: var(--danger); }
 .saved-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.saved-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; }
-.saved-item-info { display: flex; flex-direction: column; min-width: 0; }
+.saved-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; flex-wrap: wrap; }
+.saved-item-info { display: flex; flex-direction: column; min-width: 0; flex: 1 1 160px; }
 .saved-item-name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .saved-item-sub { font-size: 0.8rem; color: var(--hint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .saved-item-actions { display: flex; gap: 6px; flex: none; }

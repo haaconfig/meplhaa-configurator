@@ -1948,6 +1948,37 @@ function savedModelLabel(item) {
   return item.marca && item.marca.trim() ? `${item.marca.trim()} — ${item.dispositivo}` : item.dispositivo;
 }
 
+// Compartir con la comunidad: abre una propuesta (issue) pre-rellenada en el
+// repositorio de GitHub, con todos los datos + el JSON, para incorporar la
+// configuración al catálogo oficial (que ve todo el mundo). Sin servidor.
+function shareToGithub(item) {
+  const body = [
+    "**Aportación de dispositivo para el catálogo MEPLHAA**",
+    "",
+    "- **Marca:** " + (item.marca || "-"),
+    "- **Dispositivo:** " + (item.dispositivo || "-"),
+    "- **Función / tipo:** " + (item.funcion || "-"),
+    "- **Autor:** " + (item.autor || "-"),
+    "",
+    "**Descripción:**",
+    item.descripcion || "-",
+    "",
+    "**Configuración MEPLHAA (v12):**",
+    "```json",
+    item.config,
+    "```",
+    "",
+    "<!-- Enviado desde el Configurador MEPLHAA (https://haaconfig.github.io/meplhaa-configurator/) -->",
+  ].join("\n");
+  const title = "[Dispositivo] " + savedModelLabel(item) + (item.funcion ? ": " + item.funcion : "");
+  const url =
+    "https://github.com/haaconfig/meplhaa-configurator/issues/new?title=" +
+    encodeURIComponent(title) +
+    "&body=" +
+    encodeURIComponent(body);
+  window.open(url, "_blank", "noopener");
+}
+
 function renderSavedList() {
   const ul = document.getElementById("saved-list");
   if (!ul) return;
@@ -1965,6 +1996,7 @@ function renderSavedList() {
           ${sub ? `<span class="saved-item-sub">${sub}</span>` : ""}
         </span>
         <span class="saved-item-actions">
+          <button type="button" class="btn-secondary" data-saved-share="${i}" title="${t("savedShareTitle")}">${t("savedShareBtn")}</button>
           <button type="button" class="btn-secondary" data-saved-load="${i}">${t("savedLoadBtn")}</button>
           <button type="button" class="btn-secondary" data-saved-del="${i}">${t("savedDeleteBtn")}</button>
         </span>
@@ -2005,7 +2037,13 @@ document.getElementById("btn-save-config").addEventListener("click", saveCurrent
 document.getElementById("saved-list").addEventListener("click", (e) => {
   const loadBtn = e.target.closest("[data-saved-load]");
   const delBtn = e.target.closest("[data-saved-del]");
+  const shareBtn = e.target.closest("[data-saved-share]");
   const list = getSavedConfigs();
+  if (shareBtn) {
+    const item = list[Number(shareBtn.dataset.savedShare)];
+    if (item) shareToGithub(item);
+    return;
+  }
   if (loadBtn) {
     const item = list[Number(loadBtn.dataset.savedLoad)];
     if (!item) return;

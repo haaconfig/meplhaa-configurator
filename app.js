@@ -1742,22 +1742,34 @@ document.getElementById("mode-advanced").addEventListener("click", () => setMode
 // esto solo traduce lo que se ve en el desplegable, no el valor real.
 const CATEGORY_LABEL_EN = { Otros: "Other", Personalizado: "Custom" };
 function categoryLabel(c) {
+  if (c === "__saved__") return currentLang === "en" ? "⭐ My saved" : "⭐ Mis guardados";
   return currentLang === "en" && CATEGORY_LABEL_EN[c] ? CATEGORY_LABEL_EN[c] : c;
 }
 
 function populateDevicePicker() {
   const categorySelect = document.getElementById("device-category");
   if (typeof DEVICE_CATALOG === "undefined") return;
+  const prev = categorySelect.value;
   const categories = [...new Set(DEVICE_CATALOG.map((d) => d.category))];
-  categorySelect.innerHTML = categories.map((c) => `<option value="${c}">${categoryLabel(c)}</option>`).join("");
+  if (getSavedConfigs().length) categories.push("__saved__");
+  categorySelect.innerHTML = categories.map((c) => `<option value="${escapeHtmlSaved(c)}">${categoryLabel(c)}</option>`).join("");
+  if (prev && [...categorySelect.options].some((o) => o.value === prev)) categorySelect.value = prev;
+  // Sugerencias de marca en el formulario de guardar (marcas del catálogo).
+  const dl = document.getElementById("saved-marca-list");
+  if (dl) dl.innerHTML = [...new Set(DEVICE_CATALOG.map((d) => d.category).filter((c) => c !== "Personalizado"))].map((c) => `<option value="${escapeHtmlSaved(c)}"></option>`).join("");
   populateModelSelect();
 }
 
 function populateModelSelect() {
   const category = document.getElementById("device-category").value;
   const modelSelect = document.getElementById("device-model");
-  const models = [...new Set(DEVICE_CATALOG.filter((d) => d.category === category).map((d) => d.model))];
-  modelSelect.innerHTML = models.map((m) => `<option value="${m}">${m}</option>`).join("");
+  let models;
+  if (category === "__saved__") {
+    models = [...new Set(getSavedConfigs().map((s) => savedModelLabel(s)))];
+  } else {
+    models = [...new Set(DEVICE_CATALOG.filter((d) => d.category === category).map((d) => d.model))];
+  }
+  modelSelect.innerHTML = models.map((m) => `<option value="${escapeHtmlSaved(m)}">${escapeHtmlSaved(m)}</option>`).join("");
   populateExampleSelect();
 }
 
@@ -1773,6 +1785,16 @@ function populateExampleSelect() {
   const category = document.getElementById("device-category").value;
   const model = document.getElementById("device-model").value;
   const exampleSelect = document.getElementById("device-example");
+
+  if (category === "__saved__") {
+    const options = getSavedConfigs()
+      .map((s, i) => ({ s, i }))
+      .filter(({ s }) => savedModelLabel(s) === model)
+      .map(({ s, i }) => `<option value="saved:${i}">${escapeHtmlSaved(s.funcion || t("savedNoFunction"))}</option>`);
+    exampleSelect.innerHTML = options.join("");
+    updateDeviceDescription();
+    return;
+  }
 
   if (category === "Personalizado") {
     // En "Personalizado" el desplegable de ejemplo muestra TODAS las
@@ -1825,6 +1847,13 @@ function updateDeviceDescription() {
     );
     return;
   }
+  if (typeof select.value === "string" && select.value.indexOf("saved:") === 0) {
+    const item = getSavedConfigs()[Number(select.value.slice(6))];
+    let text = item ? item.descripcion || "" : "";
+    if (item && item.autor) text = (text ? text + "\n\n" : "") + t("savedByAuthor").replace("%s", item.autor);
+    renderDescriptionText(descEl, text);
+    return;
+  }
   const device = DEVICE_CATALOG[Number(select.value)];
   renderDescriptionText(descEl, device ? deviceDescriptionText(device) : "");
 }
@@ -1835,6 +1864,13 @@ document.getElementById("device-example").addEventListener("change", updateDevic
 
 document.getElementById("btn-use-device").addEventListener("click", () => {
   const select = document.getElementById("device-example");
+  if (typeof select.value === "string" && select.value.indexOf("saved:") === 0) {
+    const item = getSavedConfigs()[Number(select.value.slice(6))];
+    if (!item) return;
+    loadJsonIntoForm(item.config);
+    setMode("advanced");
+    return;
+  }
   if (select.value === "custom") {
     const category = document.getElementById("device-category").value;
     const model = document.getElementById("device-model").value;
@@ -1864,15 +1900,32 @@ document.getElementById("btn-use-device").addEventListener("click", () => {
 });
 
 // ---------- Mis configuraciones guardadas (localStorage) ----------
-// Guarda configuraciones MEPLHAA con nombre en el navegador del usuario.
+// Guarda MEPLHAA en el navegador del usuario como una entrada más de la
+// galería: marca, dispositivo, función/tipo, descripción y autor (opcional).
+// Aparecen en el selector de dispositivos bajo la marca "⭐ Mis guardados".
 // Todo local: no hay servidor, no se sube nada a ningún sitio.
-const SAVED_KEY = "meplhaa_saved_v1";
+const SAVED_KEY = "meplhaa_saved_v2";
+const SAVED_KEY_LEGACY = "meplhaa_saved_v1";
+const SAVED_CATEGORY_VALUE = "__saved__";
 
 function getSavedConfigs() {
   try {
     const raw = localStorage.getItem(SAVED_KEY);
-    const list = raw ? JSON.parse(raw) : [];
-    return Array.isArray(list) ? list : [];
+    if (raw) {
+      const list = JSON.parse(raw);
+      return Array.isArray(list) ? list : [];
+    }
+    // Migración desde el formato antiguo (v1: solo nombre + config).
+    const legacyRaw = localStorage.getItem(SAVED_KEY_LEGACY);
+    if (legacyRaw) {
+      const legacy = JSON.parse(legacyRaw);
+      if (Array.isArray(legacy) && legacy.length) {
+        const migrated = legacy.map((x) => ({ marca: "", dispositivo: x.name || "(sin nombre)", funcion: "", descripcion: "", autor: "", config: x.config, ts: x.ts || 0 }));
+        setSavedConfigs(migrated);
+        return migrated;
+      }
+    }
+    return [];
   } catch (e) {
     return [];
   }
@@ -1887,7 +1940,12 @@ function setSavedConfigs(list) {
 }
 
 function escapeHtmlSaved(s) {
-  return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+  return String(s == null ? "" : s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+// Etiqueta del "modelo" dentro de la galería de guardados: "marca — dispositivo".
+function savedModelLabel(item) {
+  return item.marca && item.marca.trim() ? `${item.marca.trim()} — ${item.dispositivo}` : item.dispositivo;
 }
 
 function renderSavedList() {
@@ -1899,45 +1957,51 @@ function renderSavedList() {
     return;
   }
   ul.innerHTML = list
-    .map(
-      (item, i) => `<li class="saved-item">
-        <span class="saved-item-name" title="${escapeHtmlSaved(item.name)}">${escapeHtmlSaved(item.name)}</span>
+    .map((item, i) => {
+      const sub = [item.funcion, item.autor ? t("savedByAuthor").replace("%s", item.autor) : ""].filter(Boolean).map(escapeHtmlSaved).join(" · ");
+      return `<li class="saved-item">
+        <span class="saved-item-info">
+          <span class="saved-item-name" title="${escapeHtmlSaved(savedModelLabel(item))}">${escapeHtmlSaved(savedModelLabel(item))}</span>
+          ${sub ? `<span class="saved-item-sub">${sub}</span>` : ""}
+        </span>
         <span class="saved-item-actions">
           <button type="button" class="btn-secondary" data-saved-load="${i}">${t("savedLoadBtn")}</button>
           <button type="button" class="btn-secondary" data-saved-del="${i}">${t("savedDeleteBtn")}</button>
         </span>
-      </li>`
-    )
+      </li>`;
+    })
     .join("");
 }
 
 function saveCurrentConfig() {
-  const nameInput = document.getElementById("saved-name");
   const statusEl = document.getElementById("saved-status");
-  const name = nameInput.value.trim();
-  if (!name) {
+  const marca = document.getElementById("saved-marca").value.trim();
+  const dispositivo = document.getElementById("saved-dispositivo").value.trim();
+  const funcion = document.getElementById("saved-funcion").value.trim();
+  const descripcion = document.getElementById("saved-descripcion").value.trim();
+  const autor = document.getElementById("saved-autor").value.trim();
+  if (!dispositivo) {
     statusEl.textContent = t("savedNeedName");
     statusEl.className = "error";
     return;
   }
   const config = JSON.stringify(buildConfig());
   const list = getSavedConfigs();
-  const idx = list.findIndex((x) => x.name === name);
+  const idx = list.findIndex((x) => x.marca === marca && x.dispositivo === dispositivo && x.funcion === funcion);
   const updated = idx >= 0;
-  const entry = { name, config, ts: Date.now() };
+  const entry = { marca, dispositivo, funcion, descripcion, autor, config, ts: Date.now() };
   if (updated) list[idx] = entry;
   else list.push(entry);
   setSavedConfigs(list);
-  nameInput.value = "";
-  statusEl.textContent = (updated ? t("savedUpdated") : t("savedOk")).replace("%s", name);
+  ["saved-marca", "saved-dispositivo", "saved-funcion", "saved-descripcion", "saved-autor"].forEach((id) => { document.getElementById(id).value = ""; });
+  const label = savedModelLabel(entry) + (funcion ? " · " + funcion : "");
+  statusEl.textContent = (updated ? t("savedUpdated") : t("savedOk")).replace("%s", label);
   statusEl.className = "ok";
   renderSavedList();
+  populateDevicePicker();
 }
 
 document.getElementById("btn-save-config").addEventListener("click", saveCurrentConfig);
-document.getElementById("saved-name").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") saveCurrentConfig();
-});
 document.getElementById("saved-list").addEventListener("click", (e) => {
   const loadBtn = e.target.closest("[data-saved-load]");
   const delBtn = e.target.closest("[data-saved-del]");
@@ -1947,15 +2011,17 @@ document.getElementById("saved-list").addEventListener("click", (e) => {
     if (!item) return;
     document.getElementById("json-input").value = item.config;
     loadJsonIntoForm(item.config);
-    if (document.getElementById("load-status").classList.contains("ok")) setMode("advanced");
+    const st = document.getElementById("load-status");
+    if (st.classList.contains("ok") || st.classList.contains("warn")) setMode("advanced");
   } else if (delBtn) {
     const idx = Number(delBtn.dataset.savedDel);
     const item = list[idx];
     if (!item) return;
-    if (!confirm(t("savedConfirmDelete").replace("%s", item.name))) return;
+    if (!confirm(t("savedConfirmDelete").replace("%s", savedModelLabel(item)))) return;
     list.splice(idx, 1);
     setSavedConfigs(list);
     renderSavedList();
+    populateDevicePicker();
   }
 });
 

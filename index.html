@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Configurador MEPLHAA</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 <header>
@@ -17,7 +17,7 @@
     </div>
   </div>
   <span class="badge">v12</span>
-  <span class="app-version-badge">v1.44</span>
+  <span class="app-version-badge">v1.45</span>
   <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
   <p class="github-link"><a href="https://github.com/haaconfig/meplhaa-configurator" target="_blank" rel="noopener">💡 <span data-i18n="githubLinkText">Sugerencias y errores: repositorio en GitHub</span> ↗</a></p>
 </header>
@@ -120,8 +120,13 @@
     <div class="card">
       <h2 data-i18n="savedTitle">Mis configuraciones guardadas</h2>
       <p class="hint" data-i18n="savedHint">Guarda la configuración actual con un nombre en este navegador y recupérala cuando quieras. Se guarda solo en tu dispositivo (no se sube a ningún sitio); si borras los datos del navegador, se pierde.</p>
-      <div class="saved-save-row">
-        <input type="text" id="saved-name" data-i18n-placeholder="savedNamePlaceholder" placeholder="Nombre (ej: cocina, persiana salón...)" />
+      <div class="saved-form">
+        <input type="text" id="saved-marca" list="saved-marca-list" data-i18n-placeholder="savedMarcaPlaceholder" placeholder="Marca (ej: Sonoff, Shelly, Kincony...)" />
+        <datalist id="saved-marca-list"></datalist>
+        <input type="text" id="saved-dispositivo" data-i18n-placeholder="savedDispositivoPlaceholder" placeholder="Dispositivo (ej: Sonoff Basic R2)" />
+        <input type="text" id="saved-funcion" data-i18n-placeholder="savedFuncionPlaceholder" placeholder="Función / tipo (ej: Sensor de movimiento)" />
+        <textarea id="saved-descripcion" rows="2" data-i18n-placeholder="savedDescripcionPlaceholder" placeholder="Descripción (opcional)"></textarea>
+        <input type="text" id="saved-autor" data-i18n-placeholder="savedAutorPlaceholder" placeholder="Autor (opcional)" />
         <button class="btn-primary" id="btn-save-config" data-i18n="savedSaveBtn">Guardar la actual</button>
       </div>
       <div id="saved-status"></div>
@@ -155,8 +160,8 @@
 
 <script src="devices.js?v=29"></script>
 <script src="typeInfo.js?v=6"></script>
-<script src="i18n.js?v=12"></script>
-<script src="app.js?v=30"></script>
+<script src="i18n.js?v=13"></script>
+<script src="app.js?v=31"></script>
 <script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

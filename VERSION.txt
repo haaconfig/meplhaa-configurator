@@ -1,5 +1,22 @@
-Configurador MEPLHAA — v1.44
+Configurador MEPLHAA — v1.45
 Fecha: 2026-07-18
+
+Cambios desde v1.44:
+- "Mis configuraciones guardadas" rediseñado: ahora se guarda como una
+  entrada de galería, con campos Marca, Dispositivo, Función/tipo,
+  Descripción y Autor (opcional) — igual que una entrada del catálogo.
+- Las guardadas aparecen en el SELECTOR DE DISPOSITIVOS de arriba, bajo
+  una marca nueva "⭐ Mis guardados": se navega Marca → Dispositivo
+  (marca — dispositivo) → Función igual que cualquier device, se ve su
+  descripción y autor, y se cargan con "Usar esta configuración". Siguen
+  gestionándose (cargar/borrar) desde la lista de la tarjeta.
+- El campo Marca tiene sugerencias (datalist) con las marcas del catálogo.
+- Migración automática del formato anterior (v1: solo nombre) al nuevo
+  (v2: marca/dispositivo/función/descripción/autor). Sigue siendo 100%
+  local en el navegador; nada se sube. Bilingüe ES/EN.
+- Ficheros: index.html (formulario), app.js (formato v2 + integración en
+  el selector), i18n.js (textos), style.css (formulario/lista). Catálogo
+  sin cambios (234).
 
 Cambios desde v1.43:
 - "Pegar JSON existente" ahora detecta automáticamente si el JSON pegado

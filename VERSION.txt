@@ -1,5 +1,21 @@
-Configurador MEPLHAA — v1.47
+Configurador MEPLHAA — v1.48
 Fecha: 2026-07-18
+
+Cambios desde v1.47:
+- Optimización para MÓVIL (el ~70% de las visitas son desde iPhone/Safari,
+  según las analíticas). Nueva media query (max-width: 560px) que:
+  · Reduce los márgenes/paddings laterales de 32px a 12px (cabecera,
+    layout, selector de modo, selector de dispositivos, tarjetas).
+  · Apila en una sola columna las rejillas de dos columnas (grid2) y el
+    selector de dispositivos.
+  · Quita los ancho-mínimo rígidos (tarjetas de elección y selects del
+    recuadro "¿Sabes qué dispositivo es este?") para que encojan.
+  · Reduce el tamaño del título y añade una red de seguridad contra el
+    scroll horizontal.
+  Antes había un desbordamiento horizontal (~19 px) en pantallas de móvil;
+  ahora el contenido encaja a 375 px sin scroll lateral. El escritorio no
+  cambia (la media query solo aplica en pantallas estrechas).
+- Fichero: style.css.
 
 Cambios desde v1.46:
 - Arreglo: el selector "¿Sabes qué dispositivo es este?" de Configuración

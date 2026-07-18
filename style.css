@@ -486,3 +486,29 @@ button {
 .saved-item-actions { display: flex; gap: 6px; flex: none; }
 .saved-item-actions button { padding: 4px 10px; font-size: 0.85rem; }
 .saved-empty { color: var(--hint); font-size: 0.9rem; padding: 2px 0; list-style: none; }
+
+/* --- Optimización para móvil (la mayoría de visitas son desde iPhone) --- */
+@media (max-width: 560px) {
+  header { padding: 16px 14px 6px; }
+  header h1 { font-size: 22px; }
+  .subtitle { font-size: 13px; }
+
+  .layout { padding: 12px 12px 32px; gap: 14px; }
+  .mode-toggle { padding: 0 12px; }
+  .device-picker { margin: 0 12px 14px; }
+  .card { padding: 14px 12px; }
+
+  /* Apilar rejillas de dos columnas y permitir que los campos encojan */
+  .grid2 { grid-template-columns: 1fr; }
+  .device-picker-row { grid-template-columns: 1fr; }
+  .choice-card { min-width: 0; flex-basis: 100%; }
+  .device-hint-ask-row select { min-width: 0; flex: 1 1 100%; }
+  .device-hint-ask-row .btn-secondary { flex: 1 1 100%; }
+
+  /* Que ningún campo o tabla fuerce scroll lateral */
+  input, select, textarea { max-width: 100%; }
+  .type-info { overflow-x: auto; }
+
+  /* Red de seguridad: nunca scroll horizontal en el cuerpo */
+  html, body { overflow-x: hidden; }
+}

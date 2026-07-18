@@ -1,5 +1,13 @@
-Configurador MEPLHAA — v1.29
+Configurador MEPLHAA — v1.30
 Fecha: 2026-07-17
+
+Cambios desde v1.29:
+- Añadido al catálogo un ejemplo aportado por la comunidad (rodolfo_homekit):
+  Shelly 1PM como Sistema de seguridad, con sensor de contacto cableado
+  para la puerta y un interruptor virtual para automatizaciones por
+  geolocalización. Convertido de formato v11 a v12 (el original usaba
+  sintaxis antigua de objetos para los relés/botones). Pendiente de subir
+  a la web publicada — hay más ejemplos en camino, se subirán juntos.
 
 Cambios desde v1.28:
 - Corregidos dos bugs reportados por RavenSystem al crear un dispositivo

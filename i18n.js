@@ -3,7 +3,11 @@
 // dispositivos y las tablas "qué se puede configurar" por tipo) permanece
 // en español por ahora; el resto de la interfaz es totalmente bilingüe.
 
-let currentLang = "es";
+// Idioma inicial según el navegador: español para los navegadores en
+// español, inglés para el resto (más alcance internacional). El usuario
+// puede cambiarlo en cualquier momento con el selector ES/EN.
+const _navLang = (typeof navigator !== "undefined" ? (navigator.language || (navigator.languages && navigator.languages[0]) || "") : "");
+let currentLang = String(_navLang).toLowerCase().indexOf("es") === 0 ? "es" : "en";
 
 const T = {
   es: {

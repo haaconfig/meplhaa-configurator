@@ -1,5 +1,16 @@
-Configurador MEPLHAA — v1.48
+Configurador MEPLHAA — v1.49
 Fecha: 2026-07-18
+
+Cambios desde v1.48:
+- Idioma inicial automático según el navegador: los navegadores en español
+  (es, es-ES, es-419…) arrancan en ESPAÑOL; el resto (inglés, francés,
+  italiano, portugués…) arrancan en INGLÉS, para dar más alcance
+  internacional sin molestar a la comunidad hispana. El selector ES/EN
+  sigue disponible para cambiarlo. Antes arrancaba siempre en español.
+  Fichero: i18n.js.
+- Añadido .gitignore (lista blanca): el repo solo admite los ficheros
+  reales del proyecto, así la basura de 0 bytes que a veces genera el
+  shell no puede colarse en un commit.
 
 Cambios desde v1.47:
 - Optimización para MÓVIL (el ~70% de las visitas son desde iPhone/Safari,

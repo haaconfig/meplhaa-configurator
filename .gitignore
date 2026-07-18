@@ -1,0 +1,22 @@
+# El repositorio solo debe contener los ficheros del configurador.
+# Se ignora todo por defecto y se permiten EXPLÍCITAMENTE los ficheros
+# reales del proyecto. Así, la basura de 0 bytes que a veces genera el
+# shell (nombres como "d.category", "o.value", "i)))", "({"...) nunca
+# puede colarse en un commit por accidente.
+#
+# IMPORTANTE: si en el futuro se añade un fichero nuevo de verdad al
+# proyecto, hay que añadirlo también aquí con "!/nombre".
+
+/*
+
+!/.gitignore
+!/.github/
+!/index.html
+!/app.js
+!/devices.js
+!/i18n.js
+!/style.css
+!/typeInfo.js
+!/favicon.svg
+!/README.md
+!/VERSION.txt

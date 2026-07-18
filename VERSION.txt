@@ -1,5 +1,78 @@
-Configurador MEPLHAA — v1.37
+Configurador MEPLHAA — v1.41
 Fecha: 2026-07-18
+
+Cambios desde v1.40:
+- NUEVA FUNCIÓN: convertidor de MEPLHAA antigua (v11 "Peregrine") al
+  formato actual (v12 "Merlin"). Nueva tarjeta en el panel derecho, bajo
+  "Pegar JSON existente". Pegas una config antigua y:
+  · Convierte las acciones de relé "r" de notación objeto
+    {"g":..,"v":..,"i":..} a array posicional [g,v,i].
+  · Convierte los botones "b"/"f[n]" de {"g":..,"t":..} a [g,t].
+  · Reconstruye el "io" central (obligatorio en v12) a partir de los GPIOs
+    usados: salidas (las de "r" + el LED "l") como modo 2, entradas (las de
+    "b"/"f[n]") como modo 6. Si el config ya trae "io", se respeta.
+  · Botones: "Convertir a v12", "Copiar resultado" y "Cargar resultado en
+    el formulario" (lo carga y salta al formulario avanzado).
+  Es idempotente (aplicarlo sobre un config ya v12 no lo estropea) y no
+  mete los pines de sensores en el "io". Aviso en la interfaz: los botones
+  se ponen como entrada simple (modo 6); si un botón físico necesita
+  pull-up hay que ajustarlo a mano (6,1). Bilingüe ES/EN.
+- Ficheros modificados: app.js (convertLegacyToV12 + wiring), index.html
+  (tarjeta nueva), i18n.js (textos ES/EN). Sin cambios en el catálogo
+  (sigue en 231 dispositivos).
+
+Cambios desde v1.39:
+- Tanda de 6 dispositivos nuevos aportados por rodolfo_homekit (comunidad
+  vía Discord #meplhaa-configurator-es), catálogo ahora con 231 entradas:
+  · "Shelly 1 (ESP8266)" → "Abre-portero / telefonillo del portal": abre
+    el portero automático (cerradura t:4, pulso de relé 3 s en GPIO 4).
+  · "Shelly 1 (ESP8266)" → "Alarma para trastero": sistema de seguridad
+    (t:55) con sensor de contacto cableado, armado con retardo de 5 min,
+    sirena 180 s en el relé y avisos push insistentes.
+  · "Shelly 2.5 (ESP8266)" → "Ventilación de baño por humedad, 2 vel.":
+    ventilador t:65 de 2 velocidades según humedad (65 %/80 %), auto-off
+    900 s, con medidores de potencia y termómetro.
+  · "Shelly Plug S (ESP8266)" → "Enchufe con auto-apagado de seguridad":
+    apagado por tiempo máximo (d) como protección (nebulizador). ⚠ La
+    config trae d:7200 (2 h); el autor lo citó como ~1800 s — ajustar.
+  · "NodeMCU (ESP8266)" (Otros) → "Anemómetro para protección de toldo":
+    monitor libre (t:80) que mide el viento y, al pasar el umbral (v:70),
+    dispara la recogida del toldo vía un sensor de movimiento "falso".
+  · "Sinos iFan" (Otros) → "Ventilador de techo 3 velocidades con mando":
+    ventilador t:65 (3 vel.) + receptor de mando a distancia (t:85).
+- Adaptaciones: donde hacía falta, acciones en notación objeto {"g":..}
+  convertidas a array v12 (mismos GPIOs/valores); quitadas etiquetas
+  personales de nivel c ("n":"ventilacion_bano", "n":"nebulizador"). Las
+  calibraciones (vf/vo/cf/co/pf) se conservan tal cual (son del autor).
+- Nota: la aportación repetida del "Shelly Plug S / Hubs (arranca en ON)"
+  ya se había añadido en v1.39, no se duplicó.
+
+Cambios desde v1.38:
+- Nuevo ejemplo aportado por rodolfo_homekit (comunidad), catálogo ahora
+  con 225 entradas: "Shelly Plug S (ESP8266)" → "Enchufe que arranca en
+  ON (recupera tras cortes/reconexión)". Enchufe (t:2) con estado inicial
+  ENCENDIDO (s:1): tras corte de luz/reinicio/pérdida de conexión vuelve a
+  arrancar en ON (útil para hubs/routers). Relé en GPIO 15 (GPIO 0 en
+  oposición = LED azul), botón GPIO 13, LED GPIO 2. Sin medidor de
+  potencia (a diferencia del otro ejemplo de Shelly Plug S).
+- Adaptaciones sobre la config aportada: acciones en notación objeto
+  {"g":..} convertidas a array v12 (mismos GPIOs/valores); corregida una
+  errata evidente ("cg":15 -> "g":15 en la acción de encendido, que si no
+  dejaría el relé sin activarse); y quitada una etiqueta personal
+  "n":"Hubs".
+
+Cambios desde v1.37:
+- Nuevo ejemplo aportado por rodolfo_homekit (comunidad), catálogo ahora
+  con 224 entradas: "Electrodragon placa de relé SPDT" → "Estor/persiana
+  (rodolfo_homekit, con guía de conexión, sin LED)". Persiana/estor con
+  relés en GPIO 12/13, botones subir/bajar/parar en GPIO 4/5, botón de
+  configuración en GPIO 2, sin LED de estado (tiempos 18/14 s). Incluye
+  la guía de conexión del autor: GND a la L del interruptor, IO4/IO5 a
+  subida/bajada, y ⚠ aviso de no aplicar 220 V al interruptor (son
+  entradas de señal). Config ya en formato array v12, usada tal cual.
+  Es casi idéntica al ejemplo de persiana Electrodragon que ya existía
+  (segundo ejemplo del mismo modelo); se mantiene por el crédito y la
+  guía de conexión.
 
 Cambios desde v1.36:
 - Nuevo dispositivo aportado por la comunidad vía Discord

@@ -1219,6 +1219,135 @@ document.getElementById("btn-load-json").addEventListener("click", () => {
   }
 });
 
+// ---------- Convertidor MEPLHAA v11 "Peregrine" -> v12 "Merlin" ----------
+// Convierte configuraciones antiguas al formato actual siguiendo la guía
+// oficial (Migration-Guide-for-HAA-V12-Merlin):
+//  - Acciones de relé "r" con GPIOs como objeto {"g":..,"v":..,"i":..} ->
+//    array posicional [g, v, i].
+//  - Botones "b"/"f[n]" con {"g":..,"t":..} -> array [g, t].
+//  - Reconstruye el "io" central (obligatorio en v12) a partir de los GPIOs
+//    usados: salidas (las de "r" + el LED "l") como modo 2, entradas (las de
+//    "b"/"f[n]") como modo 6. Si el config ya trae "io", se respeta.
+// Es idempotente: aplicarlo sobre un config que ya es v12 no lo estropea.
+function convertLegacyToV12(cfg) {
+  const obj = JSON.parse(JSON.stringify(cfg));
+  const outputs = new Set();
+  const inputs = new Set();
+
+  function convRelayEntry(el) {
+    if (Array.isArray(el)) {
+      if (el.length) outputs.add(Number(el[0]));
+      return el;
+    }
+    if (el && typeof el === "object" && el.g !== undefined) {
+      outputs.add(Number(el.g));
+      const arr = [Number(el.g)];
+      const hasV = el.v !== undefined;
+      const hasI = el.i !== undefined;
+      if (hasI) arr.push(hasV ? Number(el.v) : 0, Number(el.i));
+      else if (hasV) arr.push(Number(el.v));
+      return arr;
+    }
+    return el;
+  }
+
+  function convButtonEntry(el) {
+    if (Array.isArray(el)) {
+      if (el.length) inputs.add(Number(el[0]));
+      return el;
+    }
+    if (el && typeof el === "object" && el.g !== undefined) {
+      inputs.add(Number(el.g));
+      const arr = [Number(el.g)];
+      if (el.t !== undefined) arr.push(Number(el.t));
+      return arr;
+    }
+    return el;
+  }
+
+  function walk(node) {
+    if (Array.isArray(node)) {
+      node.forEach(walk);
+      return;
+    }
+    if (!node || typeof node !== "object") return;
+    Object.keys(node).forEach((key) => {
+      const val = node[key];
+      if (key === "r" && Array.isArray(val)) {
+        node[key] = val.map(convRelayEntry);
+      } else if ((key === "b" || /^f\d+$/.test(key)) && Array.isArray(val)) {
+        node[key] = val.map(convButtonEntry);
+      } else {
+        walk(val);
+      }
+    });
+  }
+
+  const c = obj.c || {};
+  if (Array.isArray(c.b)) c.b = c.b.map(convButtonEntry);
+  if (c.l !== undefined) outputs.add(Number(c.l));
+  if (Array.isArray(obj.a)) obj.a.forEach(walk);
+
+  if (c.io === undefined) {
+    const outArr = [...outputs].filter((g) => !Number.isNaN(g)).sort((a, b) => a - b);
+    const inArr = [...inputs].filter((g) => !Number.isNaN(g) && !outputs.has(g)).sort((a, b) => a - b);
+    const io = [];
+    if (outArr.length) io.push([outArr, 2]);
+    if (inArr.length) io.push([inArr, 6]);
+    if (io.length) {
+      obj.c = { io, ...c }; // "io" primero, por legibilidad
+      return obj;
+    }
+  }
+  obj.c = c;
+  return obj;
+}
+
+function runConverter() {
+  const statusEl = document.getElementById("convert-status");
+  const outEl = document.getElementById("convert-output");
+  const text = document.getElementById("convert-input").value.trim();
+  if (!text) {
+    statusEl.textContent = t("convertEmpty");
+    statusEl.className = "error";
+    outEl.textContent = "";
+    return "";
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(text);
+  } catch (e) {
+    statusEl.textContent = `${t("convertInvalid")}: ${e.message}`;
+    statusEl.className = "error";
+    outEl.textContent = "";
+    return "";
+  }
+  const before = JSON.stringify(parsed);
+  const result = JSON.stringify(convertLegacyToV12(parsed));
+  outEl.textContent = result;
+  statusEl.textContent = result === before ? t("convertOkNoChange") : t("convertOk");
+  statusEl.className = "ok";
+  return result;
+}
+
+document.getElementById("btn-convert").addEventListener("click", runConverter);
+
+document.getElementById("btn-convert-copy").addEventListener("click", () => {
+  const out = document.getElementById("convert-output").textContent;
+  if (out) navigator.clipboard.writeText(out);
+});
+
+document.getElementById("btn-convert-load").addEventListener("click", () => {
+  let result = document.getElementById("convert-output").textContent;
+  if (!result) result = runConverter();
+  if (!result) return;
+  document.getElementById("json-input").value = result;
+  loadJsonIntoForm(result);
+  if (document.getElementById("load-status").classList.contains("ok")) {
+    setMode("advanced");
+  }
+});
+
 // ---------- Modo Asistente (wizard) ----------
 
 // Declara (o corrige el modo de) un GPIO introducido en un campo del

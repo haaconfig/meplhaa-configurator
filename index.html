@@ -17,7 +17,7 @@
     </div>
   </div>
   <span class="badge">v12</span>
-  <span class="app-version-badge">v1.37</span>
+  <span class="app-version-badge">v1.41</span>
   <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
   <p class="github-link"><a href="https://github.com/haaconfig/meplhaa-configurator" target="_blank" rel="noopener">💡 <span data-i18n="githubLinkText">Sugerencias y errores: repositorio en GitHub</span> ↗</a></p>
 </header>
@@ -125,13 +125,27 @@
       <div id="load-status"></div>
       <div id="json-repair-box" class="json-repair-box hidden"></div>
     </div>
+
+    <div class="card">
+      <h2 data-i18n="convertTitle">Convertidor de MEPLHAA antigua (v11) → v12</h2>
+      <p class="hint" data-i18n="convertHint">Pega una configuración antigua (formato v11 "Peregrine", con GPIOs como objetos {"g":..} y sin "io" central) y conviértela al formato v12 "Merlin" (acciones en array + "io" reconstruido).</p>
+      <textarea id="convert-input" placeholder='{"c":{"l":13,"b":[{"g":0,"t":5}]},"a":[{"0":{"r":[{"g":12}]},"1":{"r":[{"g":12,"v":1}]}}]}'></textarea>
+      <div class="btn-row">
+        <button class="btn-primary" id="btn-convert" data-i18n="convertBtn">Convertir a v12</button>
+        <button class="btn-secondary" id="btn-convert-load" data-i18n="convertLoadBtn">Cargar resultado en el formulario</button>
+        <button class="btn-secondary" id="btn-convert-copy" data-i18n="convertCopyBtn">Copiar resultado</button>
+      </div>
+      <div id="convert-status"></div>
+      <pre id="convert-output" class="json-output"></pre>
+      <p class="hint" data-i18n="convertNote">Nota: los botones se declaran como entrada simple (modo 6). Algunos botones físicos necesitan pull-up (6,1); revísalo en el "io" si tu botón no responde. Verifica siempre el resultado antes de usarlo en tu dispositivo.</p>
+    </div>
   </section>
 </main>
 
-<script src="devices.js?v=25"></script>
+<script src="devices.js?v=28"></script>
 <script src="typeInfo.js?v=6"></script>
-<script src="i18n.js?v=9"></script>
-<script src="app.js?v=27"></script>
+<script src="i18n.js?v=10"></script>
+<script src="app.js?v=28"></script>
 <script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

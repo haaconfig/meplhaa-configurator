@@ -105,6 +105,25 @@ header h1 {
   padding: 18px 20px;
 }
 
+.device-description-box {
+  margin-top: 10px;
+}
+
+.device-description-box:empty { margin-top: 0; }
+
+.device-description-box p {
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 0 0 10px;
+  background: #f7f5fc;
+  border: 1px solid #e0d8f5;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.device-description-box p:last-child { margin-bottom: 0; }
+
 .card h2 {
   margin: 0 0 10px;
   font-size: 18px;

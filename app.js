@@ -1610,18 +1610,35 @@ function populateExampleSelect() {
   updateDeviceDescription();
 }
 
+// Las notas de la comunidad suelen ser largas (varios párrafos, alguna
+// viñeta con "*" o "-"), así que en vez de volcarlas como una sola línea
+// de "hint" pequeño, se muestran como texto legible: un párrafo <p> por
+// cada salto de línea doble, y saltos simples dentro de un párrafo se
+// respetan como líneas separadas (por ejemplo, para viñetas sueltas).
+function renderDescriptionText(el, text) {
+  const escape = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  if (!text) {
+    el.innerHTML = "";
+    return;
+  }
+  const paragraphs = text.split(/\n\s*\n/);
+  el.innerHTML = paragraphs.map((p) => `<p>${escape(p.trim()).replace(/\n/g, "<br>")}</p>`).join("");
+}
+
 function updateDeviceDescription() {
   const select = document.getElementById("device-example");
   const descEl = document.getElementById("device-description");
   if (select.value === "custom") {
-    descEl.textContent =
+    renderDescriptionText(
+      descEl,
       currentLang === "en"
         ? "Loads this model's real GPIO/general config, with an empty accessory list so you configure it yourself."
-        : "Carga la configuración general/GPIOs real de este modelo, con la lista de accesorios vacía para que la configures tú.";
+        : "Carga la configuración general/GPIOs real de este modelo, con la lista de accesorios vacía para que la configures tú."
+    );
     return;
   }
   const device = DEVICE_CATALOG[Number(select.value)];
-  descEl.textContent = device && device.description ? device.description : "";
+  renderDescriptionText(descEl, device ? device.description : "");
 }
 
 document.getElementById("device-category").addEventListener("change", populateModelSelect);

@@ -1,5 +1,22 @@
-Configurador MEPLHAA — v1.31
+Configurador MEPLHAA — v1.33
 Fecha: 2026-07-17
+
+Cambios desde v1.32:
+- Añadido tercer ejemplo de comunidad (rodolfo_homekit): Shelly 1
+  controlando una electroválvula N/A de suministro de agua, con lógica
+  invertida a propósito, cierre automático programado a las 23:00,
+  histórico de aperturas/cierres, e interruptor virtual de bloqueo de
+  seguridad para evitar que la automatización horaria reabra el agua si
+  hay una fuga. Este JSON ya venía en formato v12 correcto, sin
+  necesidad de conversión. Catálogo: 217 → 218 dispositivos.
+
+Cambios desde v1.31:
+- La descripción del dispositivo/ejemplo elegido ya no se muestra como una
+  línea pequeña de "hint" — ahora se ve como texto legible, en párrafos
+  separados (uno por cada salto de línea doble en la descripción), y
+  respeta saltos de línea sueltos para viñetas. Se han reestructurado en
+  párrafos las dos descripciones largas de la comunidad (Shelly 1PM
+  Alarma y Shelly EM) para aprovecharlo.
 
 Cambios desde v1.30:
 - Añadido segundo ejemplo de comunidad para el Shelly EM (rodolfo_homekit):

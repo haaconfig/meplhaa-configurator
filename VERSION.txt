@@ -1,5 +1,46 @@
-Configurador MEPLHAA — v1.41
+Configurador MEPLHAA — v1.44
 Fecha: 2026-07-18
+
+Cambios desde v1.43:
+- "Pegar JSON existente" ahora detecta automáticamente si el JSON pegado
+  es de una versión anterior a v12 (notación objeto {"g":..} en las
+  acciones y/o sin "io" central) y, al pulsar "Cargar en el formulario",
+  lo convierte a v12 antes de cargarlo (reutiliza convertLegacyToV12) y
+  muestra un aviso ⚠ en color ámbar indicando que era formato antiguo y
+  se ha convertido. Si el JSON ya es v12, se carga normal sin aviso.
+  Antes había que pasar por el convertidor a mano; ahora el "Cargar"
+  también convierte. Ficheros: app.js (loadJsonIntoForm), i18n.js
+  (loadJsonConverted ES/EN), style.css (#load-status.warn). Bilingüe.
+
+Cambios desde v1.42:
+- 3 dispositivos nuevos aportados por la comunidad (Discord), catálogo
+  ahora con 234 entradas:
+  · "Espejo retroiluminado con sensor de presencia (HLK-LD2410B)" (Otros):
+    luz LED (t:30) que se enciende/apaga con un sensor de presencia por
+    microondas HLK-LD2410B (accesorio de ocupación t:6). Entradas f0/f1
+    convertidas de notación objeto a array v12.
+  · "Kincony KC868-A4" → 2º ejemplo "Acuario": 3 termómetros DS18B20
+    (agua/aire/sump), 4 relés como válvulas (bomba sump, aireador, luces
+    UV, ósmosis) con temporizadores, y 2 sensores de contacto que accionan
+    relés. Config ya en array v12.
+  · "Ilonda (alimentador de acuario)" (Otros): interruptor (t:1) que
+    acciona el motor del alimentador, con botón y LED. Config ya en array.
+
+Cambios desde v1.41:
+- NUEVA FUNCIÓN: "Mis configuraciones guardadas". Nueva tarjeta bajo
+  "JSON generado" que permite guardar la configuración actual con un
+  nombre en el propio navegador (localStorage) y recuperarla más tarde:
+  · Campo de nombre + "Guardar la actual" (guarda el JSON que produce el
+    formulario en ese momento). Si el nombre ya existe, lo actualiza.
+  · Lista de configuraciones guardadas con botones "Cargar" (rellena el
+    formulario y salta a la vista avanzada) y "Borrar" (con confirmación).
+  · Persiste al cerrar/recargar. Es 100% local en el dispositivo del
+    usuario: no hay servidor ni se sube nada (la web es estática). Se
+    avisa de ello en la interfaz, y de que borrar los datos del navegador
+    la elimina.
+  Bilingüe ES/EN. Ficheros: index.html (tarjeta), app.js (funciones
+  getSavedConfigs/saveCurrentConfig/renderSavedList + wiring), i18n.js
+  (textos), style.css (estilos de la lista). Catálogo sin cambios (231).
 
 Cambios desde v1.40:
 - NUEVA FUNCIÓN: convertidor de MEPLHAA antigua (v11 "Peregrine") al

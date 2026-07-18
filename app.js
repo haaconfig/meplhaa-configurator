@@ -555,6 +555,7 @@ function setLanguage(lang) {
   refreshDevicePickerLabels();
   render();
   renderWizard();
+  renderSavedList();
 }
 
 document.getElementById("lang-es").addEventListener("click", () => setLanguage("es"));
@@ -1109,6 +1110,13 @@ function loadJsonIntoForm(text) {
   }
   hideJsonRepairSuggestion();
 
+  // Si el JSON pegado es de una versión anterior a v12 "Merlin" (acciones en
+  // notación objeto {"g":..} y/o sin "io" central), se convierte a v12
+  // automáticamente antes de cargarlo, y se avisa al usuario.
+  const convertedObj = convertLegacyToV12(parsed);
+  const wasLegacy = JSON.stringify(convertedObj) !== JSON.stringify(parsed);
+  if (wasLegacy) parsed = convertedObj;
+
   const detected = detectDeviceFromConfig(parsed);
   state.general.deviceHint = detected ? { source: "detected", category: detected.category, model: detected.model, example: detected.example, exampleEn: detected.exampleEn } : null;
 
@@ -1152,8 +1160,13 @@ function loadJsonIntoForm(text) {
   }
 
   render();
-  statusEl.textContent = t("loadJsonOk");
-  statusEl.className = "ok";
+  if (wasLegacy) {
+    statusEl.textContent = t("loadJsonConverted");
+    statusEl.className = "warn";
+  } else {
+    statusEl.textContent = t("loadJsonOk");
+    statusEl.className = "ok";
+  }
 }
 
 document.getElementById("btn-add-io").addEventListener("click", () => {
@@ -1214,7 +1227,8 @@ document.getElementById("btn-load-json").addEventListener("click", () => {
   // Si se cargó bien, muestra el formulario avanzado (donde se ve de golpe
   // la lista de GPIOs y accesorios resultante) en vez de dejar la vista en
   // el asistente, donde el resultado no se aprecia igual de claro.
-  if (document.getElementById("load-status").classList.contains("ok")) {
+  const st = document.getElementById("load-status");
+  if (st.classList.contains("ok") || st.classList.contains("warn")) {
     setMode("advanced");
   }
 });
@@ -1849,10 +1863,107 @@ document.getElementById("btn-use-device").addEventListener("click", () => {
   setMode("advanced");
 });
 
+// ---------- Mis configuraciones guardadas (localStorage) ----------
+// Guarda configuraciones MEPLHAA con nombre en el navegador del usuario.
+// Todo local: no hay servidor, no se sube nada a ningún sitio.
+const SAVED_KEY = "meplhaa_saved_v1";
+
+function getSavedConfigs() {
+  try {
+    const raw = localStorage.getItem(SAVED_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? list : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function setSavedConfigs(list) {
+  try {
+    localStorage.setItem(SAVED_KEY, JSON.stringify(list));
+  } catch (e) {
+    // localStorage puede estar deshabilitado (modo privado, cuota llena...).
+  }
+}
+
+function escapeHtmlSaved(s) {
+  return String(s).replace(/[&<>"']/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+}
+
+function renderSavedList() {
+  const ul = document.getElementById("saved-list");
+  if (!ul) return;
+  const list = getSavedConfigs();
+  if (!list.length) {
+    ul.innerHTML = `<li class="saved-empty">${t("savedEmpty")}</li>`;
+    return;
+  }
+  ul.innerHTML = list
+    .map(
+      (item, i) => `<li class="saved-item">
+        <span class="saved-item-name" title="${escapeHtmlSaved(item.name)}">${escapeHtmlSaved(item.name)}</span>
+        <span class="saved-item-actions">
+          <button type="button" class="btn-secondary" data-saved-load="${i}">${t("savedLoadBtn")}</button>
+          <button type="button" class="btn-secondary" data-saved-del="${i}">${t("savedDeleteBtn")}</button>
+        </span>
+      </li>`
+    )
+    .join("");
+}
+
+function saveCurrentConfig() {
+  const nameInput = document.getElementById("saved-name");
+  const statusEl = document.getElementById("saved-status");
+  const name = nameInput.value.trim();
+  if (!name) {
+    statusEl.textContent = t("savedNeedName");
+    statusEl.className = "error";
+    return;
+  }
+  const config = JSON.stringify(buildConfig());
+  const list = getSavedConfigs();
+  const idx = list.findIndex((x) => x.name === name);
+  const updated = idx >= 0;
+  const entry = { name, config, ts: Date.now() };
+  if (updated) list[idx] = entry;
+  else list.push(entry);
+  setSavedConfigs(list);
+  nameInput.value = "";
+  statusEl.textContent = (updated ? t("savedUpdated") : t("savedOk")).replace("%s", name);
+  statusEl.className = "ok";
+  renderSavedList();
+}
+
+document.getElementById("btn-save-config").addEventListener("click", saveCurrentConfig);
+document.getElementById("saved-name").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") saveCurrentConfig();
+});
+document.getElementById("saved-list").addEventListener("click", (e) => {
+  const loadBtn = e.target.closest("[data-saved-load]");
+  const delBtn = e.target.closest("[data-saved-del]");
+  const list = getSavedConfigs();
+  if (loadBtn) {
+    const item = list[Number(loadBtn.dataset.savedLoad)];
+    if (!item) return;
+    document.getElementById("json-input").value = item.config;
+    loadJsonIntoForm(item.config);
+    if (document.getElementById("load-status").classList.contains("ok")) setMode("advanced");
+  } else if (delBtn) {
+    const idx = Number(delBtn.dataset.savedDel);
+    const item = list[idx];
+    if (!item) return;
+    if (!confirm(t("savedConfirmDelete").replace("%s", item.name))) return;
+    list.splice(idx, 1);
+    setSavedConfigs(list);
+    renderSavedList();
+  }
+});
+
 applyStaticTranslations();
 document.getElementById("btn-simplify").textContent = hideDefaults ? t("showDefaultsBtn") : t("hideDefaultsBtn");
 document.getElementById("btn-oneline").textContent = oneLine ? t("multiLineBtn") : t("oneLineBtn");
 populateDevicePicker();
 render();
 renderWizard();
+renderSavedList();
 setMode("wizard");

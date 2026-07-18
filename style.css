@@ -274,6 +274,7 @@ button {
 
 #load-status.ok { color: #2e7d32; }
 #load-status.error { color: var(--danger); }
+#load-status.warn { color: #9a6700; font-weight: 600; }
 
 .json-repair-box {
   margin-top: 10px;
@@ -469,3 +470,17 @@ button {
 }
 
 .device-hint-ask-row select { min-width: 140px; }
+
+/* --- Mis configuraciones guardadas (localStorage) --- */
+.saved-save-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.saved-save-row input { flex: 1 1 200px; }
+.saved-save-row button { flex: none; }
+#saved-status { min-height: 1.1em; font-size: 0.9rem; margin: 2px 0 8px; }
+#saved-status.ok { color: #2e7d32; }
+#saved-status.error { color: var(--danger); }
+.saved-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.saved-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; }
+.saved-item-name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.saved-item-actions { display: flex; gap: 6px; flex: none; }
+.saved-item-actions button { padding: 4px 10px; font-size: 0.85rem; }
+.saved-empty { color: var(--hint); font-size: 0.9rem; padding: 2px 0; list-style: none; }

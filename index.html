@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Configurador MEPLHAA</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 <header>
@@ -17,7 +17,7 @@
     </div>
   </div>
   <span class="badge">v12</span>
-  <span class="app-version-badge">v1.41</span>
+  <span class="app-version-badge">v1.44</span>
   <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
   <p class="github-link"><a href="https://github.com/haaconfig/meplhaa-configurator" target="_blank" rel="noopener">💡 <span data-i18n="githubLinkText">Sugerencias y errores: repositorio en GitHub</span> ↗</a></p>
 </header>
@@ -118,6 +118,17 @@
     </div>
 
     <div class="card">
+      <h2 data-i18n="savedTitle">Mis configuraciones guardadas</h2>
+      <p class="hint" data-i18n="savedHint">Guarda la configuración actual con un nombre en este navegador y recupérala cuando quieras. Se guarda solo en tu dispositivo (no se sube a ningún sitio); si borras los datos del navegador, se pierde.</p>
+      <div class="saved-save-row">
+        <input type="text" id="saved-name" data-i18n-placeholder="savedNamePlaceholder" placeholder="Nombre (ej: cocina, persiana salón...)" />
+        <button class="btn-primary" id="btn-save-config" data-i18n="savedSaveBtn">Guardar la actual</button>
+      </div>
+      <div id="saved-status"></div>
+      <ul id="saved-list" class="saved-list"></ul>
+    </div>
+
+    <div class="card">
       <h2 data-i18n="pasteJsonTitle">Pegar JSON existente</h2>
       <p class="hint" data-i18n="pasteJsonHint">Pega aquí una configuración MEPLHAA y pulsa "Cargar" para rellenar el formulario con sus valores.</p>
       <textarea id="json-input" placeholder='{"c":{"io":[[[12,13],2]]},"a":[{"t":1}]}'></textarea>
@@ -142,10 +153,10 @@
   </section>
 </main>
 
-<script src="devices.js?v=28"></script>
+<script src="devices.js?v=29"></script>
 <script src="typeInfo.js?v=6"></script>
-<script src="i18n.js?v=10"></script>
-<script src="app.js?v=28"></script>
+<script src="i18n.js?v=12"></script>
+<script src="app.js?v=30"></script>
 <script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

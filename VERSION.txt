@@ -1,5 +1,17 @@
-Configurador MEPLHAA — v1.33
-Fecha: 2026-07-17
+Configurador MEPLHAA — v1.34
+Fecha: 2026-07-18
+
+Cambios desde v1.33:
+- Catálogo bilingüe completo: las 218 entradas (nombre de ejemplo y
+  descripción) ahora tienen traducción al inglés (exampleEn/descriptionEn
+  en devices.js). Al cambiar el idioma de la web a inglés, el selector de
+  dispositivos (categoría, ejemplo) y el texto explicativo cambian de
+  idioma correctamente, sin perder la selección que tuvieras hecha. Las
+  ~120 configuraciones migradas del issue #689 ya tenían el nombre de
+  ejemplo en inglés de origen; solo les faltaba traducir la descripción
+  ("Ejemplo de la comunidad..."). Las ~98 entradas restantes (oficiales
+  de la wiki + aportaciones de la comunidad de este proyecto) se han
+  traducido de cero.
 
 Cambios desde v1.32:
 - Añadido tercer ejemplo de comunidad (rodolfo_homekit): Shelly 1

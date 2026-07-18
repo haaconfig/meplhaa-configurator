@@ -49,7 +49,7 @@ Debajo se muestran avisos de validación si algo en la configuración no es cohe
 
 ### Idioma
 
-Selector ES/EN arriba a la derecha, para toda la interfaz interactiva. (El catálogo de dispositivos y las tablas de referencia por tipo de accesorio están en español).
+Selector ES/EN arriba a la derecha, para toda la interfaz interactiva, incluido el catálogo de dispositivos (nombre de ejemplo y descripción). Las tablas de referencia por tipo de accesorio ("¿qué se puede configurar en este tipo?") siguen solo en español por ahora.
 
 ## Estructura del proyecto
 
@@ -78,8 +78,9 @@ Abre un [issue en GitHub](https://github.com/haaconfig/meplhaa-configurator/issu
 1. Abre [`devices.js`](devices.js) y busca la sección `Otros` (o la de tu fabricante).
 2. Añade una línea con este formato:
    ```js
-   { category: "Otros", model: "Marca Modelo (chip)", example: "Descripción corta", description: "Descripción más larga si hace falta", config: cfg('{"c":{...},"a":[...]}') },
+   { category: "Otros", model: "Marca Modelo (chip)", example: "Descripción corta", exampleEn: "Short description in English", description: "Descripción más larga si hace falta", descriptionEn: "Longer description in English if needed", config: cfg('{"c":{...},"a":[...]}') },
    ```
+   Si no puedes escribir el `exampleEn`/`descriptionEn` en inglés, no pasa nada — mándalo solo en español y lo traduzco yo al añadirlo.
 3. Reglas importantes (para no dar información incorrecta a otros usuarios):
    - **No inventes GPIOs ni valores de calibración.** Usa solo datos que puedas verificar: la wiki de RavenSystem, la página del dispositivo en [templates.blakadder.com](https://templates.blakadder.com/) (para el pinout — ojo, ese sitio es de Tasmota, no de HAA, así que solo sirve para sacar los GPIOs, no la configuración HAA en sí), o tu propia prueba en hardware real.
    - Si el chip de medidor de potencia no tiene calibración documentada para HAA, dilo en la `description` en vez de inventar cifras — puedes usar el valor de partida oficial `{"vf":0.1,"cf":0.1,"pf":1}` que indica la wiki (ver página "Power-Monitor"), dejando claro que hay que calibrarlo.

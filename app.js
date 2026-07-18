@@ -520,11 +520,39 @@ function applyStaticTranslations() {
   document.getElementById("lang-en").classList.toggle("active", currentLang === "en");
 }
 
+// Al cambiar de idioma, el texto visible de las opciones del selector de
+// dispositivos (categoría/modelo/ejemplo) hay que regenerarlo — pero sin
+// perder lo que el usuario ya tenía elegido, así que se guarda y se
+// restaura la selección alrededor de repoblar los desplegables.
+function refreshDevicePickerLabels() {
+  const categorySelect = document.getElementById("device-category");
+  const modelSelect = document.getElementById("device-model");
+  const exampleSelect = document.getElementById("device-example");
+  if (!categorySelect || typeof DEVICE_CATALOG === "undefined") return;
+  const prevCategory = categorySelect.value;
+  const prevModel = modelSelect.value;
+  const prevExample = exampleSelect.value;
+  populateDevicePicker();
+  if ([...categorySelect.options].some((o) => o.value === prevCategory)) {
+    categorySelect.value = prevCategory;
+    populateModelSelect();
+    if ([...modelSelect.options].some((o) => o.value === prevModel)) {
+      modelSelect.value = prevModel;
+      populateExampleSelect();
+      if ([...exampleSelect.options].some((o) => o.value === prevExample)) {
+        exampleSelect.value = prevExample;
+        updateDeviceDescription();
+      }
+    }
+  }
+}
+
 function setLanguage(lang) {
   currentLang = lang;
   applyStaticTranslations();
   document.getElementById("btn-simplify").textContent = hideDefaults ? t("showDefaultsBtn") : t("hideDefaultsBtn");
   document.getElementById("btn-oneline").textContent = oneLine ? t("multiLineBtn") : t("oneLineBtn");
+  refreshDevicePickerLabels();
   render();
   renderWizard();
 }
@@ -1002,7 +1030,8 @@ function renderDeviceHint(containerId) {
   if (hint) {
     const wikiUrl = CATEGORY_WIKI_URL[hint.category];
     const modelLabel = hint.model.toLowerCase().startsWith(hint.category.toLowerCase()) ? hint.model : `${hint.category} ${hint.model}`;
-    const label = hint.example ? `${modelLabel} — ${hint.example}` : modelLabel;
+    const exampleText = currentLang === "en" && hint.exampleEn ? hint.exampleEn : hint.example;
+    const label = exampleText ? `${modelLabel} — ${exampleText}` : modelLabel;
     const sourceMsg = hint.source === "detected" ? t("deviceHintDetected") : t("deviceHintDeclared");
     const links = [
       `<a href="${blakadderSearchUrl(hint)}" target="_blank" rel="noopener">${t("deviceHintSchemaLink")} ↗</a>`,
@@ -1081,7 +1110,7 @@ function loadJsonIntoForm(text) {
   hideJsonRepairSuggestion();
 
   const detected = detectDeviceFromConfig(parsed);
-  state.general.deviceHint = detected ? { source: "detected", category: detected.category, model: detected.model, example: detected.example } : null;
+  state.general.deviceHint = detected ? { source: "detected", category: detected.category, model: detected.model, example: detected.example, exampleEn: detected.exampleEn } : null;
 
   const c = parsed.c || {};
   state.general.hostname = c.n || "";
@@ -1565,11 +1594,19 @@ document.getElementById("mode-advanced").addEventListener("click", () => setMode
 
 // ---------- Selector de dispositivos y funciones ----------
 
+// Las categorías se guardan siempre en español internamente (se comparan
+// por ese valor en varios sitios: category === "Personalizado", etc.) —
+// esto solo traduce lo que se ve en el desplegable, no el valor real.
+const CATEGORY_LABEL_EN = { Otros: "Other", Personalizado: "Custom" };
+function categoryLabel(c) {
+  return currentLang === "en" && CATEGORY_LABEL_EN[c] ? CATEGORY_LABEL_EN[c] : c;
+}
+
 function populateDevicePicker() {
   const categorySelect = document.getElementById("device-category");
   if (typeof DEVICE_CATALOG === "undefined") return;
   const categories = [...new Set(DEVICE_CATALOG.map((d) => d.category))];
-  categorySelect.innerHTML = categories.map((c) => `<option value="${c}">${c}</option>`).join("");
+  categorySelect.innerHTML = categories.map((c) => `<option value="${c}">${categoryLabel(c)}</option>`).join("");
   populateModelSelect();
 }
 
@@ -1579,6 +1616,14 @@ function populateModelSelect() {
   const models = [...new Set(DEVICE_CATALOG.filter((d) => d.category === category).map((d) => d.model))];
   modelSelect.innerHTML = models.map((m) => `<option value="${m}">${m}</option>`).join("");
   populateExampleSelect();
+}
+
+function deviceExampleLabel(d) {
+  return currentLang === "en" && d.exampleEn ? d.exampleEn : d.example;
+}
+
+function deviceDescriptionText(d) {
+  return currentLang === "en" && d.descriptionEn ? d.descriptionEn : d.description;
 }
 
 function populateExampleSelect() {
@@ -1594,8 +1639,8 @@ function populateExampleSelect() {
     // modelo se actualizan solos para reflejar el dispositivo real.
     const blank = DEVICE_CATALOG.map((d, idx) => ({ ...d, idx })).find((d) => d.category === "Personalizado");
     const others = DEVICE_CATALOG.map((d, idx) => ({ ...d, idx })).filter((d) => d.category !== "Personalizado");
-    const options = [`<option value="${blank.idx}">${blank.example}</option>`].concat(
-      others.map((d) => `<option value="${d.idx}">${d.model} — ${d.example}</option>`)
+    const options = [`<option value="${blank.idx}">${deviceExampleLabel(blank)}</option>`].concat(
+      others.map((d) => `<option value="${d.idx}">${d.model} — ${deviceExampleLabel(d)}</option>`)
     );
     exampleSelect.innerHTML = options.join("");
     updateDeviceDescription();
@@ -1604,7 +1649,7 @@ function populateExampleSelect() {
 
   const examples = DEVICE_CATALOG.map((d, idx) => ({ ...d, idx })).filter((d) => d.category === category && d.model === model);
   const customLabel = currentLang === "en" ? "🛠 Custom (this model's GPIOs, no preset accessory)" : "🛠 Personalizado (GPIOs de este modelo, sin accesorio predefinido)";
-  const options = examples.map((d) => `<option value="${d.idx}">${d.example}</option>`);
+  const options = examples.map((d) => `<option value="${d.idx}">${deviceExampleLabel(d)}</option>`);
   options.push(`<option value="custom">${customLabel}</option>`);
   exampleSelect.innerHTML = options.join("");
   updateDeviceDescription();
@@ -1638,7 +1683,7 @@ function updateDeviceDescription() {
     return;
   }
   const device = DEVICE_CATALOG[Number(select.value)];
-  renderDescriptionText(descEl, device ? device.description : "");
+  renderDescriptionText(descEl, device ? deviceDescriptionText(device) : "");
 }
 
 document.getElementById("device-category").addEventListener("change", populateModelSelect);

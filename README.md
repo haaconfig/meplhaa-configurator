@@ -17,10 +17,12 @@ También puedes usar cualquier otro servidor estático (Live Server de VS Code, 
 
 ## ¿Qué puedes hacer con esta web?
 
-- **Elegir un dispositivo de ejemplo** (opcional): arriba del todo hay un selector en 3 pasos — Fabricante → Modelo → Ejemplo/función — con más de 180 configuraciones ya hechas (dispositivos oficiales de la wiki de RavenSystem + ejemplos migrados de la comunidad). Selecciona "Personalizado" para partir de cero, o para explorar todos los ejemplos disponibles en un único desplegable.
+- **Elegir un dispositivo de ejemplo** (opcional): arriba del todo hay un selector en 3 pasos — Fabricante → Modelo → Ejemplo/función — con más de 230 configuraciones ya hechas (dispositivos oficiales de la wiki de RavenSystem + ejemplos migrados y aportados por la comunidad). Selecciona "Personalizado" para partir de cero, o para explorar todos los ejemplos disponibles en un único desplegable.
 - **Asistente paso a paso**: guía por preguntas para ir montando la configuración accesorio por accesorio.
 - **Formulario avanzado**: acceso directo a Configuración General, GPIOs y Accesorios, con todos los campos disponibles.
-- **Pegar un JSON existente**: en el panel derecho, pega tu script actual y pulsa "Cargar en el formulario" para editarlo visualmente. El formulario y el JSON generado están siempre sincronizados en ambos sentidos.
+- **Pegar un JSON existente**: en el panel derecho, pega tu script actual y pulsa "Cargar en el formulario" para editarlo visualmente. Si el JSON es de una versión anterior (v11 "Peregrine"), se **convierte automáticamente a v12** al cargarlo (te avisa de ello). El formulario y el JSON generado están siempre sincronizados en ambos sentidos.
+- **Convertidor v11 → v12**: una tarjeta específica donde pegar una configuración antigua y convertirla al formato actual sin cargarla (útil solo para convertir y copiar).
+- **Guardar tus configuraciones y compartirlas**: guarda tus MEPLHAA en el navegador y recupéralos cuando quieras; además puedes proponerlos al catálogo oficial para que los use toda la comunidad.
 
 El asistente y el formulario avanzado comparten el mismo estado: puedes empezar en uno y continuar en el otro sin perder nada.
 
@@ -47,6 +49,22 @@ Panel derecho, siempre actualizado en vivo. Botones disponibles:
 
 Debajo se muestran avisos de validación si algo en la configuración no es coherente.
 
+### Convertidor v11 "Peregrine" → v12 "Merlin"
+
+Las configuraciones antiguas usaban las acciones con los GPIOs como objetos (`{"g":12,"v":1}`) y no llevaban el bloque `io` central. Para pasarlas al formato actual tienes dos vías:
+
+- **Automático**: al pegar un JSON antiguo en "Pegar JSON existente" y pulsar "Cargar", se detecta y se convierte solo a v12 (con un aviso).
+- **Manual**: la tarjeta "Convertidor de MEPLHAA antigua (v11) → v12" convierte y te muestra el resultado para copiarlo, sin cargarlo en el formulario.
+
+La conversión pasa las acciones de relé (`r`) y botón (`b`/`f[n]`) a formato array, y **reconstruye el `io` central** a partir de los GPIOs usados (salidas de `r` + el LED como modo 2, entradas de `b`/`f[n]` como modo 6). Es idempotente: si le pasas algo que ya es v12, no lo toca. Nota: los botones se declaran como entrada simple (modo 6); algunos botones físicos necesitan pull-up (`6,1`), revísalo en el `io`.
+
+### Mis configuraciones guardadas
+
+Puedes guardar tus propias configuraciones en el navegador como una entrada más de la galería, rellenando **marca, dispositivo, función, descripción y autor** (opcional). Aparecen en el selector de dispositivos de arriba, bajo la marca **⭐ Mis guardados**, y se cargan igual que cualquier otro ejemplo.
+
+- Se guardan **solo en tu navegador/dispositivo** (localStorage). No se sube nada a ningún sitio; si borras los datos del navegador, se pierden.
+- Cada guardado tiene un botón **Compartir**, que abre una propuesta (issue) en GitHub ya rellena con todos los datos y el JSON, para proponerlo al **catálogo oficial** y que lo use toda la comunidad (tras una revisión).
+
 ### Idioma
 
 Selector ES/EN arriba a la derecha, para toda la interfaz interactiva, incluido el catálogo de dispositivos (nombre de ejemplo y descripción). Las tablas de referencia por tipo de accesorio ("¿qué se puede configurar en este tipo?") siguen solo en español por ahora.
@@ -69,7 +87,10 @@ No hay dependencias externas ni paso de build: todo es JS vanilla que se ejecuta
 
 ## Cómo aportar un dispositivo al catálogo
 
-¿Tienes un dispositivo que no está en el catálogo? Hay dos formas de aportarlo, según tus conocimientos:
+¿Tienes un dispositivo que no está en el catálogo? Hay varias formas de aportarlo, según tus conocimientos:
+
+**La más fácil — desde la propia web**
+Configura tu dispositivo, guárdalo en "Mis configuraciones guardadas" (con marca, modelo, función, descripción y autor) y pulsa **Compartir**: se abre una propuesta en GitHub ya rellena con todos los datos y el JSON. Solo tienes que enviarla (necesitas una cuenta de GitHub). Nosotros la revisamos y la añadimos al catálogo.
 
 **No sé programar — solo quiero sugerirlo**
 Abre un [issue en GitHub](https://github.com/haaconfig/meplhaa-configurator/issues/new/choose) con la plantilla "Sugerir un dispositivo". Cuenta más info (marca, modelo, enlace a su ficha en la wiki de RavenSystem o en [templates.blakadder.com](https://templates.blakadder.com/), y los GPIOs si los conoces), más fácil será añadirlo correctamente.

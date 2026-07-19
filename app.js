@@ -1043,33 +1043,12 @@ function renderDeviceHint(containerId) {
     `;
     return;
   }
-  const categories = [...new Set((typeof DEVICE_CATALOG !== "undefined" ? DEVICE_CATALOG : []).map((d) => d.category).filter((c) => c !== "Personalizado"))];
-  box.innerHTML = `
-    <p class="hint">${t("deviceHintAskLabel")}</p>
-    <div class="device-hint-ask-row">
-      <select class="dh-category"><option value="" selected>${t("deviceHintCategoryPlaceholder")}</option>${categories.map((c) => `<option value="${c}">${c}</option>`).join("")}</select>
-      <select class="dh-model"></select>
-      <button class="btn-secondary dh-save">${t("deviceHintSaveBtn")}</button>
-    </div>
-  `;
-  const catSelect = box.querySelector(".dh-category");
-  const modelSelect = box.querySelector(".dh-model");
-  const fillModels = () => {
-    if (!catSelect.value) {
-      modelSelect.innerHTML = `<option value="">${t("deviceHintModelPlaceholder")}</option>`;
-      return;
-    }
-    const models = [...new Set(DEVICE_CATALOG.filter((d) => d.category === catSelect.value).map((d) => d.model))];
-    modelSelect.innerHTML = models.map((m) => `<option value="${m}">${m}</option>`).join("");
-  };
-  fillModels();
-  catSelect.addEventListener("change", fillModels);
-  box.querySelector(".dh-save").addEventListener("click", () => {
-    if (!catSelect.value || !modelSelect.value) return;
-    state.general.deviceHint = { source: "declared", category: catSelect.value, model: modelSelect.value };
-    render();
-    renderWizard();
-  });
+  // Sin dispositivo detectado no mostramos nada aquí: el único selector de
+  // dispositivo es el principal de arriba (.device-picker). Así se evita el
+  // desplegable duplicado de marca/modelo en Configuración General y en el
+  // asistente. El enlace a la ficha se muestra arriba solo cuando hay un
+  // dispositivo cargado/detectado (rama anterior de esta función).
+  box.innerHTML = "";
 }
 
 function hideJsonRepairSuggestion() {
@@ -1995,9 +1974,10 @@ function renderSavedList() {
   ul.innerHTML = list
     .map((item, i) => {
       const sub = [item.funcion, item.autor ? t("savedByAuthor").replace("%s", item.autor) : ""].filter(Boolean).map(escapeHtmlSaved).join(" · ");
+      const pendBadge = item.pendiente ? `<span class="saved-pending-badge">⏳ ${currentLang === "en" ? "pending validation" : "pendiente de validar"}</span>` : "";
       return `<li class="saved-item">
         <span class="saved-item-info">
-          <span class="saved-item-name" title="${escapeHtmlSaved(savedModelLabel(item))}">${escapeHtmlSaved(savedModelLabel(item))}</span>
+          <span class="saved-item-name" title="${escapeHtmlSaved(savedModelLabel(item))}">${escapeHtmlSaved(savedModelLabel(item))}</span>${pendBadge}
           ${sub ? `<span class="saved-item-sub">${sub}</span>` : ""}
         </span>
         <span class="saved-item-actions">
@@ -2008,6 +1988,44 @@ function renderSavedList() {
       </li>`;
     })
     .join("");
+}
+
+// --- Marca/dispositivo del catálogo para el formulario de guardar ---
+function catalogModelsForMarca(marca) {
+  if (typeof DEVICE_CATALOG === "undefined" || !marca) return [];
+  const m = marca.trim().toLowerCase();
+  return [...new Set(DEVICE_CATALOG.filter((d) => d.category !== "Personalizado" && d.category.toLowerCase() === m).map((d) => d.model))];
+}
+function isDeviceInCatalog(marca, dispositivo) {
+  if (!marca || !dispositivo) return false;
+  const dev = dispositivo.trim().toLowerCase();
+  return catalogModelsForMarca(marca).some((mm) => mm.toLowerCase() === dev);
+}
+// Rellena el datalist de "Dispositivo" con los modelos de la marca elegida.
+function updateSavedDispositivoDatalist() {
+  const dl = document.getElementById("saved-dispositivo-list");
+  if (!dl) return;
+  const marca = document.getElementById("saved-marca").value;
+  dl.innerHTML = catalogModelsForMarca(marca).map((m) => `<option value="${escapeHtmlSaved(m)}"></option>`).join("");
+}
+// Si el dispositivo escrito no está en el catálogo, avisa de que se guardará
+// como "pendiente de validar" y ofrece solicitar su alta oficial.
+function updateSavedPendingNote() {
+  const note = document.getElementById("saved-pending-note");
+  if (!note) return;
+  const marca = document.getElementById("saved-marca").value.trim();
+  const dispositivo = document.getElementById("saved-dispositivo").value.trim();
+  if (dispositivo && !isDeviceInCatalog(marca, dispositivo)) {
+    const msg = currentLang === "en"
+      ? "This device isn't in the catalog. It will be saved as <strong>pending validation</strong>."
+      : "Este dispositivo no está en el listado. Se guardará como <strong>pendiente de validar</strong>.";
+    const btn = currentLang === "en" ? "Request addition to the catalog ↗" : "Solicitar alta en el catálogo ↗";
+    note.innerHTML = `<p class="hint">⏳ ${msg} <button type="button" class="btn-secondary" id="btn-request-alta">${btn}</button></p>`;
+    note.classList.remove("hidden");
+  } else {
+    note.innerHTML = "";
+    note.classList.add("hidden");
+  }
 }
 
 function saveCurrentConfig() {
@@ -2023,14 +2041,18 @@ function saveCurrentConfig() {
     return;
   }
   const config = JSON.stringify(buildConfig());
+  // Un dispositivo que no está en el catálogo (para su marca) se guarda como
+  // "pendiente de validar", para que luego se pueda solicitar su alta oficial.
+  const pendiente = !isDeviceInCatalog(marca, dispositivo);
   const list = getSavedConfigs();
   const idx = list.findIndex((x) => x.marca === marca && x.dispositivo === dispositivo && x.funcion === funcion);
   const updated = idx >= 0;
-  const entry = { marca, dispositivo, funcion, descripcion, autor, config, ts: Date.now() };
+  const entry = { marca, dispositivo, funcion, descripcion, autor, config, pendiente, ts: Date.now() };
   if (updated) list[idx] = entry;
   else list.push(entry);
   setSavedConfigs(list);
   ["saved-marca", "saved-dispositivo", "saved-funcion", "saved-descripcion", "saved-autor"].forEach((id) => { document.getElementById(id).value = ""; });
+  updateSavedPendingNote();
   const label = savedModelLabel(entry) + (funcion ? " · " + funcion : "");
   statusEl.textContent = (updated ? t("savedUpdated") : t("savedOk")).replace("%s", label);
   statusEl.className = "ok";
@@ -2039,6 +2061,23 @@ function saveCurrentConfig() {
 }
 
 document.getElementById("btn-save-config").addEventListener("click", saveCurrentConfig);
+// Marca/Dispositivo del formulario de guardar: elegir del catálogo o escribir libremente.
+document.getElementById("saved-marca").addEventListener("input", () => { updateSavedDispositivoDatalist(); updateSavedPendingNote(); });
+document.getElementById("saved-dispositivo").addEventListener("input", updateSavedPendingNote);
+document.getElementById("saved-pending-note").addEventListener("click", (e) => {
+  if (!e.target.closest("#btn-request-alta")) return;
+  const item = {
+    marca: document.getElementById("saved-marca").value.trim(),
+    dispositivo: document.getElementById("saved-dispositivo").value.trim(),
+    funcion: document.getElementById("saved-funcion").value.trim(),
+    descripcion: document.getElementById("saved-descripcion").value.trim(),
+    autor: document.getElementById("saved-autor").value.trim(),
+    config: JSON.stringify(buildConfig()),
+    pendiente: true,
+  };
+  shareToGithub(item);
+});
+updateSavedDispositivoDatalist();
 document.getElementById("saved-list").addEventListener("click", (e) => {
   const loadBtn = e.target.closest("[data-saved-load]");
   const delBtn = e.target.closest("[data-saved-del]");

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Configurador MEPLHAA</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="style.css?v=18">
 </head>
 <body>
 <header>
@@ -123,12 +123,14 @@
       <div class="saved-form">
         <input type="text" id="saved-marca" list="saved-marca-list" data-i18n-placeholder="savedMarcaPlaceholder" placeholder="Marca (ej: Sonoff, Shelly, Kincony...)" />
         <datalist id="saved-marca-list"></datalist>
-        <input type="text" id="saved-dispositivo" data-i18n-placeholder="savedDispositivoPlaceholder" placeholder="Dispositivo (ej: Sonoff Basic R2)" />
+        <input type="text" id="saved-dispositivo" list="saved-dispositivo-list" data-i18n-placeholder="savedDispositivoPlaceholder" placeholder="Dispositivo (ej: Sonoff Basic R2)" />
+        <datalist id="saved-dispositivo-list"></datalist>
         <input type="text" id="saved-funcion" data-i18n-placeholder="savedFuncionPlaceholder" placeholder="Función / tipo (ej: Sensor de movimiento)" />
         <textarea id="saved-descripcion" rows="2" data-i18n-placeholder="savedDescripcionPlaceholder" placeholder="Descripción (opcional)"></textarea>
         <input type="text" id="saved-autor" data-i18n-placeholder="savedAutorPlaceholder" placeholder="Autor (opcional)" />
         <button class="btn-primary" id="btn-save-config" data-i18n="savedSaveBtn">Guardar la actual</button>
       </div>
+      <div id="saved-pending-note" class="saved-pending-note hidden"></div>
       <div id="saved-status"></div>
       <ul id="saved-list" class="saved-list"></ul>
     </div>
@@ -158,10 +160,10 @@
   </section>
 </main>
 
-<script src="devices.js?v=30"></script>
+<script src="devices.js?v=39"></script>
 <script src="typeInfo.js?v=6"></script>
 <script src="i18n.js?v=16"></script>
-<script src="app.js?v=33"></script>
+<script src="app.js?v=35"></script>
 <script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

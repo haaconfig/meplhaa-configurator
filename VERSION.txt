@@ -1,7 +1,98 @@
-Configurador MEPLHAA — v1.51
-Fecha: 2026-07-18
+Configurador MEPLHAA — v1.62
+Fecha: 2026-07-19
 
-Cambios desde v1.50:
+Cambios desde v1.61:
+- Kincony KC868-A4: añadido 2º ejemplo "Piscina" (aportado por el usuario;
+  venía en notación v11 y se convirtió a v12 con el conversor de la app).
+  3 sensores DS18B20 (agua/aire/calentador) + 4 relés con botón local (bomba
+  principal, calentador con termostato, luces, cascada). Fichero: devices.js.
+
+Cambios desde v1.60:
+- Kincony KC868-A4: añadido ejemplo real "Acuario" (aportado por el usuario).
+  Placa ESP32: 3 sensores DS18B20 en bus GPIO13 (agua/aire/sump) + 4 relés con
+  temporizador (bomba sump GPIO2, aireador GPIO15, luces UV GPIO5 con botón
+  GPIO27, osmosis GPIO4 con entrada GPIO36). Reemplaza el placeholder del
+  KC868-A4. Fichero: devices.js.
+
+Cambios desde v1.59:
+- Eliminada la categoría "Otros" (132 entradas). El catálogo contiene ahora
+  SOLO los modelos de las listas facilitadas por el usuario: Shelly, Sonoff,
+  eWeLink, Tuya, Athom, Kincony. Las configuraciones antiguas que se
+  relacionaron ya quedaron colocadas bajo su modelo nuevo (v1.58); las no
+  relacionadas se descartan. Total catálogo 243. (Las configs descartadas
+  siguen recuperables desde git v1.51 y los zips.) Fichero: devices.js.
+
+Cambios desde v1.58:
+- Nueva categoría Kincony (14 modelos: KC868-A2/A4/A4S/A6/A8/A8M/A8S/A16/A16S/
+  A32/A32M/A64/AG/ASR), orden alfanumérico, sin config todavía. Orden de
+  fabricantes: Shelly, Sonoff, eWeLink, Tuya, Athom, Kincony, Otros. Total 375.
+  Nota: "Otros" aún tiene un "Kincony KC868-A4" que solapa; pendiente de
+  reconciliar. Fichero: devices.js.
+
+Cambios desde v1.57:
+- Asignadas las configuraciones antiguas a los modelos nuevos según el mapeo
+  revisado por el usuario (Excel mapeo-antiguos-nuevos.xlsx): 40 modelos nuevos
+  reciben config (94 ejemplos en total); los no relacionados quedan sin ejemplo
+  ("Sin configuración aún"). Reparto: Shelly 16 modelos con config, Sonoff 15,
+  eWeLink 4, Tuya 1, Athom 4. "Otros" (132) intacto. Total catálogo 361.
+  Fichero: devices.js.
+
+Cambios desde v1.56:
+- Listados canónicos corregidos: sustituidos los nombres de las 5 marcas por
+  la versión limpia y definitiva del usuario (sin códigos de parte largos).
+  Shelly 26, Sonoff 74, eWeLink 6, Tuya 23, Athom 45. Ordenados
+  alfanuméricamente, sin duplicados, config vacía (pendiente de asignar).
+  Se retira el enlace de pinout por dispositivo (los nombres nuevos ya no
+  mapean 1:1 con los ficheros de Blakadder; el pinout se añadirá al asignar
+  cada config). "Otros" (132) intacto. Total 307. Fichero: devices.js.
+
+Cambios desde v1.55:
+- "Mis configuraciones guardadas": los campos Marca y Dispositivo ahora son
+  elegir-del-catálogo-o-escribir. Marca: datalist de fabricantes (ya existía).
+  Dispositivo: nuevo datalist con los modelos de la marca elegida (editable,
+  se puede escribir uno que no esté). Si el dispositivo NO está en el catálogo,
+  aparece un aviso "se guardará como pendiente de validar" + botón "Solicitar
+  alta en el catálogo" (abre la propuesta pre-rellenada en GitHub, mismo
+  mecanismo que "Compartir"). Al guardarlo, la entrada queda marcada como
+  pendiente (distintivo "⏳ pendiente de validar" en la lista de guardados).
+  Ficheros: index.html, app.js, style.css.
+
+Cambios desde v1.54:
+- Quitado el selector de marca/modelo duplicado. El recuadro "¿Sabes qué
+  dispositivo es este?" de Configuración General (y del asistente) ya no
+  muestra su propio desplegable cuando no hay dispositivo detectado: el único
+  selector de dispositivo es el principal de arriba ("Selector de dispositivos
+  y funciones"). Cuando hay un dispositivo cargado/detectado, ese recuadro
+  sigue mostrando el enlace a su ficha/esquema. Fichero: app.js
+  (función renderDeviceHint).
+
+Cambios desde v1.53:
+- Nueva categoría con su listado canónico (Blakadder), ordenada
+  alfanuméricamente, sin duplicados y SIN configuración todavía (cada modelo
+  con su enlace de pinout Tasmota como referencia): Athom (62 modelos).
+  Orden de fabricantes: Shelly, Sonoff, eWeLink, Tuya, Athom, Otros.
+  Catálogo total 367. Pendiente de asignar configs. Fichero: devices.js.
+  Nota: "Otros" aún contiene algún Athom/Tuya/eWeLink que solapa con estas
+  categorías nuevas; pendiente de reconciliar más adelante.
+
+Cambios desde v1.52:
+- Dos categorías nuevas con su listado canónico (Blakadder), ordenadas
+  alfanuméricamente, sin duplicados y SIN configuración todavía (cada modelo
+  con su enlace de pinout Tasmota como referencia): eWeLink (10 modelos) y
+  Tuya (32 modelos). Orden de fabricantes: Shelly, Sonoff, eWeLink, Tuya,
+  Otros. Catálogo total 305. Pendiente de asignar configs. Fichero: devices.js.
+
+Cambios desde v1.51:
+- Reorganización de los catálogos Sonoff y Shelly: se sustituyen por el
+  listado canónico oficial (nombres de Blakadder), ordenado
+  alfanuméricamente y SIN duplicados por mayúsculas/minúsculas. Sonoff pasa
+  a 89 modelos y Shelly a 41. Por ahora SIN ejemplos/configuración: cada
+  modelo lleva su enlace de pinout (Tasmota) como referencia, pendiente de
+  asignarle la configuración MEPLHAA correcta. La categoría "Otros" (132)
+  queda intacta. Trabajo en curso: las configs actuales se reasignarán a su
+  modelo canónico tras revisión del usuario. Fichero: devices.js.
+
+Cambios desde v1.51:
 - Nuevo dispositivo en el catálogo (Otros): "MHCOZY DC 7-32V (interruptor
   1 canal, ESP8285)". Módulo relé/interruptor RF de 1 canal, placa PSF-B01.
   Relé GPIO12, botón GPIO0, LED de estado GPIO13. GPIOs verificados en la

@@ -512,3 +512,17 @@ button {
   /* Red de seguridad: nunca scroll horizontal en el cuerpo */
   html, body { overflow-x: hidden; }
 }
+
+/* Guardar: aviso de dispositivo pendiente de validar */
+.saved-pending-note { margin: 4px 0 2px; }
+.saved-pending-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  font-size: 0.75em;
+  border-radius: 10px;
+  background: #fff3cd;
+  color: #8a6d00;
+  border: 1px solid #ffe08a;
+  white-space: nowrap;
+}

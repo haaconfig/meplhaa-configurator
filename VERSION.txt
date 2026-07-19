@@ -1,3 +1,12 @@
+Configurador MEPLHAA — v1.63
+Fecha: 2026-07-19
+
+Cambios desde v1.62:
+- Corregido el número de versión visible en la interfaz: el badge de index.html
+  estaba fijo en "v1.49" desde esa versión (nunca se actualizó al subir las
+  siguientes). Ahora muestra v1.63 y a partir de ahora se sube junto con
+  VERSION.txt en cada release. Fichero: index.html.
+
 Configurador MEPLHAA — v1.62
 Fecha: 2026-07-19
 

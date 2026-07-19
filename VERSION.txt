@@ -1,3 +1,19 @@
+Configurador MEPLHAA — v1.64
+Fecha: 2026-07-19
+
+Cambios desde v1.63:
+- BUG corregido en "Log output type": los valores de "o" estaban desplazados.
+  UART2 (ESP32) generaba "o":4 (que en HAA es Network) y Network generaba
+  "o":5 (que es UART0+Network). Corregido según la wiki oficial: UART2=3,
+  Network=4, y añadidas las combinaciones que faltaban (UART+Network y
+  variantes con buffer, valores 5-11). Fichero: index.html.
+- Añadidos 90 ejemplos nuevos al catálogo (de la colección del usuario, ya en
+  v12), repartidos entre Sonoff Basic/4CH/4CH Pro/Mini/Dual/Dual R3/Basic R3/
+  SV/Touch/T1/TH, Shelly Plus 2PM y Kincony KC868-A4 (garaje, alarmas, timbre,
+  persiana, riego, gallinero, piscina, calentador, sensores de presencia...).
+  Fichero: devices.js.
+- Badge de versión de la interfaz actualizado a v1.64.
+
 Configurador MEPLHAA — v1.63
 Fecha: 2026-07-19
 

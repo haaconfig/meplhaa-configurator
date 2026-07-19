@@ -17,7 +17,7 @@
     </div>
   </div>
   <span class="badge">v12</span>
-  <span class="app-version-badge">v1.63</span>
+  <span class="app-version-badge">v1.64</span>
   <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
   <p class="github-link"><a href="https://github.com/haaconfig/meplhaa-configurator" target="_blank" rel="noopener">💡 <span data-i18n="githubLinkText">Sugerencias y errores: repositorio en GitHub</span> ↗</a></p>
 </header>
@@ -65,8 +65,15 @@
             <option value="0" data-i18n="logOff">Desactivado</option>
             <option value="1">UART0</option>
             <option value="2">UART1</option>
-            <option value="4">UART2 (ESP32)</option>
-            <option value="5">Network</option>
+            <option value="3">UART2 (ESP32)</option>
+            <option value="4">Network</option>
+            <option value="5">UART0 + Network</option>
+            <option value="6">UART1 + Network</option>
+            <option value="7">UART2 + Network (ESP32)</option>
+            <option value="8">Network + buffer</option>
+            <option value="9">UART0 + Network + buffer</option>
+            <option value="10">UART1 + Network + buffer</option>
+            <option value="11">UART2 + Network + buffer (ESP32)</option>
           </select>
         </label>
         <label data-i18n="ledGpioLabel">GPIO del LED de estado
@@ -160,7 +167,7 @@
   </section>
 </main>
 
-<script src="devices.js?v=39"></script>
+<script src="devices.js?v=40"></script>
 <script src="typeInfo.js?v=6"></script>
 <script src="i18n.js?v=16"></script>
 <script src="app.js?v=35"></script>

@@ -1,5 +1,21 @@
-Configurador MEPLHAA — v1.49
+Configurador MEPLHAA — v1.51
 Fecha: 2026-07-18
+
+Cambios desde v1.50:
+- Nuevo dispositivo en el catálogo (Otros): "MHCOZY DC 7-32V (interruptor
+  1 canal, ESP8285)". Módulo relé/interruptor RF de 1 canal, placa PSF-B01.
+  Relé GPIO12, botón GPIO0, LED de estado GPIO13. GPIOs verificados en la
+  plantilla Tasmota de Blakadder (mismo pinout que el Sonoff Basic).
+  Fichero: devices.js.
+
+Cambios desde v1.49:
+- README bilingüe para dar alcance internacional en GitHub. El README.md
+  principal pasa a estar en INGLÉS (lo que ve por defecto el visitante del
+  repo) y la versión en español se mueve a README.es.md. Ambos llevan un
+  selector de idioma arriba ("🇬🇧 English | 🇪🇸 Español"). No cambia nada
+  de la app; es solo documentación del repositorio.
+- .gitignore: añadido "!/README.es.md" a la lista blanca para que el nuevo
+  README en español entre en el repo.
 
 Cambios desde v1.48:
 - Idioma inicial automático según el navegador: los navegadores en español

@@ -1,3 +1,20 @@
+Configurador MEPLHAA — v1.69
+Fecha: 2026-07-19
+
+Cambios desde v1.68:
+- Asistente: ahora muestra un resumen "GPIOs que usa este dispositivo" (relé/
+  LED/botón + modo de cada io) al cargar un dispositivo, igual de claro que el
+  formulario avanzado. Antes el asistente no enseñaba los GPIOs de un vistazo.
+  Ficheros: app.js (wizardGpioSummaryHTML), style.css.
+- Corregido el Shelly 1 Gen3 mal ubicado: la config de ESP32-C3 estaba bajo
+  "Shelly 1" (ESP8266) con GPIOs incorrectos. Movida a modelos propios nuevos
+  "Shelly 1 Gen3" y "Shelly 1PM Gen3". "Shelly 1" y "Shelly 1PM" quedan solo con
+  configs ESP8266. Fichero: devices.js.
+- Badge de versión -> v1.69.
+(Aparte, no en la web: regenerado el documento Word de configuraciones del
+ usuario con un parser mejorado; 251 configs válidas en v12, 19 con errores en
+ el original marcadas para revisión manual.)
+
 Configurador MEPLHAA — v1.68
 Fecha: 2026-07-19
 

@@ -643,6 +643,27 @@ function gpioRoleLabel(gpio) {
   return null;
 }
 
+// Resumen legible de los GPIOs del dispositivo cargado, para mostrarlo en el
+// asistente (que antes no enseñaba los GPIOs "de un vistazo" como el avanzado).
+function wizardGpioSummaryHTML() {
+  if (!state.io || !state.io.length) return "";
+  const ml = modeLabels();
+  const items = state.io
+    .map((group) => {
+      if (!group.gpios || !String(group.gpios).trim()) return "";
+      const first = parseGpioList(group.gpios)[0];
+      const role = gpioRoleLabel(first);
+      const modeLabel = ml[Number(group.mode)] || `modo ${group.mode}`;
+      const roleTag = role ? ` — <strong>${role}</strong>` : "";
+      return `<li><code>GPIO ${escapeHtmlSaved(String(group.gpios))}</code> · ${modeLabel}${roleTag}</li>`;
+    })
+    .filter(Boolean)
+    .join("");
+  if (!items) return "";
+  const title = currentLang === "en" ? "GPIOs this device uses:" : "GPIOs que usa este dispositivo:";
+  return `<div class="wiz-gpio-summary"><p class="hint">📌 ${title}</p><ul>${items}</ul></div>`;
+}
+
 function renderIoList() {
   const container = document.getElementById("io-list");
   container.innerHTML = "";
@@ -1437,6 +1458,7 @@ function renderWizard() {
   if (wizard.step === "intro") {
     content.innerHTML = `
       <h3>${t("wizIntroH3")}</h3>
+      ${wizardGpioSummaryHTML()}
       <label>${t("hostnameLabel")}
         <input type="text" id="w-hostname" value="${state.general.hostname}" placeholder="${t("hostnamePlaceholder")}">
       </label>

@@ -526,3 +526,16 @@ button {
   border: 1px solid #ffe08a;
   white-space: nowrap;
 }
+
+/* Asistente: resumen de GPIOs del dispositivo cargado */
+.wiz-gpio-summary {
+  background: #eef4ff;
+  border: 1px solid #cfe0ff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin: 6px 0 12px;
+}
+.wiz-gpio-summary p.hint { margin: 0 0 4px; font-weight: 600; color: #1f4e78; }
+.wiz-gpio-summary ul { margin: 0; padding-left: 18px; }
+.wiz-gpio-summary li { margin: 2px 0; }
+.wiz-gpio-summary code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px; }

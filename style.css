@@ -542,5 +542,6 @@ button {
 
 /* Logo de la cabecera */
 .title-group { display: flex; align-items: center; gap: 10px; }
-.app-logo { width: 44px; height: 44px; flex: none; display: block; }
-@media (max-width: 560px) { .app-logo { width: 36px; height: 36px; } }
+.app-logo-full { height: 60px; width: auto; max-width: 100%; display: block; }
+@media (max-width: 560px) { .app-logo-full { height: 44px; } }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }

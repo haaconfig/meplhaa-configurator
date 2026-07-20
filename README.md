@@ -1,3 +1,5 @@
+<p align="center"><img src="meplhaa-icono.png" alt="MEPLHAA Configurator" width="180"></p>
+
 🇬🇧 **English** | 🇪🇸 [Español](README.es.md)
 
 # MEPLHAA Configurator

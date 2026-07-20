@@ -1,3 +1,14 @@
+Configurador MEPLHAA — v1.74
+Fecha: 2026-07-19
+
+Cambios desde v1.73:
+- Logo de marca en PNG (aportado por el usuario, fondo transparente, recortado
+  ajustado): "logo-meplhaa.png" (lockup icono+MEPLHAA+Configurator) en la
+  cabecera de la web, sustituyendo icono+texto (el titulo queda oculto para
+  accesibilidad). "meplhaa-icono.png" (solo icono) añadido arriba del README
+  (repo). Ficheros: index.html, style.css, README.md, README.es.md, .gitignore.
+  Badge -> v1.74.
+
 Configurador MEPLHAA — v1.73
 Fecha: 2026-07-19
 

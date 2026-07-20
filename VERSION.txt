@@ -1,3 +1,11 @@
+Configurador MEPLHAA — v1.70
+Fecha: 2026-07-19
+
+Cambios desde v1.69:
+- Nueva marca TOMZN con 4 magnetotérmicos DIN WiFi (sin config todavía):
+  1P 63A TOB8-63WiFi, 2P 63A/80A TOWBC-2P-T, 4P 80A TOWBC-4P-T, 4P 80A
+  TOWBC-4P-e. Fichero: devices.js. Badge -> v1.70.
+
 Configurador MEPLHAA — v1.69
 Fecha: 2026-07-19
 

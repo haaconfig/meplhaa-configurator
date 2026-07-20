@@ -436,4 +436,10 @@ const DEVICE_CATALOG = [
 
   // ---------------- Tongou ----------------
   { category: "Tongou", model: "Tongou 2P 63A Circuit Breaker Power Monitoring DIN (TO-Q-SR263JWE)", example: "Sin configuración aún", exampleEn: "No configuration yet", description: "Interruptor magnetotérmico (breaker) DIN de 2 polos, 63A, con medidor de consumo. Pendiente de asignar configuración MEPLHAA.", descriptionEn: "2-pole DIN circuit breaker, 63A, with power monitoring. Pending MEPLHAA configuration assignment.", config: cfg("{\"c\":{},\"a\":[]}") },
+
+  // ---------------- TOMZN ----------------
+  { category: "TOMZN", model: "TOMZN 1P 63A Circuit Breaker DIN TOB8-63WiFi", example: "Sin configuración aún", exampleEn: "No configuration yet", description: "Pendiente de asignar configuración MEPLHAA.", descriptionEn: "Pending MEPLHAA configuration assignment.", config: cfg("{\"c\":{},\"a\":[]}") },
+  { category: "TOMZN", model: "TOMZN 2P 63A/80A Circuit Breaker DIN TOWBC-2P-T", example: "Sin configuración aún", exampleEn: "No configuration yet", description: "Pendiente de asignar configuración MEPLHAA.", descriptionEn: "Pending MEPLHAA configuration assignment.", config: cfg("{\"c\":{},\"a\":[]}") },
+  { category: "TOMZN", model: "TOMZN 4P 80A Circuit Breaker DIN TOWBC-4P-e", example: "Sin configuración aún", exampleEn: "No configuration yet", description: "Pendiente de asignar configuración MEPLHAA.", descriptionEn: "Pending MEPLHAA configuration assignment.", config: cfg("{\"c\":{},\"a\":[]}") },
+  { category: "TOMZN", model: "TOMZN 4P 80A Circuit Breaker DIN TOWBC-4P-T", example: "Sin configuración aún", exampleEn: "No configuration yet", description: "Pendiente de asignar configuración MEPLHAA.", descriptionEn: "Pending MEPLHAA configuration assignment.", config: cfg("{\"c\":{},\"a\":[]}") },
 ];

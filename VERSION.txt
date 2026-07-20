@@ -1,3 +1,18 @@
+Configurador MEPLHAA — v1.66
+Fecha: 2026-07-19
+
+Cambios desde v1.65:
+- Restaurados los dispositivos que se habían quedado fuera al acortar las
+  listas en v1.57. Añadidos (sin config todavía): Sonoff +15 (Light BN-SZ01,
+  IW100, L1/L1 Lite, S55, SC, B1, NSPanel, RE5V1C, 1 Channel Inching, iFan02/
+  03/04-H/04-L, SPM), Shelly +15 (Add-On/Add-on Temp, RGBW2, UNI, Pro 1/1PM/2/
+  2PM/3, Plus PM Mini, Duo RGBW 9W/GU10, Vintage A60/G125/ST64), Tuya +9 (AOFO
+  C733, Body Fat Scale, CT61W, TY-DIY-S02, Moes UFO-R6, ESP8684, ESP8685,
+  Gosund WO1, TOVA), Athom +16 (AR01, KM01, CB01, LS5050C, SD01, LS2812B, EM2,
+  EM6, R01/R02/R08, LB01-15W, LB03-12W, LS8P-WLED, LS5P, SK03). Marcas ahora:
+  Shelly 41, Sonoff 89, eWeLink 10, Tuya 32, Athom 61, Kincony 14. Total 391.
+  Fichero: devices.js. Badge -> v1.66.
+
 Configurador MEPLHAA — v1.65
 Fecha: 2026-07-19
 

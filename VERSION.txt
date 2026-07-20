@@ -1,3 +1,11 @@
+Configurador MEPLHAA — v1.71
+Fecha: 2026-07-19
+
+Cambios desde v1.70:
+- Marca TOMZN renombrada a "Tomzn" (patrón de nombres consistente con el resto:
+  solo inicial en mayúscula), tanto la categoría como el prefijo de sus 4
+  modelos. Fichero: devices.js. Badge -> v1.71.
+
 Configurador MEPLHAA — v1.70
 Fecha: 2026-07-19
 

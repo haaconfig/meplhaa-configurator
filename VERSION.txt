@@ -1,3 +1,13 @@
+Configurador MEPLHAA — v1.65
+Fecha: 2026-07-19
+
+Cambios desde v1.64:
+- eWeLink completado a 10 modelos: al corregir nombres en v1.57 se habían
+  quedado fuera 4. Añadidos (sin config todavía): eWeLink Candle Light 5W
+  RGBCCT, eWeLink EU 20A Plug AJW-02_8285, eWeLink Single Wire 1 Gang 2 Way
+  No Neutral RF433 (errata "Sinbgle" corregida a "Single"), y LC Technology
+  PSF-B04 eWeLink 4 Channel LC-EWL-B04-MB. Fichero: devices.js.
+
 Configurador MEPLHAA — v1.64
 Fecha: 2026-07-19
 

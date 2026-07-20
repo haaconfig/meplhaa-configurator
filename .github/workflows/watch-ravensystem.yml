@@ -1,0 +1,58 @@
+name: Watch RavenSystem updates
+
+# Vigila el firmware HAA de RavenSystem. Cuando publican una release nueva,
+# abre un issue de aviso en este repo para revisar si hay que actualizar el
+# configurador (tipos de accesorio, claves de configuracion, log/io, servicios).
+# NO aplica cambios: solo detecta y avisa. La actualizacion se revisa a mano.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'      # cada dia a las 06:00 UTC
+  workflow_dispatch:          # permite lanzarlo a mano desde la pestana Actions
+
+permissions:
+  issues: write
+
+jobs:
+  check-ravensystem:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      UPSTREAM: RavenSystem/esp-homekit-devices
+    steps:
+      - name: Comprobar ultima release y avisar si es nueva
+        run: |
+          set -e
+          TAG=$(gh api "repos/$UPSTREAM/releases/latest" --jq '.tag_name' 2>/dev/null || echo "")
+          if [ -z "$TAG" ]; then
+            echo "No hay info de releases en $UPSTREAM. Nada que hacer."
+            exit 0
+          fi
+          NAME=$(gh api "repos/$UPSTREAM/releases/latest" --jq '.name // .tag_name' 2>/dev/null || echo "$TAG")
+          URL=$(gh api "repos/$UPSTREAM/releases/latest" --jq '.html_url' 2>/dev/null || echo "https://github.com/$UPSTREAM/releases")
+          TITLE="RavenSystem HAA actualizado: $TAG"
+
+          COUNT=$(gh issue list --repo "$GITHUB_REPOSITORY" --state all --search "in:title $TAG" --json number --jq 'length')
+          if [ "$COUNT" != "0" ]; then
+            echo "Ya existe un issue para $TAG. Nada que hacer."
+            exit 0
+          fi
+
+          {
+            echo "RavenSystem ha publicado una nueva version del firmware **HAA**: **$NAME** (\`$TAG\`)."
+            echo ""
+            echo "Conviene revisar si hay cambios que llevar al configurador MEPLHAA:"
+            echo "- Nuevos **tipos de accesorio** o claves de configuracion"
+            echo "- Cambios en **valores** (log \`o\`, modos de \`io\`, etc.)"
+            echo "- Nuevas opciones de servicios"
+            echo ""
+            echo "Enlaces:"
+            echo "- Release: $URL"
+            echo "- Codigo fuente (header/types): https://github.com/$UPSTREAM/tree/master/HAA/HAA_Main/main"
+            echo "- Wiki (Service-Types / General): https://github.com/$UPSTREAM/wiki"
+            echo ""
+            echo "_Aviso automatico del workflow watch-ravensystem. No aplica cambios; se revisa a mano._"
+          } > issue-body.md
+
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file issue-body.md
+          echo "Issue de aviso creado para $TAG."

@@ -1,3 +1,11 @@
+Configurador MEPLHAA — v1.67
+Fecha: 2026-07-19
+
+Cambios desde v1.66:
+- Nueva marca Tongou con 1 modelo: "Tongou 2P 63A Circuit Breaker Power
+  Monitoring DIN (TO-Q-SR263JWE)" — magnetotérmico DIN 2P 63A con medidor de
+  consumo. Sin config todavía. Fichero: devices.js. Badge -> v1.67.
+
 Configurador MEPLHAA — v1.66
 Fecha: 2026-07-19
 

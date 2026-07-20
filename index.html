@@ -17,7 +17,7 @@
     </div>
   </div>
   <span class="badge">v12</span>
-  <span class="app-version-badge">v1.71</span>
+  <span class="app-version-badge">v1.72</span>
   <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
   <p class="github-link"><a href="https://github.com/haaconfig/meplhaa-configurator" target="_blank" rel="noopener">💡 <span data-i18n="githubLinkText">Sugerencias y errores: repositorio en GitHub</span> ↗</a></p>
 </header>
@@ -142,7 +142,7 @@
       <ul id="saved-list" class="saved-list"></ul>
     </div>
 
-    <div class="card">
+    <div class="card adv-only">
       <h2 data-i18n="pasteJsonTitle">Pegar JSON existente</h2>
       <p class="hint" data-i18n="pasteJsonHint">Pega aquí una configuración MEPLHAA y pulsa "Cargar" para rellenar el formulario con sus valores.</p>
       <textarea id="json-input" placeholder='{"c":{"io":[[[12,13],2]]},"a":[{"t":1}]}'></textarea>
@@ -151,7 +151,7 @@
       <div id="json-repair-box" class="json-repair-box hidden"></div>
     </div>
 
-    <div class="card">
+    <div class="card adv-only">
       <h2 data-i18n="convertTitle">Convertidor de MEPLHAA antigua (v11) → v12</h2>
       <p class="hint" data-i18n="convertHint">Pega una configuración antigua (formato v11 "Peregrine", con GPIOs como objetos {"g":..} y sin "io" central) y conviértela al formato v12 "Merlin" (acciones en array + "io" reconstruido).</p>
       <textarea id="convert-input" placeholder='{"c":{"l":13,"b":[{"g":0,"t":5}]},"a":[{"0":{"r":[{"g":12}]},"1":{"r":[{"g":12,"v":1}]}}]}'></textarea>
@@ -170,7 +170,7 @@
 <script src="devices.js?v=47"></script>
 <script src="typeInfo.js?v=6"></script>
 <script src="i18n.js?v=16"></script>
-<script src="app.js?v=36"></script>
+<script src="app.js?v=38"></script>
 <script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

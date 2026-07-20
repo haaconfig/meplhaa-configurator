@@ -1728,6 +1728,10 @@ function setMode(mode) {
   currentMode = mode;
   document.getElementById("wizard-panel").classList.toggle("hidden", mode !== "wizard");
   document.getElementById("advanced-form").classList.toggle("hidden", mode !== "advanced");
+  // Herramientas avanzadas (Pegar JSON, Convertidor v11->v12): solo en modo avanzado,
+  // para no recargar el asistente que debe ser mas simple. Estilo en linea para que
+  // gane a las reglas de .card en el CSS.
+  document.querySelectorAll(".adv-only").forEach((el) => { el.style.display = mode === "advanced" ? "" : "none"; });
   document.getElementById("mode-wizard").classList.toggle("active", mode === "wizard");
   document.getElementById("mode-advanced").classList.toggle("active", mode === "advanced");
   if (mode === "wizard") {

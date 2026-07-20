@@ -1,3 +1,16 @@
+Configurador MEPLHAA — v1.72
+Fecha: 2026-07-19
+
+Cambios desde v1.71:
+- El asistente queda mas limpio: las herramientas avanzadas "Pegar JSON
+  existente" y "Convertidor v11->v12" ya SOLO se muestran en el formulario
+  avanzado (antes aparecian tambien en el asistente). El JSON generado sigue
+  visible en ambos modos. Ficheros: index.html (clase adv-only), app.js
+  (setMode oculta .adv-only en modo asistente con estilo en linea).
+  Nota GPIOs: al cargar una config (Pegar JSON / Convertidor / selector) los
+  GPIOs se rellenan y se ve el formulario avanzado con su "io"; como estas
+  herramientas ahora son solo de avanzado, siempre aterrizas donde se ven.
+
 Configurador MEPLHAA — v1.71
 Fecha: 2026-07-19
 

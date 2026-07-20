@@ -933,10 +933,29 @@ function renderJson() {
 // Panel derecho: tabla de GPIOs del dispositivo (GPIO -> rol -> modo), sacada
 // del "io" de la config actual. Ademas, enlace a la ficha/foto en Blakadder si
 // hay un dispositivo detectado.
+// Traduce los componentes del pinout de Blakadder (Tasmota) al español, dejando
+// intactos los nombres de chip (BL0937, HLWBL, BL0492...) y los números.
+function translateComponent(comp, en) {
+  if (en || !comp) return comp;
+  return comp
+    .replace(/^Button\b/i, "Botón")
+    .replace(/^Relay\b/i, "Relé")
+    .replace(/^Switch_n\b/i, "Interruptor")
+    .replace(/^Switch\b/i, "Interruptor")
+    .replace(/^Led_i\b/i, "LED")
+    .replace(/^Led\b/i, "LED")
+    .replace(/^Serial\b/i, "Serie");
+}
+
 function renderDeviceGpioPanel() {
   const card = document.getElementById("device-gpio-card");
   const body = document.getElementById("device-gpio-body");
   if (!card || !body) return;
+  const en = currentLang === "en";
+  const hint = state.general.deviceHint;
+  const entry = blakadderEntry(hint);
+
+  // 1) GPIOs de la configuración MEPLHAA actual (si hay).
   const rows = [];
   (state.io || []).forEach((group) => {
     const modeLabel = modeLabels()[Number(group.mode)] || `modo ${group.mode}`;
@@ -944,23 +963,36 @@ function renderDeviceGpioPanel() {
       rows.push({ g: Number(g), role: gpioRoleLabel(g), mode: modeLabel });
     });
   });
-  if (!rows.length) { card.style.display = "none"; body.innerHTML = ""; return; }
   rows.sort((a, b) => a.g - b.g);
-  const en = currentLang === "en";
-  const th = en ? ["GPIO", "Role", "Mode"] : ["GPIO", "Rol", "Modo"];
-  const trs = rows
-    .map((r) => `<tr><td>GPIO ${r.g}</td><td>${r.role ? `<span class="io-role-tag">${r.role}</span>` : "—"}</td><td>${r.mode}</td></tr>`)
-    .join("");
-  const hint = state.general.deviceHint;
-  const entry = blakadderEntry(hint);
-  // Foto del dispositivo incrustada (si Blakadder tiene ficha). onerror: si la
-  // imagen no carga, se oculta sola y no deja hueco.
+
+  // 2) Bloque de GPIOs: si hay config MEPLHAA, la tabla real; si no, el pinout
+  //    de referencia de Blakadder (Tasmota) para ese dispositivo.
+  let gpioBlock = "";
+  if (rows.length) {
+    const th = en ? ["GPIO", "Role", "Mode"] : ["GPIO", "Rol", "Modo"];
+    const trs = rows
+      .map((r) => `<tr><td>GPIO ${r.g}</td><td>${r.role ? `<span class="io-role-tag">${r.role}</span>` : "—"}</td><td>${r.mode}</td></tr>`)
+      .join("");
+    gpioBlock = `<table class="gpio-table"><thead><tr><th>${th[0]}</th><th>${th[1]}</th><th>${th[2]}</th></tr></thead><tbody>${trs}</tbody></table>`;
+  } else if (entry && entry.g && entry.g.length) {
+    const th = en ? ["GPIO", "Component"] : ["GPIO", "Componente"];
+    const trs = entry.g
+      .map((p) => `<tr><td>GPIO ${p[0]}</td><td>${translateComponent(p[1], en)}</td></tr>`)
+      .join("");
+    const note = en
+      ? "Reference pinout (Tasmota). This device has no MEPLHAA config yet."
+      : "Pinout de referencia (Tasmota). Este dispositivo aún no tiene configuración MEPLHAA.";
+    gpioBlock = `<p class="hint" style="margin-top:0">${note}</p><table class="gpio-table"><thead><tr><th>${th[0]}</th><th>${th[1]}</th></tr></thead><tbody>${trs}</tbody></table>`;
+  }
+
+  // 3) Foto del dispositivo (imagen local del repo). onerror: se oculta sola.
   const photo = entry && entry.i
-    ? `<div class="device-photo-wrap"><img class="device-photo" src="${entry.i}" alt="${hint ? `${hint.category} ${hint.model}` : ""}" referrerpolicy="no-referrer" onerror="this.parentNode.style.display='none'"></div>`
+    ? `<div class="device-photo-wrap"><img class="device-photo" src="${entry.i}" alt="${hint ? `${hint.category} ${hint.model}` : ""}" onerror="this.parentNode.style.display='none'"></div>`
     : "";
-  // Sin enlace externo: la foto (izquierda) y la tabla de GPIOs (derecha) se
-  // muestran aquí mismo, sin salir de la web. En móvil se apilan.
-  body.innerHTML = `<div class="device-gpio-layout">${photo}<div class="gpio-table-wrap"><table class="gpio-table"><thead><tr><th>${th[0]}</th><th>${th[1]}</th><th>${th[2]}</th></tr></thead><tbody>${trs}</tbody></table></div></div>`;
+
+  // Sin nada que mostrar -> ocultar la tarjeta.
+  if (!photo && !gpioBlock) { card.style.display = "none"; body.innerHTML = ""; return; }
+  body.innerHTML = `<div class="device-gpio-layout">${photo}<div class="gpio-table-wrap">${gpioBlock}</div></div>`;
   card.style.display = "";
 }
 
@@ -1948,6 +1980,9 @@ document.getElementById("btn-use-device").addEventListener("click", () => {
     document.getElementById("device-example").value = String(idx);
     updateDeviceDescription();
   }
+  // Fijar el dispositivo elegido como "hint" para que el panel (foto + GPIOs /
+  // pinout) aparezca aunque la plantilla no tenga configuración MEPLHAA todavía.
+  state.general.deviceHint = { source: "declared", category: device.category, model: device.model, example: device.example, exampleEn: device.exampleEn };
   setMode("advanced");
 });
 

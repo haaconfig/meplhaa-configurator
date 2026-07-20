@@ -1,3 +1,33 @@
+Configurador MEPLHAA — v1.89
+Fecha: 2026-07-20
+
+Cambios desde v1.86:
+- Nombres de dispositivo AHORA IGUALES a Blakadder (nombre completo, sin
+  inventar cortos). Emparejado con el índice completo de Blakadder (2861 fichas)
+  por código de modelo + marca. 248 de 253 modelos únicos con nombre exacto +
+  foto local + pinout. Incluye Kincony/Tomzn/Tongou (que sí están en Blakadder).
+- El pinout se traduce al español (Botón/Relé/Interruptor/LED/Serie); los chips
+  (BL0937, HLWBL...) se dejan igual. El nombre del producto NO se traduce.
+- Pendientes de confirmar (5, sin ficha aún): Shelly 1 Gen3 y 1PM Gen3 (no están
+  en Blakadder), Tuya 20A Power Monitoring Plug (2 fichas posibles), Athom 3 y 4
+  Gang Touch EU (Blakadder solo tiene variante US).
+  Ficheros: devices.js, blakref.js, app.js, device-images/*. Badge -> v1.89.
+
+Configurador MEPLHAA — v1.86
+Fecha: 2026-07-20
+
+Cambios desde v1.85:
+- Imágenes de dispositivo AHORA DENTRO DEL REPO (carpeta device-images/, 185
+  imágenes ~12 MB): ya no se enlazan desde Blakadder, la web es autónoma.
+- CORREGIDO: los dispositivos SIN configuración MEPLHAA (146 casos, p. ej.
+  eWeLink 20A AJW-02_8285) no mostraban nada. Ahora el panel aparece siempre que
+  el dispositivo tiene ficha: muestra la FOTO y, si no hay config MEPLHAA, el
+  PINOUT de referencia de Blakadder (Tasmota) GPIO->Componente (181 modelos con
+  pinout). Si hay config MEPLHAA, se muestra la tabla real GPIO->Rol->Modo.
+- Al elegir un dispositivo se fija el "hint" para que el panel salga aunque la
+  plantilla no tenga config. Ficheros: index.html, app.js, blakref.js, .gitignore,
+  device-images/*. Badge -> v1.86.
+
 Configurador MEPLHAA — v1.85
 Fecha: 2026-07-20
 

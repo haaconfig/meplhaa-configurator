@@ -1724,7 +1724,7 @@ let currentMode = "wizard";
 // el otro por completo, para no mezclar ambos en la misma pantalla.
 // El estado (state/wizard) es el mismo en los dos casos: cambiar de modo
 // no pierde nada de lo ya configurado.
-function setMode(mode) {
+function setMode(mode, scroll = true) {
   currentMode = mode;
   document.getElementById("wizard-panel").classList.toggle("hidden", mode !== "wizard");
   document.getElementById("advanced-form").classList.toggle("hidden", mode !== "advanced");
@@ -1739,7 +1739,7 @@ function setMode(mode) {
   } else {
     render();
   }
-  window.scrollTo({ top: document.getElementById("mode-wizard").getBoundingClientRect().top + window.scrollY - 10, behavior: "smooth" });
+  if (scroll) window.scrollTo({ top: document.getElementById("mode-wizard").getBoundingClientRect().top + window.scrollY - 10, behavior: "smooth" });
 }
 
 document.getElementById("mode-wizard").addEventListener("click", () => setMode("wizard"));
@@ -2140,4 +2140,4 @@ populateDevicePicker();
 render();
 renderWizard();
 renderSavedList();
-setMode("wizard");
+setMode("wizard", false); // carga inicial: sin scroll, para no saltar el inicio de la pagina

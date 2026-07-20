@@ -1,3 +1,12 @@
+Configurador MEPLHAA — v1.75
+Fecha: 2026-07-19
+
+Cambios desde v1.74:
+- Arreglado el "salto" al cargar: setMode hacia scrollTo tambien en la carga
+  inicial, moviendo la pagina hacia abajo. Ahora setMode(mode, scroll=true) y la
+  llamada inicial usa scroll=false; al cargar la pagina se queda arriba. El
+  scroll al pulsar los botones de modo se mantiene. Fichero: app.js. Badge -> v1.75.
+
 Configurador MEPLHAA — v1.74
 Fecha: 2026-07-19
 

@@ -1,19 +1,16 @@
-name: RavenSystem HAA -> auto-PR configurador
+name: Watch RavenSystem HAA (servicios y configuracion)
 
-# 1) Detecta cambios en donde RavenSystem define SERVICIOS (tipos de accesorio)
-#    y CONFIGURACION de HAA (types.h, header.h, setup). Abre un issue de aviso.
-# 2) Si hay cambio y existe el secreto ANTHROPIC_API_KEY, Claude lee el diff,
-#    actualiza el configurador si procede y ABRE UN PULL REQUEST para que lo
-#    revises y hagas merge (asi se publica). NO hace merge solo.
+# Vigila donde RavenSystem define los SERVICIOS (tipos de accesorio) y la
+# CONFIGURACION de HAA (types.h, header.h, setup). Cuando cambian, abre un
+# issue de aviso (y GitHub manda email) para revisar si hay que llevar mejoras
+# al configurador MEPLHAA. NO aplica cambios: solo detecta y avisa.
 
 on:
   schedule:
-    - cron: '0 6 * * *'
+    - cron: '0 6 * * *'      # cada dia a las 06:00 UTC
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pull-requests: write
   issues: write
 
 jobs:
@@ -22,21 +19,8 @@ jobs:
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       UPSTREAM: RavenSystem/esp-homekit-devices
-    outputs:
-      changed: ${{ steps.d.outputs.changed }}
-      sha: ${{ steps.d.outputs.sha }}
-      short: ${{ steps.d.outputs.short }}
-      has_key: ${{ steps.k.outputs.has_key }}
     steps:
-      - name: Comprobar si hay clave de API
-        id: k
-        env:
-          KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          if [ -n "$KEY" ]; then echo "has_key=true" >> "$GITHUB_OUTPUT"; else echo "has_key=false" >> "$GITHUB_OUTPUT"; fi
-
       - name: Detectar cambios en servicios/config de HAA
-        id: d
         run: |
           set -e
           BASE="HAA/HAA_Main/main"
@@ -55,55 +39,13 @@ jobs:
             echo "- \`$f\` -> [$short](https://github.com/$UPSTREAM/commit/$sha) ($date) - $msg" >> issue-body.md
             if [ "$date" \> "$newest_date" ]; then newest_date="$date"; newest_sha="$sha"; fi
           done
-          if [ -z "$newest_sha" ]; then
-            echo "No se pudo leer el historial."; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
+          if [ -z "$newest_sha" ]; then echo "No se pudo leer el historial. Nada que hacer."; exit 0; fi
           newest_short=$(echo "$newest_sha" | cut -c1-8)
           echo "" >> issue-body.md
           echo "Fuente: https://github.com/$UPSTREAM/tree/master/$BASE  ·  Wiki: https://github.com/$UPSTREAM/wiki" >> issue-body.md
           echo "_Aviso automatico. Referencia: $newest_short._" >> issue-body.md
 
           COUNT=$(gh issue list --repo "$GITHUB_REPOSITORY" --state all --search "in:title $newest_short" --json number --jq 'length')
-          if [ "$COUNT" != "0" ]; then
-            echo "Ya avisado de $newest_short."; echo "changed=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
+          if [ "$COUNT" != "0" ]; then echo "Ya avisado de $newest_short. Nada que hacer."; exit 0; fi
           gh issue create --repo "$GITHUB_REPOSITORY" --title "HAA servicios/config actualizados: $newest_short" --body-file issue-body.md
-          echo "changed=true" >> "$GITHUB_OUTPUT"
-          echo "sha=$newest_sha" >> "$GITHUB_OUTPUT"
-          echo "short=$newest_short" >> "$GITHUB_OUTPUT"
-
-  auto-pr:
-    needs: detect
-    if: needs.detect.outputs.changed == 'true' && needs.detect.outputs.has_key == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Configurar Git
-        run: |
-          git config --global user.name "sercitecotf"
-          git config --global user.email "it@surpan.com"
-      - name: Claude prepara el PR
-        uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          claude_args: |
-            --max-turns 25
-            --model claude-opus-4-8
-          prompt: |
-            El firmware HAA de RavenSystem (repo RavenSystem/esp-homekit-devices) ha cambiado sus servicios/config en el commit ${{ needs.detect.outputs.sha }}.
-
-            Objetivo: ver si introduce NUEVOS tipos de servicio de accesorio HomeKit o NUEVAS claves/opciones de configuracion que este configurador MEPLHAA deba soportar, y si es asi, actualizarlo y ABRIR UN PULL REQUEST (no hagas merge).
-
-            Pasos:
-            1. Lee el diff de ese commit para HAA/HAA_Main/main/types.h y header.h:
-               gh api repos/RavenSystem/esp-homekit-devices/commits/${{ needs.detect.outputs.sha }} --jq '.files[] | select(.filename|test("types.h|header.h|setup")) | {filename, patch}'
-               Consulta tambien la wiki (https://github.com/RavenSystem/esp-homekit-devices/wiki) para el significado si hace falta.
-            2. Compara con la referencia de este repo: typeInfo.js (paneles por tipo), i18n.js (ES/EN), app.js (ACCESSORY_TYPES, TYPE_FIELD_DEFS), devices.js.
-            3. Si hay tipos/claves nuevos relevantes, actualizalos manteniendo ES/EN y el estilo del codigo. NO inventes valores: solo lo que documente el diff/wiki. Sube VERSION.txt, el badge de version en index.html y el ?v= de los ficheros cambiados (mira el historial de VERSION.txt para el formato).
-            4. Si NO hay nada relevante para el configurador, no cambies nada ni abras PR: escribe una nota breve y termina.
-            5. Si hiciste cambios: crea la rama ravensystem-update-${{ needs.detect.outputs.short }}, commitea SIN ninguna linea "Co-Authored-By", y abre un PR titulado "RavenSystem ${{ needs.detect.outputs.short }}: actualizar servicios/config del configurador" explicando exactamente que cambiaste y la fuente. No hagas merge.
-
-            Se conservador: es una herramienta comunitaria publica; un dato erroneo es peor que no cambiar nada.
+          echo "Issue de aviso creado para $newest_short."

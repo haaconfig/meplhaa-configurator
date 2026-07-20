@@ -1,3 +1,12 @@
+Configurador MEPLHAA — v1.68
+Fecha: 2026-07-19
+
+Cambios desde v1.67:
+- Athom +4 (el usuario confirma que son modelos distintos, no duplicados):
+  Athom Wall Outlet SK01, Athom 16A EU Plug PG01EU16A, Athom 16A US Plug
+  PG03-US16A, Athom 7W 600lm RGBCCT LB017W. Athom pasa a 65 modelos.
+  Sin config todavía. Fichero: devices.js. Badge -> v1.68.
+
 Configurador MEPLHAA — v1.67
 Fecha: 2026-07-19
 

@@ -63,6 +63,7 @@ const T = {
     typeInfoDescCol: "Qué controla",
     typeInfoSource: "Fuente",
 
+    deviceGpioTitle: "📟 GPIOs de este dispositivo",
     jsonOutputTitle: "JSON generado",
     hideDefaultsBtn: "Ocultar valores por defecto",
     showDefaultsBtn: "Mostrar valores por defecto",
@@ -223,6 +224,7 @@ const T = {
     typeInfoDescCol: "What it controls",
     typeInfoSource: "Source",
 
+    deviceGpioTitle: "📟 This device's GPIOs",
     jsonOutputTitle: "Generated JSON",
     hideDefaultsBtn: "Hide default values",
     showDefaultsBtn: "Show default values",

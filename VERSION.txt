@@ -1,3 +1,16 @@
+Configurador MEPLHAA — v1.77
+Fecha: 2026-07-20
+
+Cambios desde v1.75:
+- NUEVO panel derecho "GPIOs de este dispositivo": al seleccionar un dispositivo
+  con configuracion, muestra una tabla GPIO -> Rol (Rele/Boton/LED) -> Modo,
+  generada a partir del "io" real. Ficheros: index.html, app.js, style.css.
+- Enlace "Ver ficha y foto (Blakadder)" ahora va DIRECTO a la ficha exacta del
+  dispositivo (foto + pinout), no a una busqueda en Google. Se apoya en un mapa
+  nuevo modelo->URL (blakref.js, 186 modelos). Si no hay ficha exacta (o la marca
+  no esta en Blakadder: Kincony/Tomzn/Tongou), el enlace se oculta. Los nombres
+  del catalogo NO se han tocado. Badge -> v1.77.
+
 Configurador MEPLHAA — v1.75
 Fecha: 2026-07-19
 

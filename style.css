@@ -1,6 +1,6 @@
 :root {
-  --purple: #6b46c1;
-  --purple-dark: #553c9a;
+  --purple: #f57c00;
+  --purple-dark: #e65100;
   --bg: #f4f4f6;
   --card-bg: #ffffff;
   --border: #e0e0e6;
@@ -116,8 +116,8 @@ header h1 {
   font-size: 14px;
   line-height: 1.55;
   margin: 0 0 10px;
-  background: #f7f5fc;
-  border: 1px solid #e0d8f5;
+  background: #fff6ec;
+  border: 1px solid #ffdcae;
   border-radius: 8px;
   padding: 10px 14px;
 }
@@ -278,8 +278,8 @@ button {
 
 .json-repair-box {
   margin-top: 10px;
-  background: #f7f5fc;
-  border: 1px solid #e0d8f5;
+  background: #fff6ec;
+  border: 1px solid #ffdcae;
   border-radius: 8px;
   padding: 10px 12px;
 }
@@ -404,8 +404,8 @@ button {
 
 .type-info {
   margin-top: 10px;
-  background: #f7f5fc;
-  border: 1px solid #e0d8f5;
+  background: #fff6ec;
+  border: 1px solid #ffdcae;
   border-radius: 8px;
   padding: 8px 12px;
 }
@@ -451,8 +451,8 @@ button {
 }
 
 .device-hint-box {
-  background: #f7f5fc;
-  border: 1px solid #e0d8f5;
+  background: #fff6ec;
+  border: 1px solid #ffdcae;
   border-radius: 8px;
   padding: 8px 12px;
   margin-bottom: 12px;
@@ -539,3 +539,8 @@ button {
 .wiz-gpio-summary ul { margin: 0; padding-left: 18px; }
 .wiz-gpio-summary li { margin: 2px 0; }
 .wiz-gpio-summary code { background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 4px; }
+
+/* Logo de la cabecera */
+.title-group { display: flex; align-items: center; gap: 10px; }
+.app-logo { width: 44px; height: 44px; flex: none; display: block; }
+@media (max-width: 560px) { .app-logo { width: 36px; height: 36px; } }

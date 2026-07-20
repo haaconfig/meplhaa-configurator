@@ -1,4 +1,21 @@
-Configurador MEPLHAA — v1.77
+Configurador MEPLHAA — v1.85
+Fecha: 2026-07-20
+
+Cambios desde v1.77:
+- Nuevo bloque "GPIOs de este dispositivo" DEBAJO DEL SELECTOR (a lo ancho):
+  foto real del dispositivo (izquierda) + tabla GPIO->Rol->Modo (derecha), que
+  se apilan en móvil. La foto se incrusta desde Blakadder (og:image) vía el mapa
+  blakref.js (186 modelos con enlace y foto).
+- Se han QUITADO los enlaces externos a Blakadder (ni en el bloque ni en la caja
+  "Dispositivo detectado"): la foto y los GPIOs se ven dentro de la web, sin salir.
+- Etiquetas de rol (Relé/Botón/LED) con el mismo formato que la lista de GPIOs
+  (pastilla), y contraste corregido (naranja oscuro #b23c00 + blanco).
+- Arreglado el "salto" de scroll al cargar (setMode sin scroll en la carga).
+- i18n: añadida la clave deviceGpioTitle (ES/EN) que faltaba.
+- Marca/paleta naranja y logo PNG en cabecera (versiones previas 1.73-1.74).
+- Ficheros: index.html, app.js, style.css, i18n.js, blakref.js (nuevo). Badge -> v1.85.
+
+Configurador MEPLHAA — v1.77 (histórico)
 Fecha: 2026-07-20
 
 Cambios desde v1.75:

@@ -937,14 +937,17 @@ function renderJson() {
 // intactos los nombres de chip (BL0937, HLWBL, BL0492...) y los números.
 function translateComponent(comp, en) {
   if (en || !comp) return comp;
+  // Ojo: el formato Sonoff viene sin espacio ("Button1", "Relay1", "Led1i"),
+  // así que NO se usa \b. Se traduce la palabra inicial y se conserva el resto
+  // (número, sufijo "i" de invertido, nombres de chip como BL0937, etc.).
   return comp
-    .replace(/^Button\b/i, "Botón")
-    .replace(/^Relay\b/i, "Relé")
-    .replace(/^Switch_n\b/i, "Interruptor")
-    .replace(/^Switch\b/i, "Interruptor")
-    .replace(/^Led_i\b/i, "LED")
-    .replace(/^Led\b/i, "LED")
-    .replace(/^Serial\b/i, "Serie");
+    .replace(/^Switch_n/i, "Interruptor")
+    .replace(/^Switch/i, "Interruptor")
+    .replace(/^Button/i, "Botón")
+    .replace(/^Relay/i, "Relé")
+    .replace(/^Led_i/i, "LED")
+    .replace(/^Led/i, "LED")
+    .replace(/^Serial/i, "Serie");
 }
 
 function renderDeviceGpioPanel() {

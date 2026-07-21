@@ -1,3 +1,11 @@
+Configurador MEPLHAA — v1.90
+Fecha: 2026-07-20
+
+Cambios desde v1.89:
+- Arreglada la traducción del pinout en formato Sonoff sin espacio ("Button1",
+  "Relay1", "Led1i"): la regex usaba \b y no casaba; ahora traduce con y sin
+  espacio -> Botón1 / Relé1 / LED1i. Fichero: app.js. Badge -> v1.90.
+
 Configurador MEPLHAA — v1.89
 Fecha: 2026-07-20
 

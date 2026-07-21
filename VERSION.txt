@@ -1,3 +1,15 @@
+Configurador MEPLHAA — v1.91
+Fecha: 2026-07-21
+
+Cambios desde v1.90 (cerrados los 5 pendientes -> 0 sin ficha):
+- Tuya 20A Power Monitoring Plug -> ficha tuya_AJW-02_8285 (era el "AJW" de tu
+  lista). Nombre exacto + foto + pinout.
+- Athom 3/4 Gang Touch EU -> fichas EU exactas SW11-TAS-3EU / SW11-TAS-4EU
+  (foto + pinout). Renombrados a "Athom 3/4 Gang Touch Switch (SW11-TAS-xEU)".
+- Shelly 1 Gen3 y Shelly 1PM Gen3 -> foto local (aportada por el usuario) en
+  device-images/; no están en Blakadder, así que muestran foto + su tabla MEPLHAA.
+  Ficheros: devices.js, blakref.js, device-images/*. Badge -> v1.91.
+
 Configurador MEPLHAA — v1.90
 Fecha: 2026-07-20
 

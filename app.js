@@ -1989,6 +1989,105 @@ document.getElementById("btn-use-device").addEventListener("click", () => {
   setMode("advanced");
 });
 
+// Selecciona un dispositivo del catálogo por índice, dejando el selector
+// (fabricante/modelo/ejemplo) y la descripción como si se hubiera navegado a
+// mano. El usuario remata con "Usar esta configuración".
+function selectDeviceByIdx(idx) {
+  const device = DEVICE_CATALOG[idx];
+  if (!device) return;
+  const categorySelect = document.getElementById("device-category");
+  categorySelect.value = device.category;
+  populateModelSelect();
+  document.getElementById("device-model").value = device.model;
+  populateExampleSelect();
+  document.getElementById("device-example").value = String(idx);
+  updateDeviceDescription();
+}
+
+// ---------- Buscador de dispositivos ----------
+(function initDeviceSearch() {
+  const input = document.getElementById("device-search");
+  const clearBtn = document.getElementById("device-search-clear");
+  const results = document.getElementById("device-search-results");
+  if (!input || !results || typeof DEVICE_CATALOG === "undefined") return;
+
+  const norm = (s) => (s || "").toString().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const haystack = (d) => norm([d.category, d.model, d.example, d.exampleEn, d.description, d.descriptionEn].join(" "));
+
+  function search(q) {
+    const terms = norm(q).split(/\s+/).filter(Boolean);
+    if (!terms.length) return [];
+    const out = [];
+    for (let i = 0; i < DEVICE_CATALOG.length; i++) {
+      const d = DEVICE_CATALOG[i];
+      if (d.category === "Personalizado") continue;
+      if (terms.every((term) => haystack(d).includes(term))) {
+        const inModel = terms.every((term) => norm(d.category + " " + d.model).includes(term));
+        out.push({ idx: i, d: d, rank: inModel ? 0 : 1 });
+      }
+    }
+    out.sort((a, b) => a.rank - b.rank);
+    return out;
+  }
+
+  const MAX = 50;
+  function render(q) {
+    if (!q.trim()) { results.hidden = true; results.innerHTML = ""; clearBtn.hidden = true; return; }
+    clearBtn.hidden = false;
+    const matches = search(q);
+    if (!matches.length) {
+      results.innerHTML = '<div class="dsr-empty">' + escapeHtmlSaved(t("deviceSearchNone")) + "</div>";
+      results.hidden = false;
+      return;
+    }
+    let html = matches.slice(0, MAX).map((m) =>
+      '<div class="dsr-item" data-idx="' + m.idx + '"><span class="dsr-cat">' + escapeHtmlSaved(m.d.category) +
+      '</span><span class="dsr-text"><b>' + escapeHtmlSaved(m.d.model) + '</b> <span class="dsr-ex">— ' +
+      escapeHtmlSaved(deviceExampleLabel(m.d)) + "</span></span></div>"
+    ).join("");
+    if (matches.length > MAX) {
+      html += '<div class="dsr-more">' + escapeHtmlSaved(t("deviceSearchMore").replace("%s", matches.length - MAX)) + "</div>";
+    }
+    results.innerHTML = html;
+    results.hidden = false;
+  }
+
+  function choose(idx) {
+    selectDeviceByIdx(idx);
+    const d = DEVICE_CATALOG[idx];
+    input.value = d ? d.model : "";
+    results.hidden = true;
+    const btn = document.getElementById("btn-use-device");
+    if (btn) btn.focus();
+  }
+
+  input.addEventListener("input", () => render(input.value));
+  input.addEventListener("focus", () => { if (input.value.trim()) render(input.value); });
+  input.addEventListener("keydown", (e) => {
+    const items = [].slice.call(results.querySelectorAll(".dsr-item"));
+    if (e.key === "Escape") { results.hidden = true; return; }
+    if (!items.length) return;
+    let active = results.querySelector(".dsr-item.active");
+    let i = items.indexOf(active);
+    if (e.key === "ArrowDown") { e.preventDefault(); i = Math.min(items.length - 1, i + 1); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); i = Math.max(0, i - 1); }
+    else if (e.key === "Enter") { e.preventDefault(); choose(Number((active || items[0]).dataset.idx)); return; }
+    else return;
+    items.forEach((it) => it.classList.remove("active"));
+    if (items[i]) { items[i].classList.add("active"); items[i].scrollIntoView({ block: "nearest" }); }
+  });
+  results.addEventListener("mousedown", (e) => {
+    const item = e.target.closest(".dsr-item");
+    if (!item) return;
+    e.preventDefault();
+    choose(Number(item.dataset.idx));
+  });
+  clearBtn.addEventListener("click", () => { input.value = ""; render(""); input.focus(); });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".device-search-wrap")) results.hidden = true;
+  });
+})();
+
 // ---------- Mis configuraciones guardadas (localStorage) ----------
 // Guarda MEPLHAA en el navegador del usuario como una entrada más de la
 // galería: marca, dispositivo, función/tipo, descripción y autor (opcional).

@@ -1,3 +1,28 @@
+Configurador MEPLHAA — v1.92
+Fecha: 2026-07-24
+
+Cambios desde v1.91 (recuperada la categoría "Otros"):
+- La reorganización v1.52-v1.62 (agrupar por fabricantes canónicos) había
+  ELIMINADO por error los 132 dispositivos de la antigua categoría "Otros"
+  (marcas comunitarias sin fabricante canónico: Gosund, BlitzWolf, Teckin,
+  MagicHome, Kogan, Mirabella, Deta, Electrodragon, NEO Coolcam, LSC, Avatto,
+  Ikea, NodeMCU/ESP-01, etc.). En la web solo quedaban Sonoff/Shelly/Athom/
+  Tuya/Kincony/eWeLink/Tomzn/Tongou.
+- Recuperados 118 de esos dispositivos (los otros 14 ya se habían movido a su
+  marca canónica; se omiten para no duplicar). Se restauran bajo la categoría
+  "Otros / Comunidad" tal cual estaban (bilingües, config v12).
+- Catálogo: 400 -> 518 entradas.
+
+Nuevo: BUSCADOR de dispositivos.
+- Campo de búsqueda encima del selector: filtra en vivo por marca, modelo,
+  ejemplo/función y descripción (ES e EN), sin acentos ni mayúsculas y con
+  varias palabras (p.ej. "gosund plug", "sonoff persiana", "valvula").
+- Resultados clicables (chip de marca + modelo + función). Al elegir uno se
+  rellenan solos fabricante/modelo/ejemplo y su descripción; se remata con
+  "Usar esta configuración". Teclado: flechas + Enter, Esc cierra, botón ✕ limpia.
+  Ficheros: devices.js, app.js, i18n.js, style.css, index.html.
+  index.html: devices.js?v=51, app.js?v=51, i18n.js?v=18, style.css?v=26, badge -> v1.92.
+
 Configurador MEPLHAA — v1.91
 Fecha: 2026-07-21
 

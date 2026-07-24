@@ -18,6 +18,9 @@ const T = {
     modeAdvanced: "🛠 Ir al formulario avanzado",
     devicePickerTitle: "Selector de dispositivos y funciones",
     devicePickerHint: 'Opcional: elige un dispositivo real como punto de partida, o usa "Personalizado" para configurar todo tú mismo con el asistente o el formulario avanzado de más abajo.',
+    deviceSearchPlaceholder: "🔍 Buscar dispositivo (marca, modelo, función…)",
+    deviceSearchNone: "Sin resultados. Prueba con otra palabra (marca, modelo o función).",
+    deviceSearchMore: "…y %s más. Afina la búsqueda para verlos.",
     useDeviceBtn: "Usar esta configuración",
 
     generalConfigTitle: "Configuración General",
@@ -179,6 +182,9 @@ const T = {
     modeAdvanced: "🛠 Go to advanced form",
     devicePickerTitle: "Device & feature picker",
     devicePickerHint: 'Optional: pick a real device as a starting point, or use "Custom" to configure everything yourself with the wizard or the advanced form below.',
+    deviceSearchPlaceholder: "🔍 Search device (brand, model, function…)",
+    deviceSearchNone: "No results. Try another word (brand, model or function).",
+    deviceSearchMore: "…and %s more. Refine your search to see them.",
     useDeviceBtn: "Use this configuration",
 
     generalConfigTitle: "General Configuration",

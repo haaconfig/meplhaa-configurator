@@ -402,6 +402,84 @@ button {
   }
 }
 
+/* Buscador de dispositivos */
+.device-search-wrap {
+  position: relative;
+  margin: 10px 0 4px;
+}
+#device-search {
+  width: 100%;
+  padding: 11px 38px 11px 14px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  font-size: 15px;
+  background: var(--card-bg);
+  color: var(--text);
+}
+#device-search:focus {
+  outline: none;
+  border-color: var(--purple);
+}
+.device-search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: var(--hint);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+}
+.device-search-clear:hover { color: var(--danger); }
+.device-search-results {
+  position: absolute;
+  z-index: 30;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 340px;
+  overflow-y: auto;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.14);
+}
+.dsr-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.dsr-item:last-child { border-bottom: none; }
+.dsr-item:hover,
+.dsr-item.active { background: #fff3e6; }
+.dsr-cat {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--purple-dark);
+  background: #fff3e6;
+  border: 1px solid #ffd7ab;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+.dsr-text { color: var(--text); }
+.dsr-text b { color: var(--text); }
+.dsr-ex { color: var(--hint); }
+.dsr-empty,
+.dsr-more {
+  padding: 10px 12px;
+  color: var(--hint);
+  font-size: 13px;
+}
+.dsr-more { border-top: 1px solid var(--border); }
+
 .type-info {
   margin-top: 10px;
   background: #fff6ec;

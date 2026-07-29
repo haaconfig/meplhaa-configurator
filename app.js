@@ -131,6 +131,35 @@ const TYPE_FIELD_DEFS = {
       ],
     },
   ],
+  45: [
+    { key: "o", label: "Tiempo de apertura (s)", labelEn: "Opening time (s)", type: "number", hint: "por defecto 15 (admite decimales)", hintEn: "default 15 (decimals allowed)" },
+    { key: "c", label: "Tiempo de cierre (s)", labelEn: "Closing time (s)", type: "number", hint: "por defecto 15", hintEn: "default 15" },
+    {
+      key: "w",
+      label: "Tipo de cobertura",
+      labelEn: "Covering type",
+      type: "select",
+      options: [
+        { value: 0, label: "0 — Persiana / enrollable" },
+        { value: 1, label: "1 — Ventana motorizada" },
+        { value: 2, label: "2 — Puerta motorizada" },
+      ],
+    },
+    {
+      key: "vs",
+      label: "Parada virtual (stop)",
+      labelEn: "Virtual stop",
+      type: "select",
+      hint: "para en vez de invertir",
+      hintEn: "stops instead of reversing",
+      options: [
+        { value: 0, label: "No" },
+        { value: 1, label: "Sí / Yes" },
+      ],
+    },
+    { key: "f", label: "Corrección de posición (%)", labelEn: "Position correction (%)", type: "number", hint: "0-100, por defecto 0", hintEn: "0-100, default 0" },
+    { key: "m", label: "Margen recalibración (%)", labelEn: "Recalibration margin (%)", type: "number", hint: "0-100, por defecto 5", hintEn: "0-100, default 5" },
+  ],
 };
 
 function tfLabel(f) {
@@ -175,6 +204,10 @@ function buildTypeFields(acc) {
     if (d.f2gpio !== undefined && d.f2gpio !== "") {
       extra.f2 = d.f2lvl !== undefined && d.f2lvl !== "" ? [[Number(d.f2gpio), Number(d.f2lvl)]] : [[Number(d.f2gpio)]];
     }
+  } else if (t === 45) {
+    ["o", "c", "w", "vs", "f", "m"].forEach((k) => {
+      if (d[k] !== undefined && d[k] !== "") extra[k] = Number(d[k]);
+    });
   }
   return extra;
 }
@@ -242,6 +275,21 @@ function parseTypeFields(t, accObj) {
     };
     grabF("f3", "f3gpio", "f3lvl");
     grabF("f2", "f2gpio", "f2lvl");
+  } else if (t === 45) {
+    // o/c/w/vs son escalares inequívocos; f/m solo si son numéricos (por si
+    // "m" viniera como array de notificaciones, que se deja en JSON avanzado).
+    ["o", "c", "w", "vs"].forEach((k) => {
+      if (rest[k] !== undefined) {
+        data[k] = rest[k];
+        delete rest[k];
+      }
+    });
+    ["f", "m"].forEach((k) => {
+      if (typeof rest[k] === "number") {
+        data[k] = rest[k];
+        delete rest[k];
+      }
+    });
   }
   return { data, rest };
 }
@@ -285,6 +333,15 @@ function accessoryObjectToState(acc) {
     inching = restAfterType.i;
     delete restAfterType.i;
   }
+  // Estado inicial al arrancar "s" (autoencendido): campo propio solo para
+  // interruptor/enchufe/válvula (1/2/20), donde significa apagado/encendido/
+  // último estado. En otros tipos "s" tiene otro significado y se deja en el
+  // JSON avanzado.
+  let initState = "";
+  if ((t === 1 || t === 2 || t === 20) && restAfterType.s !== undefined) {
+    initState = restAfterType.s;
+    delete restAfterType.s;
+  }
   if (Object.keys(restAfterType).length) rawExtra = JSON.stringify(restAfterType, null, 2);
   return {
     id: nextId(),
@@ -292,6 +349,7 @@ function accessoryObjectToState(acc) {
     custom: !known && !TYPE_FIELD_DEFS[t],
     nm: acc.nm || "",
     inching,
+    initState,
     relayGpio,
     buttons,
     typeData,
@@ -409,7 +467,7 @@ const state = {
     deviceHint: null, // { source: "detected"|"declared", category, model, example? }
   },
   io: [],
-  accessories: [{ id: nextId(), t: 1, custom: false, nm: "", inching: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }],
+  accessories: [{ id: nextId(), t: 1, custom: false, nm: "", inching: "", initState: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }],
 };
 
 function parseGpioList(str) {
@@ -493,6 +551,7 @@ function buildConfig() {
     const obj = { t: Number(acc.t) };
     if (acc.nm.trim()) obj.nm = acc.nm.trim();
     if (acc.inching !== undefined && String(acc.inching).trim() !== "") obj.i = Number(acc.inching);
+    if (acc.initState !== undefined && acc.initState !== "") obj.s = Number(acc.initState);
     if (acc.buttons.length) {
       obj.b = acc.buttons
         .filter((b) => b.gpio !== null && b.gpio !== "")
@@ -857,6 +916,9 @@ function renderAccessoryList() {
     // El temporizador "i" no aplica a cerradura (4, usa auto-rebloqueo), ni a
     // puerta de garaje (40) ni persiana (45).
     const showInching = ![4, 40, 45].includes(Number(acc.t));
+    // "Estado inicial al arrancar" (autoencendido, "s") solo tiene sentido
+    // apagado/encendido en interruptor/enchufe/válvula.
+    const showInitState = [1, 2, 20].includes(Number(acc.t));
     const typeFieldDefs = TYPE_FIELD_DEFS[Number(acc.t)] || null;
     const esCount = extraServicesCount(acc);
     const div = document.createElement("div");
@@ -881,6 +943,20 @@ function renderAccessoryList() {
           showInching
             ? `<label>${t("inchingLabel")} <span class="hint">${t("inchingHint")}</span>
                  <input type="number" step="any" data-field="inching" value="${acc.inching ?? ""}" placeholder="ej: 10">
+               </label>`
+            : ""
+        }
+        ${
+          showInitState
+            ? `<label>${t("initStateLabel")}
+                 <select data-field="initState">
+                   <option value="" ${(acc.initState ?? "") === "" ? "selected" : ""}>${t("initStateDefault")}</option>
+                   <option value="0" ${String(acc.initState) === "0" ? "selected" : ""}>0 · ${t("initStateOff")}</option>
+                   <option value="1" ${String(acc.initState) === "1" ? "selected" : ""}>1 · ${t("initStateOn")}</option>
+                   <option value="4" ${String(acc.initState) === "4" ? "selected" : ""}>4 · ${t("initStateInputs")}</option>
+                   <option value="5" ${String(acc.initState) === "5" ? "selected" : ""}>5 · ${t("initStateLast")}</option>
+                   <option value="6" ${String(acc.initState) === "6" ? "selected" : ""}>6 · ${t("initStateOpposite")}</option>
+                 </select>
                </label>`
             : ""
         }
@@ -1326,7 +1402,7 @@ function loadJsonIntoForm(text) {
   // quedar oculto hasta pulsar "Separar en accesorios independientes").
   state.accessories = (parsed.a || []).map(accessoryObjectToState).flatMap(expandAccessoryEs);
   if (!state.accessories.length) {
-    state.accessories = [{ id: nextId(), t: 1, custom: false, nm: "", inching: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }];
+    state.accessories = [{ id: nextId(), t: 1, custom: false, nm: "", inching: "", initState: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }];
   }
 
   render();
@@ -1345,7 +1421,7 @@ document.getElementById("btn-add-io").addEventListener("click", () => {
 });
 
 document.getElementById("btn-add-accessory").addEventListener("click", () => {
-  state.accessories.push({ id: nextId(), t: 1, custom: false, nm: "", inching: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" });
+  state.accessories.push({ id: nextId(), t: 1, custom: false, nm: "", inching: "", initState: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" });
   render();
 });
 
@@ -1563,7 +1639,7 @@ function ensureIoDeclaration(gpio, mode, source) {
 }
 
 function newAccessory() {
-  return { id: nextId(), t: 1, custom: false, nm: "", inching: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" };
+  return { id: nextId(), t: 1, custom: false, nm: "", inching: "", initState: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" };
 }
 
 const wizard = {

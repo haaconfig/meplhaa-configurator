@@ -1,3 +1,22 @@
+Configurador MEPLHAA — v1.95
+Fecha: 2026-07-29
+
+Cambios desde v1.94 (persiana + autoencendido):
+- Persiana / toldo (tipo 45): campos dedicados nuevos -> tiempo de apertura "o"
+  y cierre "c" (admiten decimales), tipo de cobertura "w" (persiana/ventana/
+  puerta), parada virtual "vs", corrección de posición "f" y margen "m". Las
+  acciones de relé (0-8) y sensores de entrada (f0-f7) siguen en el JSON
+  avanzado, ahora documentados en la ficha de ayuda.
+- Ficha de ayuda del tipo 45 corregida/ampliada con la wiki: valores de "w",
+  acciones 0-8 (incluye invertir dirección y parar) y entradas f0-f7.
+- Nuevo campo "Estado inicial al arrancar (s)" = autoencendido, en interruptor,
+  enchufe y válvula (tipos 1/2/20): 0 apagado (def.), 1 encendido, 4 según
+  entradas, 5 último estado, 6 opuesto al último. En otros tipos "s" tiene otro
+  significado, así que ahí se deja en el JSON avanzado (sin tocar).
+- Round-trip verificado idéntico en persiana, interruptor con "s" y seguridad.
+  Ficheros: app.js, typeInfo.js, i18n.js.
+  index.html: app.js?v=55, i18n.js?v=20, typeInfo.js?v=8, badge -> v1.95.
+
 Configurador MEPLHAA — v1.94
 Fecha: 2026-07-29
 

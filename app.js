@@ -94,6 +94,43 @@ const TYPE_FIELD_DEFS = {
       hintEn: "e.g.: 12,13,14 (R,G,B or white/warm channels)",
     },
   ],
+  40: [
+    { key: "d", label: "Tiempo de apertura (s)", labelEn: "Opening time (s)", type: "number", hint: "por defecto 30", hintEn: "default 30" },
+    {
+      key: "vs",
+      label: "Parada virtual (stop)",
+      labelEn: "Virtual stop",
+      type: "select",
+      hint: "botón de parada en la app Casa",
+      hintEn: "stop button in the Home app",
+      options: [
+        { value: 0, label: "No" },
+        { value: 1, label: "Sí / Yes" },
+      ],
+    },
+    { key: "f3gpio", label: "GPIO sensor 'cerrada' (f3)", labelEn: "'Closed' sensor GPIO (f3)", type: "number" },
+    {
+      key: "f3lvl",
+      label: "Nivel activo 'cerrada'",
+      labelEn: "'Closed' active level",
+      type: "select",
+      options: [
+        { value: 0, label: "0 (LOW / a masa)" },
+        { value: 1, label: "1 (HIGH / +)" },
+      ],
+    },
+    { key: "f2gpio", label: "GPIO sensor 'abierta' (f2)", labelEn: "'Open' sensor GPIO (f2)", type: "number" },
+    {
+      key: "f2lvl",
+      label: "Nivel activo 'abierta'",
+      labelEn: "'Open' active level",
+      type: "select",
+      options: [
+        { value: 0, label: "0 (LOW / a masa)" },
+        { value: 1, label: "1 (HIGH / +)" },
+      ],
+    },
+  ],
 };
 
 function tfLabel(f) {
@@ -129,6 +166,15 @@ function buildTypeFields(acc) {
   } else if (t === 30) {
     const gpios = parseGpioList(d.gpios);
     if (gpios.length) extra.g = gpios;
+  } else if (t === 40) {
+    if (d.d !== undefined && d.d !== "") extra.d = Number(d.d);
+    if (d.vs !== undefined && d.vs !== "") extra.vs = Number(d.vs);
+    if (d.f3gpio !== undefined && d.f3gpio !== "") {
+      extra.f3 = d.f3lvl !== undefined && d.f3lvl !== "" ? [[Number(d.f3gpio), Number(d.f3lvl)]] : [[Number(d.f3gpio)]];
+    }
+    if (d.f2gpio !== undefined && d.f2gpio !== "") {
+      extra.f2 = d.f2lvl !== undefined && d.f2lvl !== "" ? [[Number(d.f2gpio), Number(d.f2lvl)]] : [[Number(d.f2gpio)]];
+    }
   }
   return extra;
 }
@@ -174,6 +220,28 @@ function parseTypeFields(t, accObj) {
       data.gpios = (rest.g || []).join(", ");
       delete rest.g;
     }
+  } else if (t === 40) {
+    if (rest.d !== undefined) {
+      data.d = rest.d;
+      delete rest.d;
+    }
+    if (rest.vs !== undefined) {
+      data.vs = rest.vs;
+      delete rest.vs;
+    }
+    // Sensores f2 (abierta) y f3 (cerrada): solo se extraen si tienen la forma
+    // simple [[gpio]] o [[gpio, nivel]]; cualquier forma más compleja se deja
+    // intacta en el JSON avanzado para no perder información.
+    const grabF = (key, gk, lk) => {
+      const v = rest[key];
+      if (Array.isArray(v) && v.length === 1 && Array.isArray(v[0]) && v[0].length >= 1 && v[0].length <= 2 && typeof v[0][0] === "number") {
+        data[gk] = v[0][0];
+        if (v[0].length === 2) data[lk] = v[0][1];
+        delete rest[key];
+      }
+    };
+    grabF("f3", "f3gpio", "f3lvl");
+    grabF("f2", "f2gpio", "f2lvl");
   }
   return { data, rest };
 }
@@ -209,12 +277,21 @@ function accessoryObjectToState(acc) {
     delete rest["1"];
   }
   const { data: typeData, rest: restAfterType } = parseTypeFields(t, rest);
+  // El temporizador "i" (inching / auto-retorno) se expone como campo propio
+  // (salvo tipo 4, que ya lo usa como "auto-rebloqueo"). Se saca de restAfterType
+  // para que no se duplique en el JSON avanzado.
+  let inching = "";
+  if (restAfterType.i !== undefined) {
+    inching = restAfterType.i;
+    delete restAfterType.i;
+  }
   if (Object.keys(restAfterType).length) rawExtra = JSON.stringify(restAfterType, null, 2);
   return {
     id: nextId(),
     t,
     custom: !known && !TYPE_FIELD_DEFS[t],
     nm: acc.nm || "",
+    inching,
     relayGpio,
     buttons,
     typeData,
@@ -332,7 +409,7 @@ const state = {
     deviceHint: null, // { source: "detected"|"declared", category, model, example? }
   },
   io: [],
-  accessories: [{ id: nextId(), t: 1, custom: false, nm: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }],
+  accessories: [{ id: nextId(), t: 1, custom: false, nm: "", inching: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }],
 };
 
 function parseGpioList(str) {
@@ -415,6 +492,7 @@ function buildConfig() {
   const a = state.accessories.map((acc) => {
     const obj = { t: Number(acc.t) };
     if (acc.nm.trim()) obj.nm = acc.nm.trim();
+    if (acc.inching !== undefined && String(acc.inching).trim() !== "") obj.i = Number(acc.inching);
     if (acc.buttons.length) {
       obj.b = acc.buttons
         .filter((b) => b.gpio !== null && b.gpio !== "")
@@ -776,6 +854,9 @@ function renderAccessoryList() {
   state.accessories.forEach((acc, idx) => {
     const friendly = Number(acc.t) === 1 || Number(acc.t) === 2;
     const inCatalog = ACCESSORY_TYPES.some((x) => x.id === Number(acc.t));
+    // El temporizador "i" no aplica a cerradura (4, usa auto-rebloqueo), ni a
+    // puerta de garaje (40) ni persiana (45).
+    const showInching = ![4, 40, 45].includes(Number(acc.t));
     const typeFieldDefs = TYPE_FIELD_DEFS[Number(acc.t)] || null;
     const esCount = extraServicesCount(acc);
     const div = document.createElement("div");
@@ -796,6 +877,13 @@ function renderAccessoryList() {
         <label>${t("nameLabel")}
           <input type="text" data-field="nm" value="${acc.nm}" placeholder="${t("namePlaceholder")}">
         </label>
+        ${
+          showInching
+            ? `<label>${t("inchingLabel")} <span class="hint">${t("inchingHint")}</span>
+                 <input type="number" step="any" data-field="inching" value="${acc.inching ?? ""}" placeholder="ej: 10">
+               </label>`
+            : ""
+        }
         ${
           friendly
             ? `<label>${t("relayGpioLabel")}
@@ -1238,7 +1326,7 @@ function loadJsonIntoForm(text) {
   // quedar oculto hasta pulsar "Separar en accesorios independientes").
   state.accessories = (parsed.a || []).map(accessoryObjectToState).flatMap(expandAccessoryEs);
   if (!state.accessories.length) {
-    state.accessories = [{ id: nextId(), t: 1, custom: false, nm: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }];
+    state.accessories = [{ id: nextId(), t: 1, custom: false, nm: "", inching: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }];
   }
 
   render();
@@ -1257,7 +1345,7 @@ document.getElementById("btn-add-io").addEventListener("click", () => {
 });
 
 document.getElementById("btn-add-accessory").addEventListener("click", () => {
-  state.accessories.push({ id: nextId(), t: 1, custom: false, nm: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" });
+  state.accessories.push({ id: nextId(), t: 1, custom: false, nm: "", inching: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" });
   render();
 });
 
@@ -1475,7 +1563,7 @@ function ensureIoDeclaration(gpio, mode, source) {
 }
 
 function newAccessory() {
-  return { id: nextId(), t: 1, custom: false, nm: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" };
+  return { id: nextId(), t: 1, custom: false, nm: "", inching: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" };
 }
 
 const wizard = {
@@ -1795,7 +1883,7 @@ document.getElementById("wizard-next").addEventListener("click", () => {
 });
 document.getElementById("wizard-back").addEventListener("click", wizardBack);
 
-let currentMode = "wizard";
+let currentMode = "advanced";
 
 // Muestra solo el modo elegido (asistente o formulario avanzado) y oculta
 // el otro por completo, para no mezclar ambos en la misma pantalla.
@@ -2319,4 +2407,4 @@ populateDevicePicker();
 render();
 renderWizard();
 renderSavedList();
-setMode("wizard", false); // carga inicial: sin scroll, para no saltar el inicio de la pagina
+setMode("advanced", false); // carga inicial: formulario avanzado por defecto, sin scroll

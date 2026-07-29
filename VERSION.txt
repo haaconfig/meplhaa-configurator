@@ -1,3 +1,30 @@
+Configurador MEPLHAA — v1.94
+Fecha: 2026-07-29
+
+Cambios desde v1.93 (más campos expuestos, pedidos por la comunidad):
+- Nuevo campo "Temporizador auto-apagado (i, s)" en cada accesorio (inching):
+  el servicio vuelve al estado anterior tras N segundos. Antes ese "i" solo se
+  podía meter a mano en el JSON avanzado. No se muestra en cerradura (4, ya usa
+  auto-rebloqueo), puerta de garaje (40) ni persiana (45).
+- Puerta de garaje (tipo 40): campos dedicados nuevos -> tiempo de apertura "d",
+  parada virtual "vs" (sí/no) y GPIO+nivel de los sensores de puerta ABIERTA
+  ("f2") y CERRADA ("f3"). Las acciones de relé (0-3) y sensores avanzados
+  (f4/f5...) siguen en el JSON avanzado, ahora documentados en la ficha de ayuda.
+- Ficha de ayuda del tipo 40 corregida y ampliada con la wiki oficial: acciones
+  0-8 (incluye invertir dirección) y sensores f0-f8 con su significado exacto.
+- Round-trip verificado: cargar y regenerar un JSON de garaje da un resultado
+  idéntico (sin perder nada); el "i":10 del ejemplo del "Deposito" se conserva.
+  Ficheros: app.js, typeInfo.js, i18n.js.
+  index.html: app.js?v=53, i18n.js?v=19, typeInfo.js?v=7, badge -> v1.94.
+
+Configurador MEPLHAA — v1.93
+Fecha: 2026-07-29
+
+Cambios desde v1.92:
+- La página ahora arranca en el FORMULARIO AVANZADO por defecto (antes abría en
+  el asistente). El botón "🧙 Ir al asistente" sigue disponible para cambiar.
+  Ficheros: app.js (setMode inicial + currentMode). index.html: app.js?v=52, badge -> v1.93.
+
 Configurador MEPLHAA — v1.92
 Fecha: 2026-07-24
 

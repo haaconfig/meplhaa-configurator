@@ -1,3 +1,19 @@
+Configurador MEPLHAA — v1.96
+Fecha: 2026-07-30
+
+Cambios desde v1.95 (canal de sugerencias/errores):
+- El enlace "Sugerencias y errores" de la cabecera antes iba a la raíz del repo
+  (el código) y, además, la creación de issues está restringida -> nadie de la
+  comunidad podía reportar. Ahora abre un FORMULARIO (Google Forms) para que
+  cualquiera envíe sugerencias/errores sin cuenta y SIN exponer ningún correo;
+  se mantiene el enlace "ver en GitHub" para quien quiera.
+  Ficheros: index.html, i18n.js (nuevas claves feedbackIntro/feedbackForm/
+  feedbackGithub; eliminada githubLinkText). index.html: i18n.js?v=22, badge v1.96.
+- Anti-caché: metaetiquetas Cache-Control/Pragma/Expires en el <head> del
+  index.html para que el navegador revalide siempre el index y coja la versión
+  nueva sin Ctrl+F5 (los .js/.css siguen versionados con ?v=N). Evita el
+  "no se actualiza" tras publicar.
+
 Configurador MEPLHAA — v1.95
 Fecha: 2026-07-29
 

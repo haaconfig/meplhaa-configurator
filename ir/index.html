@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAA IR Toolkit</title>
+    <meta name="author" content="Copyright 2020 Antonio García (@GarzaCon)">
+    <link rel="stylesheet" type="text/css" href="haairtoolkit.css"/>
+    <!-- jQuery servido en local (no hotlink) -->
+    <script src="jquery-3.5.1.min.js"></script>
+    <script src="haairtoolkit.js"></script>
+    <script src="haairtoolkit-jq.js"></script>
+    <style>
+        body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+        .haa-credit {
+            margin: 10px 12px;
+            padding: 8px 12px;
+            border: 1px solid #ffd7ab;
+            background: #fff3e6;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #333;
+        }
+        .haa-credit a { color: #e65100; }
+    </style>
+</head>
+<body>
+    <div class="haa-credit">
+        🛰️ <b>HAA IR Toolkit</b> — herramienta oficial de RavenSystem, creada por
+        Antonio García (<a href="https://github.com/GarzaCon/HAA-IR-Toolkit" target="_blank" rel="noopener">@GarzaCon</a>),
+        licencia Apache 2.0. Integrada aquí sin modificar su lógica.
+        Convierte una captura IR (timings en crudo o Pronto hex) en el
+        <b>protocolo</b> y <b>comando</b> que usa HAA. Pégalos luego en tu accesorio
+        (por ejemplo un HeaterCooler/aire por IR) en los campos <code>"p"</code> y <code>"c"</code>.
+        Fuente: <a href="https://ravensystem.github.io/haairtoolkit/" target="_blank" rel="noopener">ravensystem.github.io/haairtoolkit</a>.
+    </div>
+    <div class="container">
+        <div class="wrapper">
+            <div class="cctabs">
+                <input checked id="one" name="tabs" type="radio">
+                <label for="one"><i class="fa fa-pencil-square-o"></i>Standard Protocol HAA IR - 2, 4 &amp; 6 bits</label>
+                <input id="three" name="tabs" type="radio">
+                <label for="three"><i class="fa fa-plus-square"></i>Pronto Codes Protocol - HAA IR</label>
+                <div class="panels">
+                    <div class="panel">
+                        <table id="table1" width="100%">
+                            <tr>
+                                <td>
+                                    <b>Paste your captured HAA IR Packets, including header and footer,
+                                        then click button "Decode HAA IR Protocol"</b>
+                                    <br/>Note: the code assumes (and ignores) a header pair (e.g. + 9050 - 4524 below) and a
+                                    footer single value (e.g. + 540 below). If your capture does not contain header/footer,
+                                    check the appropriate checkboxes.
+                                    <br/>Sample captured packets below are for an LG TV "MUTE" button (bAeBaFbAeBaD)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button class="button buttonBlue"
+                                            onclick="javascript:getIRProtocol_Standard_N_Bits(this);"> Decode HAA IR
+                                        Protocol
+                                    </button>
+                                    <button id="clearPackets" class="button buttonRed"> Clear Captured Packets</button>
+                                    <button id="clearAll" class="button buttonRed"> Clear All</button>
+                                    &nbsp;
+                                    <input type="checkbox" id="noheader" value="noheader"
+                                           title="Check if your IR capture does not have a header pair"/>No Header
+                                    <input type="checkbox" id="nofooter" value="nofooter"
+                                           title="Check if your IR capture does not have a footer"/>No Footer
+                                    &nbsp;Max diff range:
+                                    <input class="" type="text" id="maxDifStandard" size="6" value="100"
+                                           title="IR packets are grouped based on this range. E.g. 449 and 397 below have a difference of 82, and will be grouped together if 100 range is entered"/>
+                                    Round bits to nearest:
+                                    <select id="roundingStandard">
+                                        <option value="1">None</option>
+                                        <option value="5">5</option>
+                                        <option value="10" selected>10</option>
+                                        <option value="20">20</option>
+                                        <option value="30">30</option>
+                                        <option value="40">40</option>
+                                        <option value="50">50</option>
+                                        <option value="100">100</option>
+                                        <option value="250">250</option>
+                                        <option value="250">500</option>
+                                    </select>
+
+                                    <br/>
+                                    <b>IR Captured Packets</b>
+                                    <textarea id="inputIR" cols="150" rows="16">
+    + 9050 - 4524 +  540 -  585 +  540 -  584 +  539 - 1709 +  540 -  585 +  539 -  585 +  539 -  585 +  539 -  586
+    +  539 -  585 +  538 - 1710 +  539 - 1709 +  540 -  584 +  540 - 1709 +  540 - 1708 +  540 - 1709 +  539 - 1709
+    +  539 - 1709 +  541 - 1708 +  539 -  585 +  539 -  586 +  539 - 1709 +  539 -  585 +  539 -  585 +  539 -  585
+    +  539 -  585 +  540 -  584 +  540 - 1709 +  540 - 1709 +  539 -  585 +  539 - 1709 +  540 - 1709 +  539 - 1710
+    +  538 - 1709 +  540
+                                  </textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Protocol Bits</b> (averaged and rounded)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><textarea id="protocolBits" cols="150" rows="2"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Command Bits</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><textarea id="standardBitsString" cols="150" rows="10"></textarea></td>
+                            </tr>
+                            <tr>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <b>Protocol Command</b>
+                                        </td>
+                                        <td>
+                                            <b>Protocol</b> (value between quotes)
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td>
+                                            <textarea id="outputProtocolCommand" cols="150" rows="10"></textarea>
+                                        </td>
+                                        <td>
+                                            <textarea id="outputProtocol" cols="150" rows="10"></textarea>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="panel">
+                        <table id="table1" width="100%">
+                            <tr>
+                                <td>
+                                    <b>Paste your Hex Pronto code and click "Decode HAA IR Protocol"</b> - Tested on Samsung
+                                    IR Pronto codes
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <button id="decodePronto" class="button buttonBlue"> Decode HAA IR Protocol</button>
+                                    <button id="clearPacketsPronto" class="button buttonRed"> Clear Captured Packets
+                                    </button>
+                                    <button id="clearAllPronto" class="button buttonRed"> Clear All</button>
+                                    # Header Pairs to Ignore: <input class="" type="text" id="numHeadersToIgnore" size="6"
+                                                                     value="3"/>
+                                    # Footer Pairs to Ignore: <input class="" type="text" id="numFootersToIgnore" size="6"
+                                                                     value="1"/>
+                                    <br/>
+                                    <b>IR Captured Packets</b>
+
+                                    <textarea id="inputIRPronto" cols="150" rows="16">
+    0000 006D 0000 0022 00AC 00AC 0015 0040 0015 0040 0015 0040 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0040 0015 0040 0015 0040 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0040 0015 0015 0015 0015 0015 0040 0015 0015 0015 0040 0015 0040 0015 0040 0015 0015 0015 0040 0015 0040 0015 0015 0015 0040 0015 0015 0015 0015 0015 0015 0015 0689
+                              </textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <b>Packets To Process</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><textarea id="preprocessOutputPronto" cols="150" rows="10"></textarea></td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    <b>Result Bits</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><textarea id="resultBitsPronto" cols="150" rows="10"></textarea></td>
+                            </tr>
+                            <tr>
+                                <td><b>Result Protocol Command</b>
+                                    &nbsp;&nbsp;
+                                    <button id="clearRawPronto" class="button buttonRed"> Clear</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><textarea id="resultProtocolPronto" cols="150" rows="10"></textarea></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div> <!-- panels -->
+            </div> <!-- cctabs -->
+        </div> <!-- wrapper -->
+    </div>  <!-- container -->
+    <div class="footer">
+        &copy; Copyright 2020 Antonio Garcia (@GarzaCon) — Apache 2.0
+    </div>
+</body>
+</html>

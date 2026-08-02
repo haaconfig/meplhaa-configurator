@@ -1967,17 +1967,35 @@ let currentMode = "advanced";
 // no pierde nada de lo ya configurado.
 function setMode(mode, scroll = true) {
   currentMode = mode;
+  const isIr = mode === "ir";
   document.getElementById("wizard-panel").classList.toggle("hidden", mode !== "wizard");
   document.getElementById("advanced-form").classList.toggle("hidden", mode !== "advanced");
+  // Modo IR: muestra el conversor (iframe aislado) y oculta el resto del
+  // configurador (selector, panel de GPIOs y formulario+JSON).
+  const irPanel = document.getElementById("ir-panel");
+  if (irPanel) irPanel.classList.toggle("hidden", !isIr);
+  const picker = document.querySelector(".device-picker");
+  if (picker) picker.classList.toggle("hidden", isIr);
+  const layout = document.querySelector("main.layout");
+  if (layout) layout.classList.toggle("hidden", isIr);
+  const gpioCard = document.getElementById("device-gpio-card");
+  if (gpioCard && isIr) gpioCard.style.display = "none";
+  // Carga diferida del iframe: solo al entrar por primera vez en el conversor.
+  if (isIr) {
+    const frame = document.getElementById("ir-frame");
+    if (frame && !frame.src && frame.dataset.src) frame.src = frame.dataset.src;
+  }
   // Herramientas avanzadas (Pegar JSON, Convertidor v11->v12): solo en modo avanzado,
   // para no recargar el asistente que debe ser mas simple. Estilo en linea para que
   // gane a las reglas de .card en el CSS.
   document.querySelectorAll(".adv-only").forEach((el) => { el.style.display = mode === "advanced" ? "" : "none"; });
   document.getElementById("mode-wizard").classList.toggle("active", mode === "wizard");
   document.getElementById("mode-advanced").classList.toggle("active", mode === "advanced");
+  const irBtn = document.getElementById("mode-ir");
+  if (irBtn) irBtn.classList.toggle("active", isIr);
   if (mode === "wizard") {
     renderWizard();
-  } else {
+  } else if (mode === "advanced") {
     render();
   }
   if (scroll) window.scrollTo({ top: document.getElementById("mode-wizard").getBoundingClientRect().top + window.scrollY - 10, behavior: "smooth" });
@@ -1985,6 +2003,7 @@ function setMode(mode, scroll = true) {
 
 document.getElementById("mode-wizard").addEventListener("click", () => setMode("wizard"));
 document.getElementById("mode-advanced").addEventListener("click", () => setMode("advanced"));
+document.getElementById("mode-ir").addEventListener("click", () => setMode("ir"));
 
 // ---------- Selector de dispositivos y funciones ----------
 

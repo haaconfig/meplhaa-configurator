@@ -1,3 +1,28 @@
+Configurador MEPLHAA — v1.97
+Fecha: 2026-07-30
+
+Cambios desde v1.96 (nuevo: Conversor IR):
+- Tercer modo en la barra superior: "🛰️ Conversor IR". Integra la herramienta
+  oficial HAA IR Toolkit (de RavenSystem / Antonio García @GarzaCon, Apache 2.0)
+  para convertir una captura IR (timings en crudo del modo "Standard Protocol"
+  o Pronto hex) en el protocolo "p" y el comando "c" que usa HAA. Se pegan luego
+  en un accesorio por IR (HeaterCooler/aire, etc.).
+- Integración SIN modificar su lógica: sus ficheros van intactos en la carpeta
+  /ir (haairtoolkit.js, -jq.js, .css, LICENSE) + jQuery servido en local (no
+  hotlink), y se muestran en un iframe aislado (cero conflicto de CSS/IDs con el
+  configurador). Carga diferida: el iframe solo se carga al entrar al conversor.
+- Paridad verificada con la herramienta oficial (ejemplo LG MUTE -> bAeBaFbAeBaD).
+- Crédito visible a los autores + licencia Apache 2.0 dentro del panel.
+  Ficheros nuevos: /ir/*. Modificados: index.html, app.js (setMode), i18n.js,
+  style.css, .gitignore (whitelist /ir/).
+  index.html: style.css?v=27, i18n.js?v=23, app.js?v=56, badge -> v1.97.
+- ARREGLO caché de fichas: blakref.js había cambiado de contenido en versiones
+  pasadas SIN bumpear su ?v=6, así que navegadores con caché antigua mostraban
+  la ficha/imagen equivocada en algunos dispositivos (p.ej. el Moes UFO-R6 IR
+  salía con el pinout e imagen de un Shelly 1PM Gen4). Bumpeado a blakref.js?v=7
+  para forzar la recarga de la ficha correcta. (El anti-caché de v1.96 evita que
+  vuelva a pasar.)
+
 Configurador MEPLHAA — v1.96
 Fecha: 2026-07-30
 

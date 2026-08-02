@@ -315,6 +315,25 @@ button {
   display: none;
 }
 
+/* Utilidad genérica para ocultar (modo IR, etc.) */
+.hidden { display: none !important; }
+
+/* Conversor IR (tercer modo): iframe con la herramienta oficial aislada */
+#ir-panel {
+  margin: 0 32px 16px;
+}
+#ir-panel iframe {
+  width: 100%;
+  height: 82vh;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+@media (max-width: 720px) {
+  #ir-panel { margin: 0 12px 14px; }
+  #ir-panel iframe { height: 88vh; }
+}
+
 .wizard-progress {
   font-size: 13px;
   color: var(--hint);

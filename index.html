@@ -10,7 +10,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Configurador MEPLHAA</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=2">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
 <header>
@@ -25,7 +25,7 @@
     </div>
   </div>
   <span class="badge">v12</span>
-  <span class="app-version-badge">v1.96</span>
+  <span class="app-version-badge">v1.97</span>
   <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
   <p class="github-link">💡 <span data-i18n="feedbackIntro">Sugerencias y errores:</span> <a href="https://docs.google.com/forms/d/e/1FAIpQLSfO5kJFTOnqMvyDNCk1mXBWeOM2BfvpMesBLq3p9S3YpGg-xA/viewform" target="_blank" rel="noopener"><span data-i18n="feedbackForm">rellenar formulario</span> ↗</a> · <a href="https://github.com/haaconfig/meplhaa-configurator" target="_blank" rel="noopener"><span data-i18n="feedbackGithub">ver en GitHub</span> ↗</a></p>
 </header>
@@ -33,6 +33,7 @@
 <div class="mode-toggle">
   <button id="mode-wizard" class="mode-btn" data-i18n="modeWizard">🧙 Ir al asistente</button>
   <button id="mode-advanced" class="mode-btn" data-i18n="modeAdvanced">🛠 Ir al formulario avanzado</button>
+  <button id="mode-ir" class="mode-btn" data-i18n="modeIr">🛰️ Conversor IR</button>
 </div>
 
 <div class="device-picker card">
@@ -185,11 +186,16 @@
   </section>
 </main>
 
-<script src="blakref.js?v=6"></script>
+<section id="ir-panel" class="hidden">
+  <p class="hint" data-i18n="irPanelHint" style="margin:0 0 8px">Convierte una captura IR (timings en crudo o Pronto hex) en el protocolo y comando de HAA, para pegarlos en un accesorio por infrarrojos. Herramienta oficial de RavenSystem/GarzaCon (Apache 2.0), integrada sin modificar.</p>
+  <iframe id="ir-frame" data-src="ir/index.html" title="HAA IR Toolkit" loading="lazy"></iframe>
+</section>
+
+<script src="blakref.js?v=7"></script>
 <script src="devices.js?v=51"></script>
 <script src="typeInfo.js?v=8"></script>
-<script src="i18n.js?v=22"></script>
-<script src="app.js?v=55"></script>
+<script src="i18n.js?v=23"></script>
+<script src="app.js?v=56"></script>
 <script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

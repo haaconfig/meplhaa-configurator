@@ -1,3 +1,25 @@
+Configurador MEPLHAA — v1.98
+Fecha: 2026-08-05
+
+Cambios desde v1.97 (nuevo: ejemplo Aire Acondicionado TCL por IR + fix LG):
+- Nuevo dispositivo en el catálogo (categoría "Otros"): "Eachen IR DC6 (blaster
+  IR)" con el ejemplo "Aire acondicionado TCL por IR (HeaterCooler + sensor
+  DS18B20)".
+- El código IR NO se capturó (la captura de HAA nunca entregaba la trama TCL
+  completa: sin cabecera y truncada). Se construyó la trama TCL112AC desde la
+  especificación oficial (IRremoteESP8266) y se codificó al formato p+c de HAA.
+  Protocolo p = "GSC<AQ0@AQBrAQ".
+- Config TCL: emisor IR en GPIO14 (IRsend del Eachen IR DC6), sensor DS18B20 en
+  GPIO3, HeaterCooler t:25 que regula frío/calor con el sensor. Cada acción envía
+  las 2 variantes de TCL (GZ055BE1 + TAC09CHSD): el aire obedece a la que
+  reconoce e ignora la otra.
+- Corregido el ejemplo existente "Aire acondicionado LG por infrarrojos": el
+  sensor pasa a GPIO0 (n:1), que es la configuración real que funciona (antes
+  estaba en GPIO1).
+- Añadido "Aire acondicionado Cecotec por IR": mismos parámetros y códigos que
+  el TCL (los Cecotec suelen fabricarse sobre TCL → mismo protocolo TCL112AC),
+  emisor GPIO14 + sensor DS18B20 en GPIO3.
+
 Configurador MEPLHAA — v1.97
 Fecha: 2026-07-30
 

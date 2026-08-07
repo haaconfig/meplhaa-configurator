@@ -1,3 +1,47 @@
+Configurador MEPLHAA — v2.2
+Fecha: 2026-08-07
+
+Cambios desde v2.1 (fiabilidad + seguridad; auditado con equipos de agentes y
+una batería de pruebas automática):
+
+Correcciones de FIABILIDAD (el JSON generado ya no se corrompe):
+- Bombillas PWM y grupos "io" avanzados: los GPIOs anidados (p.ej. [[12,14]]) y
+  los grupos sin modo (p.ej. [[33]]) se conservan TAL CUAL en vez de aplanarse o
+  cambiar al cargar/guardar. Antes 5 configuraciones del catálogo se alteraban al
+  hacer ida y vuelta; ahora las 519 se conservan idénticas.
+- Válvula de agua (t:20): ya NO se fuerza el tipo a "riego" (w=1) ni se pierde al
+  cargar. Nuevo selector de tipo de válvula (0=agua por defecto, 1=riego, 2=ducha,
+  3=grifo), configurable y con round-trip correcto.
+- Remapeo de GPIOs (v2.0): ahora también remapea los canales PWM de bombilla y los
+  sensores de fin de carrera de la puerta de garaje (antes se quedaban en los
+  GPIOs del dispositivo antiguo, provocando colisiones silenciosas).
+
+Seguridad:
+- Escapado de HTML en todos los puntos donde se mostraban datos del usuario
+  (nombre de accesorio, hostname, JSON avanzado, avisos) para evitar inyección de
+  código (XSS) al cargar una configuración de terceros.
+
+Pruebas:
+- Nueva batería de autocomprobación (selftest.js, local): ida y vuelta de las 519
+  configuraciones del catálogo, cobertura de tipos de sensor, remapeo, integridad
+  de traducciones, y CONSTRUCCIÓN DESDE CERO (interruptor/sensor/válvula por el
+  formulario y un interruptor completo por el asistente). Todo en verde.
+
+Configurador MEPLHAA — v2.1
+Fecha: 2026-08-07
+
+Cambios desde v2.0 (más tipos de sensor de temperatura/humedad):
+- El desplegable "Tipo de sensor" de los accesorios Termómetro (t:22), Sensor de
+  humedad (t:23) y Termómetro+Humedad (t:24) solo ofrecía DHT22 (y DS18B20 en el
+  termómetro). Ahora incluye TODOS los tipos que soporta HAA según la wiki oficial
+  de RavenSystem, y cada servicio muestra solo los que admite:
+    · Termómetro (22): DHT22, DHT11, DS18B20, Si7021, Virtual, Termistor NTC/PTC
+      (ADC y ADC crudo) y sensor interno del chip (ESP32-C/S).
+    · Humedad (23): DHT22, DHT11, Si7021, Virtual y humedad ADC crudo (normal e
+      invertida).
+    · Termómetro+Humedad (24): DHT22, DHT11, Si7021 y Virtual.
+- DHT22 (n:2) se mantiene primero para no cambiar el valor por defecto.
+
 Configurador MEPLHAA — v2.0
 Fecha: 2026-08-07
 

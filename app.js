@@ -62,7 +62,27 @@ const TYPE_FIELD_DEFS = {
     { key: "gpio", label: "GPIO del relé (cerradura)", labelEn: "Relay GPIO (lock)", type: "number" },
     { key: "autoRelock", label: "Auto-cierre tras (segundos, opcional)", labelEn: "Auto-relock after (seconds, optional)", type: "number" },
   ],
-  20: [{ key: "gpio", label: "GPIO de la válvula", labelEn: "Valve GPIO", type: "number" }],
+  20: [
+    { key: "gpio", label: "GPIO de la válvula", labelEn: "Valve GPIO", type: "number" },
+    {
+      key: "w",
+      label: "Tipo de válvula",
+      labelEn: "Valve type",
+      type: "select",
+      options: [
+        { value: 0, label: "0 — Válvula de agua / Water valve" },
+        { value: 1, label: "1 — Riego / Irrigation (sprinkler)" },
+        { value: 2, label: "2 — Ducha / Shower" },
+        { value: 3, label: "3 — Grifo / Tap (faucet)" },
+      ],
+    },
+  ],
+  // Tipos de sensor ("n") según la wiki oficial de RavenSystem (tabla
+  // "Temperature and Humidity Sensors"). Cada servicio admite un subconjunto:
+  //   t:22 (temperatura) -> 0,1,2,3,4,5,6,7,8,100
+  //   t:23 (humedad)     -> 0,1,2,4,9,10
+  //   t:24 (temp+humedad)-> 0,1,2,4
+  // DHT22 (n:2) va primero por ser el valor por defecto de HAA.
   22: [
     { key: "gpio", label: "GPIO del sensor", labelEn: "Sensor GPIO", type: "number" },
     {
@@ -71,18 +91,50 @@ const TYPE_FIELD_DEFS = {
       labelEn: "Sensor type",
       type: "select",
       options: [
-        { value: 2, label: "DHT22" },
+        { value: 2, label: "DHT22 / AM2301 (por defecto)" },
+        { value: 1, label: "DHT11" },
         { value: 3, label: "DS18B20" },
+        { value: 4, label: "Si7021" },
+        { value: 0, label: "Virtual, sin sensor físico / no hardware" },
+        { value: 5, label: "Termistor NTC (ADC)" },
+        { value: 6, label: "Termistor PTC (ADC)" },
+        { value: 7, label: "Termistor NTC (ADC crudo / raw)" },
+        { value: 8, label: "Termistor PTC (ADC crudo / raw)" },
+        { value: 100, label: "Sensor interno del chip (solo ESP32-C / ESP32-S)" },
       ],
     },
   ],
   23: [
     { key: "gpio", label: "GPIO del sensor", labelEn: "Sensor GPIO", type: "number" },
-    { key: "sensorType", label: "Tipo de sensor", labelEn: "Sensor type", type: "select", options: [{ value: 2, label: "DHT22" }] },
+    {
+      key: "sensorType",
+      label: "Tipo de sensor",
+      labelEn: "Sensor type",
+      type: "select",
+      options: [
+        { value: 2, label: "DHT22 / AM2301 (por defecto)" },
+        { value: 1, label: "DHT11" },
+        { value: 4, label: "Si7021" },
+        { value: 0, label: "Virtual, sin sensor físico / no hardware" },
+        { value: 9, label: "Humedad ADC crudo / raw ADC" },
+        { value: 10, label: "Humedad ADC crudo, lógica invertida / inverted" },
+      ],
+    },
   ],
   24: [
     { key: "gpio", label: "GPIO del sensor", labelEn: "Sensor GPIO", type: "number" },
-    { key: "sensorType", label: "Tipo de sensor", labelEn: "Sensor type", type: "select", options: [{ value: 2, label: "DHT22" }] },
+    {
+      key: "sensorType",
+      label: "Tipo de sensor",
+      labelEn: "Sensor type",
+      type: "select",
+      options: [
+        { value: 2, label: "DHT22 / AM2301 (por defecto)" },
+        { value: 1, label: "DHT11" },
+        { value: 4, label: "Si7021" },
+        { value: 0, label: "Virtual, sin sensor físico / no hardware" },
+      ],
+    },
   ],
   30: [
     {
@@ -186,7 +238,10 @@ function buildTypeFields(acc) {
     if (d.autoRelock !== undefined && d.autoRelock !== "") extra.i = Number(d.autoRelock);
   } else if (t === 20 && hasGpio) {
     const g = Number(d.gpio);
-    extra.w = 1;
+    // "w" = tipo de válvula HomeKit (0=agua por defecto, 1=riego, 2=ducha,
+    // 3=grifo). Solo se emite si el usuario elige algo distinto de 0, para no
+    // ensuciar el JSON ni forzar "riego" como hacía antes.
+    if (d.w !== undefined && d.w !== "" && Number(d.w) !== 0) extra.w = Number(d.w);
     extra["0"] = { r: [[g]] };
     extra["1"] = { r: [[g, 1]] };
   } else if (t === 22 || t === 23 || t === 24) {
@@ -237,7 +292,7 @@ function parseTypeFields(t, accObj) {
       data.gpio = rest["1"].r[0][0];
       delete rest["1"];
       delete rest["0"];
-      delete rest.w;
+      if (rest.w !== undefined) { data.w = rest.w; delete rest.w; }
     }
   } else if (t === 22 || t === 23 || t === 24) {
     if (rest.g !== undefined) {
@@ -249,8 +304,11 @@ function parseTypeFields(t, accObj) {
       delete rest.n;
     }
   } else if (t === 30) {
-    if (rest.g !== undefined) {
-      data.gpios = (rest.g || []).join(", ");
+    // Solo se extrae a un campo editable si "g" es una lista PLANA de GPIOs. Si
+    // viene anidada (p.ej. [[12,14]], PWM multipin/direccionable) se deja en el
+    // JSON avanzado (rawExtra) para conservarla verbatim y no aplanarla.
+    if (rest.g !== undefined && Array.isArray(rest.g) && !rest.g.some((x) => Array.isArray(x))) {
+      data.gpios = rest.g.join(", ");
       delete rest.g;
     }
   } else if (t === 40) {
@@ -514,6 +572,8 @@ function buildConfig() {
   const c = {};
   const io = state.io
     .map((g) => {
+      // Grupo avanzado conservado tal cual (GPIOs anidados, p.ej. PWM de bombilla).
+      if (g.raw) { try { return JSON.parse(g.raw); } catch (e) { /* si el raw se corrompió, cae al parseo normal */ } }
       const gpios = parseGpioList(g.gpios);
       if (!gpios.length) return null;
       const extra = parseParamsList(g.params);
@@ -810,6 +870,23 @@ function renderIoList() {
   state.io.forEach((group) => {
     const div = document.createElement("div");
     div.className = "io-group";
+    // Grupo avanzado (GPIOs anidados PWM): se muestra en solo lectura y se
+    // conserva verbatim; no se edita por campos para no romper su estructura.
+    if (group.raw) {
+      div.innerHTML = `
+        <div class="io-group-row">
+          <label>${t("gpiosLabel")} <span class="io-role-tag">${currentLang === "en" ? "advanced (PWM)" : "avanzado (PWM)"}</span>
+            <input type="text" value="${escapeHtmlSaved(group.raw)}" readonly title="${currentLang === "en" ? "Nested PWM group, preserved as-is" : "Grupo PWM anidado, se conserva tal cual"}">
+          </label>
+          <button class="remove-btn" data-action="remove-io">${t("removeBtn")}</button>
+        </div>`;
+      div.querySelector('[data-action="remove-io"]').addEventListener("click", () => {
+        state.io = state.io.filter((g) => g.id !== group.id);
+        render();
+      });
+      container.appendChild(div);
+      return;
+    }
     const roleLabel = gpioRoleLabel(parseGpioList(group.gpios)[0]);
     div.innerHTML = `
       <div class="io-group-row">
@@ -940,7 +1017,7 @@ function renderAccessoryList() {
           </select>
         </label>
         <label>${t("nameLabel")}
-          <input type="text" data-field="nm" value="${acc.nm}" placeholder="${t("namePlaceholder")}">
+          <input type="text" data-field="nm" value="${escapeHtmlSaved(acc.nm)}" placeholder="${t("namePlaceholder")}">
         </label>
         ${
           showInching
@@ -992,7 +1069,7 @@ function renderAccessoryList() {
                        </label>`;
                    }
                    return `<label>${tfLabel(f)} ${tfHint(f) ? `<span class="hint">${tfHint(f)}</span>` : ""}
-                       <input type="${f.type}" data-typefield="${f.key}" value="${val}">
+                       <input type="${f.type}" data-typefield="${f.key}" value="${escapeHtmlSaved(val)}">
                      </label>`;
                  })
                  .join("")}
@@ -1000,7 +1077,7 @@ function renderAccessoryList() {
           : ""
       }
       <label style="margin-top:10px">${t("buttonsLabel")} <span class="hint">ej: 0:1, 14:1</span>
-        <input type="text" data-field="buttons" value="${acc.buttons.map((b) => `${b.gpio}:${b.type}`).join(", ")}">
+        <input type="text" data-field="buttons" value="${escapeHtmlSaved(acc.buttons.map((b) => `${b.gpio}:${b.type}`).join(", "))}">
       </label>
       ${
         !friendly || (acc.rawExtra && acc.rawExtra.trim())
@@ -1011,7 +1088,7 @@ function renderAccessoryList() {
                 ? ` <span class="hint">${t("rawExtraTypeFieldsHint")}</span>`
                 : ` <span class="hint">${t("rawExtraGenericHint")}</span>`
             }
-               <textarea data-field="rawExtra" placeholder='{"0":{"r":[[12,0]]},"1":{"r":[[12,1]]}}'>${acc.rawExtra}</textarea>
+               <textarea data-field="rawExtra" placeholder='{"0":{"r":[[12,0]]},"1":{"r":[[12,1]]}}'>${escapeHtmlSaved(acc.rawExtra)}</textarea>
              </label>`
           : ""
       }
@@ -1092,7 +1169,7 @@ function renderJson() {
 
   const warnings = validate();
   const warningsEl = document.getElementById("warnings");
-  warningsEl.innerHTML = warnings.map((w) => `<div class="warning-item">⚠ ${w}</div>`).join("");
+  warningsEl.innerHTML = warnings.map((w) => `<div class="warning-item">⚠ ${escapeHtmlSaved(w)}</div>`).join("");
 
   renderDeviceGpioPanel();
 }
@@ -1423,6 +1500,15 @@ function loadJsonIntoForm(text) {
     const mode = arr[1];
     const pull = arr[2] !== undefined ? arr[2] : 0;
     const params = arr.slice(3).join(", ");
+    // Grupos que el modelo por filas NO puede representar sin corromperlos al
+    // round-trip: (a) GPIOs ANIDADOS (p.ej. bombillas PWM: [[12,14]]), o (b) sin
+    // modo declarado (p.ej. [[33]], donde el modo quedaría undefined→null→0). Se
+    // conservan TAL CUAL (raw) y se re-emiten verbatim.
+    const nested = Array.isArray(gpios) && gpios.some((x) => Array.isArray(x));
+    const noMode = arr[1] === undefined || arr[1] === null;
+    if (nested || noMode) {
+      return [{ id: nextId(), gpios: (Array.isArray(gpios) ? gpios.flat(Infinity) : [gpios]).join(", "), mode, pull, params, raw: JSON.stringify(arr) }];
+    }
     return gpios.map((gpio) => ({ id: nextId(), gpios: String(gpio), mode, pull, params }));
   });
   if (!state.io.length) {
@@ -1746,7 +1832,7 @@ function renderWizard() {
       <h3>${t("wizIntroH3")}</h3>
       ${wizardGpioSummaryHTML()}
       <label>${t("hostnameLabel")}
-        <input type="text" id="w-hostname" value="${state.general.hostname}" placeholder="${t("hostnamePlaceholder")}">
+        <input type="text" id="w-hostname" value="${escapeHtmlSaved(state.general.hostname)}" placeholder="${t("hostnamePlaceholder")}">
       </label>
       <label class="checkbox-label"><input type="checkbox" id="w-has-led" ${state.general.ledGpio !== null && state.general.ledGpio !== "" ? "checked" : ""}> ${t("wizIntroLedCheckbox")}</label>
       <div id="w-led-fields" style="${state.general.ledGpio !== null && state.general.ledGpio !== "" ? "" : "display:none"}">
@@ -1811,7 +1897,7 @@ function renderWizard() {
     content.innerHTML = `
       <h3>${t("wizAccNameH3")}</h3>
       <label>${t("wizAccNameLabel")}
-        <input type="text" id="w-acc-name" value="${acc.nm}" placeholder="${t("namePlaceholder")}">
+        <input type="text" id="w-acc-name" value="${escapeHtmlSaved(acc.nm)}" placeholder="${t("namePlaceholder")}">
       </label>
     `;
     document.getElementById("w-acc-name").addEventListener("input", (e) => {
@@ -1884,7 +1970,7 @@ function renderWizard() {
         <input type="number" id="w-custom-t" value="${acc.t}" placeholder="ej: 3">
       </label>
       <label>${t("wizAccCustomJsonLabel")}
-        <textarea id="w-custom-json" placeholder='{"0":{"r":[[12,0]]},"1":{"r":[[12,1]]}}'>${acc.rawExtra}</textarea>
+        <textarea id="w-custom-json" placeholder='{"0":{"r":[[12,0]]},"1":{"r":[[12,1]]}}'>${escapeHtmlSaved(acc.rawExtra)}</textarea>
       </label>
     `;
     document.getElementById("w-custom-t").addEventListener("input", (e) => {
@@ -1939,7 +2025,7 @@ function renderWizard() {
     content.innerHTML = `
       <h3>${t("wizConfirmH3")}</h3>
       <div class="wizard-summary-box">
-        <strong>${acc.nm.trim() || t("wizConfirmNoName")}</strong> — ${typeLabelText}<br>
+        <strong>${escapeHtmlSaved(acc.nm.trim() || t("wizConfirmNoName"))}</strong> — ${typeLabelText}<br>
         ${acc.relayGpio !== null && acc.relayGpio !== "" ? `${t("relayGpioLabel")}: ${acc.relayGpio}<br>` : ""}
         ${typeDataSummary ? `${typeDataSummary}<br>` : ""}
         ${acc.buttons.length ? `${t("wizConfirmButtonOn")} ${acc.buttons[0].gpio}` : t("wizConfirmNoButton")}
@@ -2307,6 +2393,13 @@ function currentGpioRoles() {
     if ((tAcc === 1 || tAcc === 2) && acc.relayGpio !== null && acc.relayGpio !== "") pushU(relays, acc.relayGpio);
     if ((tAcc === 4 || tAcc === 20) && td.gpio !== undefined && td.gpio !== "") pushU(relays, td.gpio);
     if (tAcc === 3 && td.gpio !== undefined && td.gpio !== "") pushU(buttons, td.gpio);
+    // Bombilla t:30 — canales PWM (salidas): van con los relés para emparejar.
+    if (tAcc === 30 && td.gpios) parseGpioList(td.gpios).forEach((g) => pushU(relays, g));
+    // Puerta de garaje t:40 — sensores de fin de carrera (entradas): con los pulsadores.
+    if (tAcc === 40) {
+      if (td.f3gpio !== undefined && td.f3gpio !== "") pushU(buttons, td.f3gpio);
+      if (td.f2gpio !== undefined && td.f2gpio !== "") pushU(buttons, td.f2gpio);
+    }
     (acc.buttons || []).forEach((b) => { if (b.gpio !== null && b.gpio !== "") pushU(buttons, b.gpio); });
     if (acc.rawExtra && acc.rawExtra.trim()) {
       try { collectGpiosOrderedFrom(JSON.parse(acc.rawExtra), relays, buttons, pushU); } catch (e) { /* JSON inválido: se ignora */ }
@@ -2355,6 +2448,17 @@ function applyRemapPlan(plan) {
   const map = plan.map;
   const one = (v) => { const n = Number(v); return (!Number.isNaN(n) && map.has(n)) ? map.get(n) : v; };
   state.io.forEach((group) => {
+    if (group.raw) {
+      // Remapea dentro de la estructura anidada conservada, en profundidad.
+      try {
+        const arr = JSON.parse(group.raw);
+        const deep = (a) => a.map((x) => (Array.isArray(x) ? deep(x) : (map.has(x) ? map.get(x) : x)));
+        if (Array.isArray(arr[0])) arr[0] = deep(arr[0]);
+        group.raw = JSON.stringify(arr);
+        group.gpios = (Array.isArray(arr[0]) ? arr[0].flat(Infinity) : []).join(", ");
+      } catch (e) { /* raw corrupto: se deja */ }
+      return;
+    }
     group.gpios = parseGpioList(group.gpios).map((g) => (map.has(g) ? map.get(g) : g)).join(", ");
   });
   if (state.general.ledGpio !== null && state.general.ledGpio !== "") {
@@ -2367,6 +2471,10 @@ function applyRemapPlan(plan) {
     if (acc.relayGpio !== null && acc.relayGpio !== "") acc.relayGpio = one(acc.relayGpio);
     const td = acc.typeData || {};
     if (td.gpio !== undefined && td.gpio !== "") td.gpio = one(td.gpio);
+    // Canales PWM de bombilla (t:30) y sensores de garaje (t:40): también se remapean.
+    if (td.gpios !== undefined && td.gpios !== "") td.gpios = parseGpioList(td.gpios).map((g) => (map.has(g) ? map.get(g) : g)).join(", ");
+    if (td.f3gpio !== undefined && td.f3gpio !== "") td.f3gpio = one(td.f3gpio);
+    if (td.f2gpio !== undefined && td.f2gpio !== "") td.f2gpio = one(td.f2gpio);
     (acc.buttons || []).forEach((b) => { if (b.gpio !== null && b.gpio !== "") b.gpio = one(b.gpio); });
     // GPIOs dentro de acciones en crudo (r/b/f<n>), que si no quedarían sin remapear.
     if (acc.rawExtra && acc.rawExtra.trim()) {

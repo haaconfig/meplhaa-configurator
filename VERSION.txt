@@ -1,3 +1,36 @@
+Configurador MEPLHAA — v2.0
+Fecha: 2026-08-07
+
+Cambios desde v1.99 (nuevo: adaptar los GPIOs de un JSON pegado a otro dispositivo):
+- Nuevo botón "Adaptar mis GPIOs a este" junto a "Usar esta configuración". Tras
+  pegar un JSON y elegir un dispositivo real del selector, PROPONE un remapeo pin
+  a pin (relé→relé, pulsador→pulsador, LED→LED) contra el pinout real del destino
+  (blakref.js) y solo lo aplica tras revisarlo y confirmar. No reemplaza la config
+  (eso lo sigue haciendo "Usar esta configuración").
+- Nueva tarjeta "🔀 Adaptar GPIOs al dispositivo": tabla de correspondencias
+  (Rol · tu GPIO → GPIO destino · pin), avisos cuando el destino no tiene pines
+  suficientes de un tipo, y botones Aplicar / Cancelar. Si tu config no tiene nada
+  que adaptar, degrada a solo MOSTRAR los GPIOs y roles del dispositivo elegido.
+- El remapeo se aplica en un solo paso (lee el valor original y escribe el nuevo),
+  así un intercambio de pines 5↔12 funciona sin remapear en cadena.
+- Soporte de tooltips bilingües (data-i18n-title) en la interfaz.
+- Motivado por el trabajo manual de reubicar GPIOs al adaptar el TCL y el LG a
+  otros emisores: automatiza esa reasignación de forma revisable, no a ciegas.
+
+Configurador MEPLHAA — v1.99
+Fecha: 2026-08-06
+
+Cambios desde v1.98 (mejora del apartado "Pegar JSON existente"):
+- Si el JSON pegado es inválido, el mensaje de error ahora indica la línea y
+  columna (Lx:y) y muestra un FRAGMENTO del JSON alrededor del fallo con un
+  marcador ▸, y además SELECCIONA esa posición en el textarea (el navegador
+  hace scroll hasta ahí) para localizar el error de un vistazo.
+- Nuevo botón "Limpiar" que vacía el textarea y el estado, para pegar otro JSON
+  de cero sin tener que borrar a mano.
+- Motivado por un caso real: una config larga en una sola línea se corrompía al
+  copiarla desde el terminal ("Unterminated string at position N") y no había
+  forma cómoda de ver dónde ni de empezar de nuevo.
+
 Configurador MEPLHAA — v1.98
 Fecha: 2026-08-05
 

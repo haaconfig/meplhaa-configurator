@@ -653,6 +653,9 @@ function applyStaticTranslations() {
   document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
     el.placeholder = t(el.dataset.i18nPlaceholder);
   });
+  document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+    el.title = t(el.dataset.i18nTitle);
+  });
   document.getElementById("lang-es").classList.toggle("active", currentLang === "es");
   document.getElementById("lang-en").classList.toggle("active", currentLang === "en");
 }
@@ -1338,14 +1341,43 @@ function showJsonRepairSuggestion(fixedText) {
   document.getElementById("btn-repair-dismiss").addEventListener("click", hideJsonRepairSuggestion);
 }
 
+// Enriquece el mensaje de error de JSON.parse: además del texto del motor,
+// calcula línea/columna y un fragmento del JSON alrededor del fallo (con un
+// marcador ▸), para que el usuario vea DÓNDE está el problema. Devuelve también
+// la posición del carácter para poder resaltarlo en el textarea.
+function describeJsonError(text, errMsg) {
+  const m = /position (\d+)/.exec(errMsg || "");
+  if (!m) return { msg: errMsg, pos: -1 };
+  const pos = Math.min(Number(m[1]), text.length);
+  let line = 1, col = 1;
+  for (let i = 0; i < pos; i++) {
+    if (text[i] === "\n") { line++; col = 1; } else col++;
+  }
+  const from = Math.max(0, pos - 22);
+  const to = Math.min(text.length, pos + 22);
+  const near = (text.slice(from, pos) + "▸" + text.slice(pos, to)).replace(/\s+/g, " ");
+  return { msg: `${errMsg} — L${line}:${col} · ${t("loadJsonErrorNear")}: …${near}…`, pos };
+}
+
+// Lleva el cursor del textarea a la posición del error y la selecciona, para
+// que el navegador haga scroll hasta ahí y el usuario la vea marcada.
+function highlightJsonError(pos) {
+  const ta = document.getElementById("json-input");
+  if (!ta || pos < 0) return;
+  ta.focus();
+  try { ta.setSelectionRange(pos, Math.min(pos + 1, ta.value.length)); } catch (e) {}
+}
+
 function loadJsonIntoForm(text) {
   const statusEl = document.getElementById("load-status");
   let parsed;
   try {
     parsed = JSON.parse(text);
   } catch (e) {
-    statusEl.textContent = `${t("loadJsonInvalid")}: ${e.message}`;
+    const info = describeJsonError(text, e.message);
+    statusEl.textContent = `${t("loadJsonInvalid")}: ${info.msg}`;
     statusEl.className = "error";
+    highlightJsonError(info.pos);
     const repair = tryRepairJson(text);
     if (repair) {
       showJsonRepairSuggestion(repair.fixed);
@@ -1355,6 +1387,7 @@ function loadJsonIntoForm(text) {
     return;
   }
   hideJsonRepairSuggestion();
+  hideRemapReview();
 
   // Si el JSON pegado es de una versión anterior a v12 "Merlin" (acciones en
   // notación objeto {"g":..} y/o sin "io" central), se convierte a v12
@@ -1477,6 +1510,18 @@ document.getElementById("btn-load-json").addEventListener("click", () => {
   if (st.classList.contains("ok") || st.classList.contains("warn")) {
     setMode("advanced");
   }
+});
+
+// "Limpiar": vacía el textarea y el estado para poder pegar otro JSON de cero.
+document.getElementById("btn-clear-json").addEventListener("click", () => {
+  const ta = document.getElementById("json-input");
+  ta.value = "";
+  const st = document.getElementById("load-status");
+  st.textContent = "";
+  st.className = "";
+  hideJsonRepairSuggestion();
+  hideRemapReview();
+  ta.focus();
 });
 
 // ---------- Convertidor MEPLHAA v11 "Peregrine" -> v12 "Merlin" ----------
@@ -2186,6 +2231,239 @@ function selectDeviceByIdx(idx) {
   document.getElementById("device-example").value = String(idx);
   updateDeviceDescription();
 }
+
+// ---------- Adaptar GPIOs a otro dispositivo (remapeo revisable) ----------
+// El usuario pega su JSON, elige un dispositivo del selector y pulsa "Adaptar
+// mis GPIOs a este": en lugar de reemplazar la config (eso es "Usar esta
+// configuración"), se PROPONE un remapeo pin a pin (relé→relé, pulsador→
+// pulsador, LED→LED) contra el pinout real del destino (blakref.js) y solo se
+// aplica tras revisarlo y confirmar. Nada silencioso: el usuario ha sufrido
+// bastante con GPIOs equivocados como para reescribirlos a ciegas.
+let pendingRemap = null; // plan calculado, pendiente de "Aplicar"
+
+// Clasifica el pinout Tasmota del destino (blakref g) en cubos por rol MEPLHAA,
+// ordenando por el número de sufijo (Relay1, Relay2…) y luego por GPIO.
+function deviceTargetPins(hint) {
+  const entry = blakadderEntry(hint);
+  if (!entry || !entry.g || !entry.g.length) return null;
+  const buckets = { relays: [], buttons: [], ledLinks: [], leds: [], others: [] };
+  const num = (comp) => { const m = /(\d+)\s*$/.exec(comp || ""); return m ? Number(m[1]) : 0; };
+  entry.g.slice().sort((a, b) => (num(a[1]) - num(b[1])) || (a[0] - b[0])).forEach(([g, comp]) => {
+    if (/^Relay/i.test(comp)) buckets.relays.push({ g, comp });
+    else if (/^Button/i.test(comp) || /^Switch/i.test(comp)) buckets.buttons.push({ g, comp });
+    else if (/^LedLink/i.test(comp)) buckets.ledLinks.push({ g, comp });
+    else if (/^Led/i.test(comp)) buckets.leds.push({ g, comp });
+    else buckets.others.push({ g, comp });
+  });
+  return buckets;
+}
+
+// Recorre acciones en crudo (rawExtra) recogiendo GPIOs en orden: entry[0] de
+// los arrays "r" (relé) y "b"/"f<n>" (pulsador/entrada digital), igual que
+// collectGpioRolesFrom pero conservando el orden para el emparejamiento.
+function collectGpiosOrderedFrom(node, relays, buttons, pushU) {
+  if (Array.isArray(node)) { node.forEach((it) => collectGpiosOrderedFrom(it, relays, buttons, pushU)); return; }
+  if (typeof node !== "object" || node === null) return;
+  for (const [key, value] of Object.entries(node)) {
+    if (key === "r" && Array.isArray(value)) {
+      value.forEach((entry) => { if (Array.isArray(entry) && entry.length) pushU(relays, entry[0]); });
+    } else if ((key === "b" || /^f\d$/.test(key)) && Array.isArray(value)) {
+      value.forEach((entry) => { if (Array.isArray(entry) && entry.length) pushU(buttons, entry[0]); });
+    } else {
+      collectGpiosOrderedFrom(value, relays, buttons, pushU);
+    }
+  }
+}
+
+// Reescribe in situ los GPIOs de un árbol de acciones (rawExtra) según el Map
+// from→to, en los mismos sitios que collectGpiosOrderedFrom (entry[0] de r/b/f).
+function remapGpiosInNode(node, map) {
+  if (Array.isArray(node)) { node.forEach((it) => remapGpiosInNode(it, map)); return; }
+  if (typeof node !== "object" || node === null) return;
+  for (const [key, value] of Object.entries(node)) {
+    if ((key === "r" || key === "b" || /^f\d$/.test(key)) && Array.isArray(value)) {
+      value.forEach((entry) => {
+        if (Array.isArray(entry) && entry.length) {
+          const n = Number(entry[0]);
+          if (!Number.isNaN(n) && map.has(n)) entry[0] = map.get(n);
+        }
+      });
+    } else {
+      remapGpiosInNode(value, map);
+    }
+  }
+}
+
+// GPIOs de MI config actual agrupados por rol, en orden de aparición y sin
+// duplicados (misma lógica que gpioRoleLabel: relés t:1/2/4/20, pulsadores t:3
+// + buttons + botones de setup, LED = c.l), incluyendo los que viven dentro de
+// acciones en crudo (rawExtra) de accesorios personalizados.
+function currentGpioRoles() {
+  const relays = [], buttons = [];
+  const pushU = (arr, g) => { g = Number(g); if (!Number.isNaN(g) && !arr.includes(g)) arr.push(g); };
+  for (const acc of state.accessories) {
+    const tAcc = Number(acc.t);
+    const td = acc.typeData || {};
+    if ((tAcc === 1 || tAcc === 2) && acc.relayGpio !== null && acc.relayGpio !== "") pushU(relays, acc.relayGpio);
+    if ((tAcc === 4 || tAcc === 20) && td.gpio !== undefined && td.gpio !== "") pushU(relays, td.gpio);
+    if (tAcc === 3 && td.gpio !== undefined && td.gpio !== "") pushU(buttons, td.gpio);
+    (acc.buttons || []).forEach((b) => { if (b.gpio !== null && b.gpio !== "") pushU(buttons, b.gpio); });
+    if (acc.rawExtra && acc.rawExtra.trim()) {
+      try { collectGpiosOrderedFrom(JSON.parse(acc.rawExtra), relays, buttons, pushU); } catch (e) { /* JSON inválido: se ignora */ }
+    }
+  }
+  parseButtonPairs(state.general.setupButtons).forEach(([g]) => pushU(buttons, g));
+  const led = (state.general.ledGpio !== null && state.general.ledGpio !== "" && !Number.isNaN(Number(state.general.ledGpio))) ? Number(state.general.ledGpio) : null;
+  return { relays, buttons, ledGpio: led };
+}
+
+// Empareja mis GPIOs con los pines del destino, por rol y en orden. Devuelve las
+// correspondencias (para la tabla de revisión), un Map from→to para aplicar, y
+// avisos de lo que no cupo (más relés/pulsadores que pines del destino).
+function buildRemapPlan(hint) {
+  const target = deviceTargetPins(hint);
+  if (!target) return null;
+  const cur = currentGpioRoles();
+  const rows = [], warnings = [];
+  const map = new Map();
+  const zip = (fromList, toList, roleLabel) => {
+    fromList.forEach((from, i) => {
+      const to = toList[i];
+      if (to === undefined) { warnings.push({ role: roleLabel, from }); return; }
+      rows.push({ role: roleLabel, from, to: to.g, comp: to.comp, changed: from !== to.g });
+      if (from !== to.g) map.set(from, to.g);
+    });
+  };
+  zip(cur.relays, target.relays, t("roleRelay"));
+  zip(cur.buttons, target.buttons, t("roleButton"));
+  if (cur.ledGpio !== null) {
+    const ledTo = target.ledLinks[0] || target.leds[0];
+    if (ledTo) {
+      rows.push({ role: t("roleLed"), from: cur.ledGpio, to: ledTo.g, comp: ledTo.comp, changed: cur.ledGpio !== ledTo.g });
+      if (cur.ledGpio !== ledTo.g) map.set(cur.ledGpio, ledTo.g);
+    } else {
+      warnings.push({ role: t("roleLed"), from: cur.ledGpio });
+    }
+  }
+  return { rows, map, warnings, target, hint };
+}
+
+// Aplica el remapeo en un solo paso (lee siempre el valor ORIGINAL y escribe el
+// nuevo desde el Map), así un intercambio 5↔12 funciona sin remapear en cadena.
+function applyRemapPlan(plan) {
+  if (!plan || !plan.map || !plan.map.size) return 0;
+  const map = plan.map;
+  const one = (v) => { const n = Number(v); return (!Number.isNaN(n) && map.has(n)) ? map.get(n) : v; };
+  state.io.forEach((group) => {
+    group.gpios = parseGpioList(group.gpios).map((g) => (map.has(g) ? map.get(g) : g)).join(", ");
+  });
+  if (state.general.ledGpio !== null && state.general.ledGpio !== "") {
+    const n = Number(state.general.ledGpio);
+    if (!Number.isNaN(n) && map.has(n)) state.general.ledGpio = map.get(n);
+  }
+  state.general.setupButtons = parseButtonPairs(state.general.setupButtons)
+    .map(([g, ty]) => `${map.has(g) ? map.get(g) : g}:${ty}`).join(", ");
+  state.accessories.forEach((acc) => {
+    if (acc.relayGpio !== null && acc.relayGpio !== "") acc.relayGpio = one(acc.relayGpio);
+    const td = acc.typeData || {};
+    if (td.gpio !== undefined && td.gpio !== "") td.gpio = one(td.gpio);
+    (acc.buttons || []).forEach((b) => { if (b.gpio !== null && b.gpio !== "") b.gpio = one(b.gpio); });
+    // GPIOs dentro de acciones en crudo (r/b/f<n>), que si no quedarían sin remapear.
+    if (acc.rawExtra && acc.rawExtra.trim()) {
+      try { const extra = JSON.parse(acc.rawExtra); remapGpiosInNode(extra, map); acc.rawExtra = JSON.stringify(extra, null, 2); } catch (e) { /* JSON inválido: se ignora */ }
+    }
+  });
+  render();
+  return map.size;
+}
+
+function hideRemapReview() {
+  const card = document.getElementById("gpio-remap-card");
+  if (!card) return;
+  card.style.display = "none";
+  const body = document.getElementById("gpio-remap-body");
+  if (body) body.innerHTML = "";
+  pendingRemap = null;
+}
+
+// Pinta la revisión: correspondencia propuesta + avisos + Aplicar/Cancelar. Si
+// no hay nada que adaptar, degrada al modo "solo mostrar" el pinout del destino.
+function renderRemapReview(plan, hint) {
+  const card = document.getElementById("gpio-remap-card");
+  const body = document.getElementById("gpio-remap-body");
+  if (!card || !body) return;
+  const en = currentLang === "en";
+  const devName = hint ? `${hint.category} ${hint.model}` : "";
+  card.style.display = "";
+
+  const target = plan ? plan.target : deviceTargetPins(hint);
+  if (!target) {
+    body.innerHTML = `<p class="hint">${escapeHtmlSaved(t("remapNoPinout"))}</p>`;
+    return;
+  }
+
+  // Tabla de pines del destino (referencia), con rol traducido.
+  const roleOf = (comp) => /^Relay/i.test(comp) ? t("roleRelay")
+    : (/^Button/i.test(comp) || /^Switch/i.test(comp)) ? t("roleButton")
+    : /^Led/i.test(comp) ? t("roleLed") : translateComponent(comp, en);
+  const allPins = [...target.relays, ...target.buttons, ...target.ledLinks, ...target.leds, ...target.others];
+  const pinRows = allPins.map((p) => `<tr><td>GPIO ${p.g}</td><td><span class="io-role-tag">${escapeHtmlSaved(roleOf(p.comp))}</span></td><td>${escapeHtmlSaved(translateComponent(p.comp, en))}</td></tr>`).join("");
+  const pinTable = `<table class="gpio-table"><thead><tr><th>GPIO</th><th>${en ? "Role" : "Rol"}</th><th>${en ? "Component" : "Componente"}</th></tr></thead><tbody>${pinRows}</tbody></table>`;
+
+  if (!plan || !plan.rows.length) {
+    body.innerHTML = `<p class="hint">${escapeHtmlSaved(t("remapNothing").replace("%s", devName))}</p>${pinTable}`;
+    return;
+  }
+
+  const th = en ? ["Role", "Your GPIO", "", "Target GPIO", "Pin"] : ["Rol", "Tu GPIO", "", "GPIO destino", "Pin"];
+  const trs = plan.rows.map((r) => {
+    const arrow = r.changed ? "→" : "=";
+    const cls = r.changed ? "" : ' class="remap-nochange"';
+    return `<tr${cls}><td><span class="io-role-tag">${escapeHtmlSaved(r.role)}</span></td><td>GPIO ${r.from}</td><td>${arrow}</td><td>GPIO ${r.to}</td><td>${escapeHtmlSaved(translateComponent(r.comp, en))}</td></tr>`;
+  }).join("");
+  const mapTable = `<table class="gpio-table remap-table"><thead><tr><th>${th[0]}</th><th>${th[1]}</th><th></th><th>${th[3]}</th><th>${th[4]}</th></tr></thead><tbody>${trs}</tbody></table>`;
+
+  let warnHtml = "";
+  if (plan.warnings.length) {
+    const items = plan.warnings.map((w) => `<li>${escapeHtmlSaved(t("remapUnmapped").replace("%r", w.role).replace("%g", "GPIO " + w.from).replace("%d", devName))}</li>`).join("");
+    warnHtml = `<div class="remap-warn"><b>${escapeHtmlSaved(t("remapWarnTitle"))}</b><ul>${items}</ul></div>`;
+  }
+
+  const nChange = plan.rows.filter((r) => r.changed).length;
+  const intro = `<p class="hint">${escapeHtmlSaved(t("remapIntro").replace("%s", devName).replace("%n", String(nChange)))}</p>`;
+  const actions = nChange
+    ? `<div class="json-input-actions"><button class="btn-primary" id="btn-remap-apply">${escapeHtmlSaved(t("remapApplyBtn"))}</button><button class="btn-secondary" id="btn-remap-cancel">${escapeHtmlSaved(t("remapCancelBtn"))}</button></div>`
+    : `<p class="ok">${escapeHtmlSaved(t("remapNoChangeNeeded"))}</p><div class="json-input-actions"><button class="btn-secondary" id="btn-remap-cancel">${escapeHtmlSaved(t("remapCloseBtn"))}</button></div>`;
+
+  body.innerHTML = intro + mapTable + warnHtml + actions;
+
+  const applyBtn = document.getElementById("btn-remap-apply");
+  if (applyBtn) applyBtn.addEventListener("click", () => {
+    const n = applyRemapPlan(plan);
+    body.innerHTML = `<p class="ok">${escapeHtmlSaved(t("remapDone").replace("%n", String(n)).replace("%s", devName))}</p>`;
+    pendingRemap = null;
+  });
+  const cancelBtn = document.getElementById("btn-remap-cancel");
+  if (cancelBtn) cancelBtn.addEventListener("click", hideRemapReview);
+}
+
+document.getElementById("btn-adapt-device").addEventListener("click", () => {
+  const val = document.getElementById("device-example").value;
+  const card = document.getElementById("gpio-remap-card");
+  const body = document.getElementById("gpio-remap-body");
+  // Necesita un dispositivo real del catálogo (no "custom" ni "saved:").
+  if (val === "custom" || val === "" || (typeof val === "string" && val.indexOf("saved:") === 0)) {
+    card.style.display = "";
+    body.innerHTML = `<p class="hint">${escapeHtmlSaved(t("remapPickDevice"))}</p>`;
+    return;
+  }
+  const device = DEVICE_CATALOG[Number(val)];
+  if (!device) return;
+  const hint = { category: device.category, model: device.model };
+  pendingRemap = buildRemapPlan(hint);
+  renderRemapReview(pendingRemap, hint);
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+});
 
 // ---------- Buscador de dispositivos ----------
 (function initDeviceSearch() {

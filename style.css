@@ -1,6 +1,7 @@
 :root {
-  --purple: #f57c00;
-  --purple-dark: #e65100;
+  /* Paleta dorada (tonos oro iOS 27). "purple" es histórico: es el color de acento. */
+  --purple: #C77A12;      /* oro ámbar — fondo de botones/acento (contraste ~ con blanco como el naranja anterior) */
+  --purple-dark: #9A5E08; /* oro oscuro — texto/enlaces/hover sobre blanco (AA) */
   --bg: #f4f4f6;
   --card-bg: #ffffff;
   --border: #e0e0e6;
@@ -225,7 +226,7 @@ button {
 
 .io-role-tag {
   display: inline-block;
-  background: #b23c00; /* naranja oscuro: contraste AA con texto blanco (~5:1) */
+  background: #8A5406; /* oro oscuro: contraste AA con texto blanco (~6:1) */
   color: #fff;
   font-size: 11px;
   font-weight: 700;
@@ -660,7 +661,7 @@ button {
 .gpio-table tr:last-child td { border-bottom: 0; }
 #device-gpio-card h2 { margin-top: 0; }
 #gpio-remap-card h2 { margin-top: 0; }
-.remap-table td:nth-child(3) { color: var(--accent, #e8730c); font-weight: 700; text-align: center; width: 1.5em; }
+.remap-table td:nth-child(3) { color: var(--accent, #C77A12); font-weight: 700; text-align: center; width: 1.5em; }
 .remap-table td:nth-child(4) { font-family: ui-monospace, Consolas, monospace; white-space: nowrap; }
 .remap-nochange { opacity: 0.5; }
 .remap-warn { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: rgba(220, 140, 0, 0.10); border: 1px solid rgba(220, 140, 0, 0.35); font-size: 0.9em; }

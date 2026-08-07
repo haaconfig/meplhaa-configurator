@@ -1,3 +1,23 @@
+Configurador MEPLHAA — v2.3
+Fecha: 2026-08-07
+
+Cambios desde v2.2 (imagen de marca — tonos dorados iOS 27):
+- La paleta naranja de la web pasa a DORADO (tonos oro tipo iOS 27): acento
+  --purple #f57c00 -> #C77A12 (oro ámbar) y --purple-dark #e65100 -> #9A5E08
+  (oro oscuro, texto/enlaces sobre blanco con contraste AA). El botón de
+  contraste AA #b23c00 -> #8A5406. No se añade ningún color de fondo: la web
+  mantiene su fondo claro.
+- Logo (logo-meplhaa-gold.png): recoloreado a nivel de píxel solo en los tonos
+  NARANJAS -> oro iOS 27, conservando el AZUL de las "AA", el texto oscuro "MEP"
+  y la MISMA fuente (es el mismo trazado, solo cambia el tono). Sin halo/fondo.
+- Favicon (favicon.svg): casa en oro ámbar con reflejo, fondo transparente.
+- El logo naranja anterior (logo-meplhaa.png) se conserva en el repo por si se
+  quiere revertir.
+- Traducción del catálogo: 76 etiquetas de ejemplo aportadas por la comunidad
+  que aparecían en ESPAÑOL con la web en inglés ahora tienen su texto en inglés
+  (exampleEn). Añadida una comprobación en el tester para que no vuelva a colarse
+  texto sin traducir.
+
 Configurador MEPLHAA — v2.2
 Fecha: 2026-08-07
 

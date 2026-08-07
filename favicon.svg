@@ -1,12 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
     <linearGradient id="haaG" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFB300"/>
-      <stop offset="1" stop-color="#F4511E"/>
+      <stop offset="0" stop-color="#FFD87A"/>
+      <stop offset="0.5" stop-color="#F0A520"/>
+      <stop offset="1" stop-color="#C77A12"/>
+    </linearGradient>
+    <linearGradient id="haaSpec" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
     </linearGradient>
   </defs>
   <rect x="45" y="11" width="6" height="14" rx="2" fill="url(#haaG)"/>
   <path d="M32 6 L57 29 L57 52 Q57 56 53 56 L11 56 Q7 56 7 52 L7 29 Z" fill="url(#haaG)"/>
+  <path d="M32 6 L57 29 L57 34 Q45 28 32 28 Q19 28 7 34 L7 29 Z" fill="url(#haaSpec)" opacity="0.8"/>
   <g fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round">
     <path d="M22 28 A14 14 0 0 1 42 28"/>
     <path d="M26 32 A8 8 0 0 1 38 32"/>

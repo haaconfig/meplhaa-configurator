@@ -647,20 +647,36 @@ function validate() {
   const outputs = declaredGpios(OUTPUT_MODES);
   const inputs = declaredGpios(INPUT_MODES);
   const notOutput =
-    currentLang === "en" ? (g) => `GPIO ${g} is not declared as Output in "io".` : (g) => `El GPIO ${g} no está declarado como Salida en "io".`;
+    currentLang === "en"
+      ? (g) => `GPIO ${g} is not declared as Output in "io". Add it in the "GPIOs (io)" section with Mode = 2 (Output).`
+      : (g) => `El GPIO ${g} no está declarado como Salida en "io". Añádelo en la sección "GPIOs (io)" con Modo = 2 (Salida).`;
   const notInput =
     currentLang === "en"
-      ? (g) => `GPIO ${g} is not declared as Binary Input (mode 6) in "io".`
-      : (g) => `El GPIO ${g} no está declarado como Entrada binaria (modo 6) en "io".`;
+      ? (g) => `GPIO ${g} is not declared as Binary Input (mode 6) in "io". Add it in the "GPIOs (io)" section with Mode = 6 (Binary input).`
+      : (g) => `El GPIO ${g} no está declarado como Entrada binaria (modo 6) en "io". Añádelo en la sección "GPIOs (io)" con Modo = 6 (Entrada binaria).`;
 
   if (state.general.ledGpio !== null && state.general.ledGpio !== "") {
     if (!outputs.has(Number(state.general.ledGpio))) {
-      warnings.push(currentLang === "en" ? `LED ${notOutput(state.general.ledGpio)}` : `LED: ${notOutput(state.general.ledGpio)}`);
+      warnings.push(`LED: ${notOutput(state.general.ledGpio)}`);
     }
   }
 
   state.accessories.forEach((acc, idx) => {
     const label = acc.nm.trim() || (currentLang === "en" ? `Accessory #${idx + 1}` : `Accesorio #${idx + 1}`);
+    // Accesorio que se quedaría "sin hacer nada" por falta de GPIO (sin JSON avanzado que lo supla).
+    const tt = Number(acc.t);
+    const td0 = acc.typeData || {};
+    const noRaw = !(acc.rawExtra && acc.rawExtra.trim());
+    if (noRaw && (tt === 1 || tt === 2) && (acc.relayGpio === null || acc.relayGpio === "")) {
+      warnings.push(currentLang === "en"
+        ? `${label}: switch/outlet without a relay GPIO — it won't do anything. Fill in "Relay GPIO".`
+        : `${label}: interruptor/enchufe sin GPIO de relé — no hará nada. Indica el "GPIO del relé".`);
+    }
+    if (noRaw && [3, 4, 20, 22, 23, 24].includes(tt) && (td0.gpio === undefined || td0.gpio === "")) {
+      warnings.push(currentLang === "en"
+        ? `${label}: this accessory has no GPIO assigned — it won't work. Fill in its GPIO.`
+        : `${label}: este accesorio no tiene GPIO asignado — no funcionará. Indica su GPIO.`);
+    }
     if (acc.relayGpio !== null && acc.relayGpio !== "" && !outputs.has(Number(acc.relayGpio))) {
       warnings.push(`${label}: ${notOutput(acc.relayGpio)}`);
     }
@@ -716,8 +732,12 @@ function applyStaticTranslations() {
   document.querySelectorAll("[data-i18n-title]").forEach((el) => {
     el.title = t(el.dataset.i18nTitle);
   });
-  document.getElementById("lang-es").classList.toggle("active", currentLang === "es");
-  document.getElementById("lang-en").classList.toggle("active", currentLang === "en");
+  document.querySelectorAll("[data-i18n-aria]").forEach((el) => {
+    el.setAttribute("aria-label", t(el.dataset.i18nAria));
+  });
+  const les = document.getElementById("lang-es"), len = document.getElementById("lang-en");
+  les.classList.toggle("active", currentLang === "es"); les.setAttribute("aria-pressed", String(currentLang === "es"));
+  len.classList.toggle("active", currentLang === "en"); len.setAttribute("aria-pressed", String(currentLang === "en"));
 }
 
 // Al cambiar de idioma, el texto visible de las opciones del selector de
@@ -772,6 +792,7 @@ function render() {
   document.getElementById("gen-raw-extra").value = state.general.rawExtra;
   renderDeviceHint("device-hint-box");
   renderJson();
+  renderDeviceGpioPanel();
 }
 
 // Detecta para qué se usa un GPIO (relé, LED, botón) cruzando los
@@ -793,7 +814,7 @@ function collectGpioRolesFrom(node, relaySet, buttonSet) {
       value.forEach((entry) => {
         if (Array.isArray(entry) && entry.length) relaySet.add(Number(entry[0]));
       });
-    } else if ((key === "b" || /^f\d$/.test(key)) && Array.isArray(value)) {
+    } else if ((key === "b" || /^f\d+$/.test(key)) && Array.isArray(value)) {
       value.forEach((entry) => {
         if (Array.isArray(entry) && entry.length) buttonSet.add(Number(entry[0]));
       });
@@ -891,7 +912,7 @@ function renderIoList() {
     div.innerHTML = `
       <div class="io-group-row">
         <label>${t("gpiosLabel")} ${roleLabel ? `<span class="io-role-tag">${roleLabel}</span>` : ""}
-          <input type="text" data-field="gpios" value="${group.gpios}" placeholder="ej: 12, 13">
+          <input type="text" data-field="gpios" value="${escapeHtmlSaved(group.gpios)}" placeholder="ej: 12, 13">
         </label>
         <label>${t("modeLabel")}
           <select data-field="mode">
@@ -908,7 +929,7 @@ function renderIoList() {
           </select>
         </label>
         <label>${t("paramsLabel")} <span class="hint">(${paramHint(group.mode)})</span>
-          <input type="text" data-field="params" value="${group.params}" placeholder="ej: 1">
+          <input type="text" data-field="params" value="${escapeHtmlSaved(group.params)}" placeholder="ej: 1">
         </label>
         <button class="remove-btn" data-action="remove-io">${t("removeBtn")}</button>
       </div>
@@ -1004,7 +1025,7 @@ function renderAccessoryList() {
     const div = document.createElement("div");
     div.className = "accessory-item";
     const typeInfo = ACCESSORY_TYPES.find((x) => x.id === Number(acc.t));
-    const typeLabelText = typeInfo ? `${acc.t} - ${currentLang === "en" ? typeInfo.labelEn : typeInfo.label}` : `${t("manualTypeOption")} (${acc.t})`;
+    const typeLabelText = typeInfo ? `${escapeHtmlSaved(acc.t)} - ${currentLang === "en" ? typeInfo.labelEn : typeInfo.label}` : `${t("manualTypeOption")} (${escapeHtmlSaved(acc.t)})`;
     div.innerHTML = `
       <h3 class="accessory-heading">${t("wizAccessoryLabel")} #${idx + 1} — ${typeLabelText}</h3>
       <div class="accessory-row">
@@ -1022,7 +1043,7 @@ function renderAccessoryList() {
         ${
           showInching
             ? `<label>${t("inchingLabel")} <span class="hint">${t("inchingHint")}</span>
-                 <input type="number" step="any" data-field="inching" value="${acc.inching ?? ""}" placeholder="ej: 10">
+                 <input type="number" step="any" data-field="inching" value="${escapeHtmlSaved(acc.inching ?? "")}" placeholder="ej: 10">
                </label>`
             : ""
         }
@@ -1043,11 +1064,11 @@ function renderAccessoryList() {
         ${
           friendly
             ? `<label>${t("relayGpioLabel")}
-                 <input type="number" data-field="relayGpio" value="${acc.relayGpio ?? ""}" placeholder="ej: 12">
+                 <input type="number" data-field="relayGpio" value="${escapeHtmlSaved(acc.relayGpio ?? "")}" placeholder="ej: 12">
                </label>`
             : !inCatalog
             ? `<label>${t("numericTypeLabel")}
-                 <input type="number" data-field="tCustom" value="${acc.t}" placeholder="ej: 100">
+                 <input type="number" data-field="tCustom" value="${escapeHtmlSaved(acc.t)}" placeholder="ej: 100">
                </label>`
             : ""
         }
@@ -1169,9 +1190,13 @@ function renderJson() {
 
   const warnings = validate();
   const warningsEl = document.getElementById("warnings");
-  warningsEl.innerHTML = warnings.map((w) => `<div class="warning-item">⚠ ${escapeHtmlSaved(w)}</div>`).join("");
-
-  renderDeviceGpioPanel();
+  // Encabezado identificador + intro cuando hay avisos (y nada si no los hay).
+  const head = warnings.length
+    ? `<div class="warnings-head">${escapeHtmlSaved(t("warningsTitle"))}</div><div class="warnings-intro">${escapeHtmlSaved(t("warningsIntro"))}</div>`
+    : "";
+  warningsEl.innerHTML = head + warnings.map((w) => `<div class="warning-item">⚠ ${escapeHtmlSaved(w)}</div>`).join("");
+  // El panel de foto/GPIOs del dispositivo NO se reconstruye aquí (renderJson se
+  // llama en cada tecla); se refresca en render() ante cambios estructurales.
 }
 
 // Panel derecho: tabla de GPIOs del dispositivo (GPIO -> rol -> modo), sacada
@@ -1424,16 +1449,17 @@ function showJsonRepairSuggestion(fixedText) {
 // la posición del carácter para poder resaltarlo en el textarea.
 function describeJsonError(text, errMsg) {
   const m = /position (\d+)/.exec(errMsg || "");
-  if (!m) return { msg: errMsg, pos: -1 };
+  // Mensaje propio y traducible (no se vuelca el e.message del navegador, que
+  // viene en inglés y con jerga); se conserva la posición para resaltarla.
+  if (!m) return { msg: t("loadJsonErrorGeneric"), pos: -1 };
   const pos = Math.min(Number(m[1]), text.length);
-  let line = 1, col = 1;
-  for (let i = 0; i < pos; i++) {
-    if (text[i] === "\n") { line++; col = 1; } else col++;
-  }
+  let line = 1;
+  for (let i = 0; i < pos; i++) { if (text[i] === "\n") line++; }
   const from = Math.max(0, pos - 22);
   const to = Math.min(text.length, pos + 22);
   const near = (text.slice(from, pos) + "▸" + text.slice(pos, to)).replace(/\s+/g, " ");
-  return { msg: `${errMsg} — L${line}:${col} · ${t("loadJsonErrorNear")}: …${near}…`, pos };
+  const lineWord = currentLang === "en" ? "line" : "línea";
+  return { msg: `${t("loadJsonErrorGeneric")} (${lineWord} ${line}) · ${t("loadJsonErrorNear")}: …${near}…`, pos };
 }
 
 // Lleva el cursor del textarea a la posición del error y la selecciona, para
@@ -1519,18 +1545,21 @@ function loadJsonIntoForm(text) {
   // automáticamente al cargar, para que cada relé/válvula/etc. aparezca
   // como una tarjeta propia y editable desde el primer momento (en vez de
   // quedar oculto hasta pulsar "Separar en accesorios independientes").
-  state.accessories = (parsed.a || []).map(accessoryObjectToState).flatMap(expandAccessoryEs);
+  const baseAccs = (parsed.a || []).map(accessoryObjectToState);
+  state.accessories = baseAccs.flatMap(expandAccessoryEs);
+  const esSplit = state.accessories.length - baseAccs.length; // servicios "es" separados
   if (!state.accessories.length) {
-    state.accessories = [{ id: nextId(), t: 1, custom: false, nm: "", inching: "", initState: "", relayGpio: null, buttons: [], typeData: {}, rawExtra: "" }];
+    state.accessories = [newAccessory()];
   }
 
   render();
+  const esNotice = esSplit > 0 ? " " + t("loadJsonEsSplit").replace("%n", String(esSplit)) : "";
   if (wasLegacy) {
-    statusEl.textContent = t("loadJsonConverted");
+    statusEl.textContent = t("loadJsonConverted") + esNotice;
     statusEl.className = "warn";
   } else {
-    statusEl.textContent = t("loadJsonOk");
-    statusEl.className = "ok";
+    statusEl.textContent = t("loadJsonOk") + esNotice;
+    statusEl.className = esSplit > 0 ? "warn" : "ok";
   }
 }
 
@@ -1624,6 +1653,7 @@ function convertLegacyToV12(cfg) {
   const obj = JSON.parse(JSON.stringify(cfg));
   const outputs = new Set();
   const inputs = new Set();
+  const pwm = new Set(); // canales PWM de bombilla (t:30, clave "g" en array)
 
   function convRelayEntry(el) {
     if (Array.isArray(el)) {
@@ -1668,6 +1698,12 @@ function convertLegacyToV12(cfg) {
         node[key] = val.map(convRelayEntry);
       } else if ((key === "b" || /^f\d+$/.test(key)) && Array.isArray(val)) {
         node[key] = val.map(convButtonEntry);
+      } else if (key === "g" && node.t !== undefined) {
+        // GPIO(s) de accesorio declarados con "g": sensores t:22-24 (escalar ->
+        // entrada) y bombillas t:30 (array de canales PWM -> salida PWM). Sin
+        // esto, el "io" reconstruido dejaba fuera esos pines (JSON incompleto).
+        if (Array.isArray(val)) val.flat(Infinity).forEach((n) => { const x = Number(n); if (!Number.isNaN(x)) pwm.add(x); });
+        else { const x = Number(val); if (!Number.isNaN(x)) inputs.add(x); }
       } else {
         walk(val);
       }
@@ -1682,9 +1718,11 @@ function convertLegacyToV12(cfg) {
   if (c.io === undefined) {
     const outArr = [...outputs].filter((g) => !Number.isNaN(g)).sort((a, b) => a - b);
     const inArr = [...inputs].filter((g) => !Number.isNaN(g) && !outputs.has(g)).sort((a, b) => a - b);
+    const pwmArr = [...pwm].filter((g) => !Number.isNaN(g) && !outputs.has(g) && !inputs.has(g)).sort((a, b) => a - b);
     const io = [];
     if (outArr.length) io.push([outArr, 2]);
     if (inArr.length) io.push([inArr, 6]);
+    if (pwmArr.length) io.push([pwmArr, 7]); // canales PWM de bombilla (modo 7)
     if (io.length) {
       obj.c = { io, ...c }; // "io" primero, por legibilidad
       return obj;
@@ -1911,7 +1949,7 @@ function renderWizard() {
     content.innerHTML = `
       <h3>${t("wizAccOutputH3")}</h3>
       <label>${t("wizAccOutputLabel")}
-        <input type="number" id="w-acc-gpio" value="${acc.relayGpio ?? ""}" placeholder="ej: 12">
+        <input type="number" id="w-acc-gpio" value="${escapeHtmlSaved(acc.relayGpio ?? "")}" placeholder="ej: 12">
       </label>
       <p class="hint">${t("wizAccOutputHint")}</p>
     `;
@@ -1940,7 +1978,7 @@ function renderWizard() {
               </label>`;
           }
           return `<label>${tfLabel(f)} ${tfHint(f) ? `<span class="hint">${tfHint(f)}</span>` : ""}
-              <input type="${f.type}" data-typefield="${f.key}" value="${val}">
+              <input type="${f.type}" data-typefield="${f.key}" value="${escapeHtmlSaved(val)}">
             </label>`;
         })
         .join("")}
@@ -1967,7 +2005,7 @@ function renderWizard() {
     content.innerHTML = `
       <h3>${label || t("wizAccCustomDefaultTitle")}</h3>
       <label>${t("wizAccCustomLabel")}
-        <input type="number" id="w-custom-t" value="${acc.t}" placeholder="ej: 3">
+        <input type="number" id="w-custom-t" value="${escapeHtmlSaved(acc.t)}" placeholder="ej: 3">
       </label>
       <label>${t("wizAccCustomJsonLabel")}
         <textarea id="w-custom-json" placeholder='{"0":{"r":[[12,0]]},"1":{"r":[[12,1]]}}'>${escapeHtmlSaved(acc.rawExtra)}</textarea>
@@ -2016,7 +2054,7 @@ function renderWizard() {
   if (wizard.step === "acc-confirm") {
     const acc = wizardCurrentAcc();
     const label = typeLabel(acc.t);
-    const typeLabelText = label ? `${acc.t} - ${label}` : `${currentLang === "en" ? "custom type" : "tipo personalizado"} (t=${acc.t})`;
+    const typeLabelText = label ? `${escapeHtmlSaved(acc.t)} - ${label}` : `${currentLang === "en" ? "custom type" : "tipo personalizado"} (t=${escapeHtmlSaved(acc.t)})`;
     const typeDataSummary = Object.entries(acc.typeData || {})
       .filter(([, v]) => v !== "" && v !== undefined)
       .map(([k, v]) => `${k}: ${v}`)
@@ -2120,10 +2158,11 @@ function setMode(mode, scroll = true) {
   // para no recargar el asistente que debe ser mas simple. Estilo en linea para que
   // gane a las reglas de .card en el CSS.
   document.querySelectorAll(".adv-only").forEach((el) => { el.style.display = mode === "advanced" ? "" : "none"; });
-  document.getElementById("mode-wizard").classList.toggle("active", mode === "wizard");
-  document.getElementById("mode-advanced").classList.toggle("active", mode === "advanced");
+  const mw = document.getElementById("mode-wizard"), ma = document.getElementById("mode-advanced");
+  mw.classList.toggle("active", mode === "wizard"); mw.setAttribute("aria-pressed", String(mode === "wizard"));
+  ma.classList.toggle("active", mode === "advanced"); ma.setAttribute("aria-pressed", String(mode === "advanced"));
   const irBtn = document.getElementById("mode-ir");
-  if (irBtn) irBtn.classList.toggle("active", isIr);
+  if (irBtn) { irBtn.classList.toggle("active", isIr); irBtn.setAttribute("aria-pressed", String(isIr)); }
   if (mode === "wizard") {
     renderWizard();
   } else if (mode === "advanced") {
@@ -2360,7 +2399,7 @@ function collectGpiosOrderedFrom(node, relays, buttons, pushU) {
   for (const [key, value] of Object.entries(node)) {
     if (key === "r" && Array.isArray(value)) {
       value.forEach((entry) => { if (Array.isArray(entry) && entry.length) pushU(relays, entry[0]); });
-    } else if ((key === "b" || /^f\d$/.test(key)) && Array.isArray(value)) {
+    } else if ((key === "b" || /^f\d+$/.test(key)) && Array.isArray(value)) {
       value.forEach((entry) => { if (Array.isArray(entry) && entry.length) pushU(buttons, entry[0]); });
     } else {
       collectGpiosOrderedFrom(value, relays, buttons, pushU);
@@ -2374,7 +2413,7 @@ function remapGpiosInNode(node, map) {
   if (Array.isArray(node)) { node.forEach((it) => remapGpiosInNode(it, map)); return; }
   if (typeof node !== "object" || node === null) return;
   for (const [key, value] of Object.entries(node)) {
-    if ((key === "r" || key === "b" || /^f\d$/.test(key)) && Array.isArray(value)) {
+    if ((key === "r" || key === "b" || /^f\d+$/.test(key)) && Array.isArray(value)) {
       value.forEach((entry) => {
         if (Array.isArray(entry) && entry.length) {
           const n = Number(entry[0]);
@@ -2637,7 +2676,11 @@ document.getElementById("btn-adapt-device").addEventListener("click", () => {
     if (btn) btn.focus();
   }
 
-  input.addEventListener("input", () => render(input.value));
+  let searchTimer = null;
+  input.addEventListener("input", () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => render(input.value), 130); // debounce: no recomputar en cada tecla
+  });
   input.addEventListener("focus", () => { if (input.value.trim()) render(input.value); });
   input.addEventListener("keydown", (e) => {
     const items = [].slice.call(results.querySelectorAll(".dsr-item"));
@@ -2895,4 +2938,4 @@ populateDevicePicker();
 render();
 renderWizard();
 renderSavedList();
-setMode("advanced", false); // carga inicial: formulario avanzado por defecto, sin scroll
+setMode("wizard", false); // carga inicial: ASISTENTE por defecto (público sin conocimientos), sin scroll

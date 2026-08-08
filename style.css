@@ -189,10 +189,10 @@ button {
 }
 
 .btn-primary {
-  background: var(--purple);
+  background: var(--purple-dark); /* oro oscuro: blanco encima da ~5.3:1 (WCAG AA) */
   color: white;
 }
-.btn-primary:hover { background: var(--purple-dark); }
+.btn-primary:hover { background: #7a4a05; }
 
 .btn-secondary {
   background: #eee;
@@ -258,6 +258,8 @@ button {
   margin-top: 10px;
 }
 
+.warnings-head { font-weight: 800; color: #8a5406; margin: 4px 0 2px; }
+.warnings-intro { color: #6b5c4c; font-size: 0.9em; margin-bottom: 8px; }
 .warning-item {
   background: #fff8e1;
   color: #8a6d00;
@@ -388,7 +390,7 @@ button {
 
 .choice-card.selected {
   border-color: var(--purple);
-  background: #ece5fa;
+  background: #fff3e6;
   color: var(--purple-dark);
 }
 
@@ -448,6 +450,7 @@ button {
 #device-search:focus {
   outline: none;
   border-color: var(--purple);
+  box-shadow: 0 0 0 3px rgba(199, 122, 18, 0.35); /* foco visible (accesibilidad) */
 }
 .device-search-clear {
   position: absolute;
@@ -546,7 +549,7 @@ button {
 .type-info-table th, .type-info-table td {
   text-align: left;
   padding: 5px 8px;
-  border-bottom: 1px solid #e6e0f2;
+  border-bottom: 1px solid #f0e4d2;
   vertical-align: top;
 }
 

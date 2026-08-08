@@ -8,6 +8,14 @@ Generador visual de configuraciones JSON (script MEPLHAA) para dispositivos con 
 
 ## Uso rápido
 
+**👉 Ábrela en el navegador — nada que instalar:**
+### **[haaconfig.github.io/meplhaa-configurator](https://haaconfig.github.io/meplhaa-configurator/)**
+
+Es la forma recomendada para todo el mundo. Lo de abajo es solo si prefieres ejecutarla en local.
+
+<details>
+<summary>Ejecutarla en local (avanzado / sin conexión)</summary>
+
 1. Descomprime el zip (o clona/descarga la carpeta `haa-web`).
 2. Abre una terminal en esa carpeta y arranca un servidor estático, por ejemplo:
    ```
@@ -18,6 +26,7 @@ Generador visual de configuraciones JSON (script MEPLHAA) para dispositivos con 
 También puedes usar cualquier otro servidor estático (Live Server de VS Code, `npx serve`, etc.) — son ficheros planos, no requieren Node ni build.
 
 > Nota: abrir `index.html` con doble clic (`file://`) puede fallar por restricciones del navegador al cargar los ficheros `.js`. Usa siempre un servidor local como el del paso 2.
+</details>
 
 ## ¿Qué puedes hacer con esta web?
 

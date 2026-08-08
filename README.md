@@ -8,6 +8,14 @@ Visual generator of JSON configurations (MEPLHAA script) for devices running the
 
 ## Quick start
 
+**👉 Just open it in your browser — nothing to install:**
+### **[haaconfig.github.io/meplhaa-configurator](https://haaconfig.github.io/meplhaa-configurator/)**
+
+That's the recommended way for everyone. The sections below are only if you prefer to run it locally.
+
+<details>
+<summary>Run it locally (advanced / offline)</summary>
+
 1. Unzip the archive (or clone/download the `haa-web` folder).
 2. Open a terminal in that folder and start a static server, for example:
    ```
@@ -18,6 +26,7 @@ Visual generator of JSON configurations (MEPLHAA script) for devices running the
 You can also use any other static server (VS Code Live Server, `npx serve`, etc.) — these are plain files, they need neither Node nor a build step.
 
 > Note: opening `index.html` with a double click (`file://`) may fail due to browser restrictions when loading the `.js` files. Always use a local server like the one in step 2.
+</details>
 
 ## What can you do with this web app?
 

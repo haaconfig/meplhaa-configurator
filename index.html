@@ -10,38 +10,38 @@
 <meta http-equiv="Expires" content="0">
 <title>Configurador MEPLHAA</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
-<link rel="stylesheet" href="style.css?v=30">
+<link rel="stylesheet" href="style.css?v=31">
 </head>
 <body>
 <header>
   <div class="header-row">
     <div class="title-group">
-      <img src="logo-meplhaa-gold.png?v=1" alt="MEPLHAA Configurator" class="app-logo-full">
+      <img src="logo-meplhaa-gold.webp?v=1" width="900" height="241" alt="MEPLHAA Configurator" class="app-logo-full">
       <h1 data-i18n="appTitle" class="sr-only">Configurador MEPLHAA</h1>
     </div>
     <div class="lang-toggle">
-      <button id="lang-es" class="lang-btn">🇪🇸 ES</button>
-      <button id="lang-en" class="lang-btn">🇬🇧 EN</button>
+      <button id="lang-es" class="lang-btn" aria-pressed="false">🇪🇸 ES</button>
+      <button id="lang-en" class="lang-btn" aria-pressed="false">🇬🇧 EN</button>
     </div>
   </div>
   <span class="badge">v12</span>
-  <span class="app-version-badge">v2.5</span>
+  <span class="app-version-badge">v2.6</span>
   <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
   <p class="github-link">💡 <span data-i18n="feedbackIntro">Sugerencias y errores:</span> <a href="https://docs.google.com/forms/d/e/1FAIpQLSfO5kJFTOnqMvyDNCk1mXBWeOM2BfvpMesBLq3p9S3YpGg-xA/viewform" target="_blank" rel="noopener"><span data-i18n="feedbackForm">rellenar formulario</span> ↗</a> · <a href="https://github.com/haaconfig/meplhaa-configurator" target="_blank" rel="noopener"><span data-i18n="feedbackGithub">ver en GitHub</span> ↗</a></p>
 </header>
 
 <div class="mode-toggle">
-  <button id="mode-wizard" class="mode-btn" data-i18n="modeWizard">🧙 Ir al asistente</button>
-  <button id="mode-advanced" class="mode-btn" data-i18n="modeAdvanced">🛠 Ir al formulario avanzado</button>
-  <button id="mode-ir" class="mode-btn" data-i18n="modeIr">🛰️ Conversor IR</button>
+  <button id="mode-wizard" class="mode-btn" aria-pressed="false" data-i18n="modeWizard">🧙 Ir al asistente</button>
+  <button id="mode-advanced" class="mode-btn" aria-pressed="false" data-i18n="modeAdvanced">🛠 Ir al formulario avanzado</button>
+  <button id="mode-ir" class="mode-btn" aria-pressed="false" data-i18n="modeIr">🛰️ Conversor IR</button>
 </div>
 
 <div class="device-picker card">
   <h2 data-i18n="devicePickerTitle">Selector de dispositivos y funciones</h2>
   <p class="hint" data-i18n="devicePickerHint">Elige el fabricante, el modelo y el ejemplo/función concreta, y pulsa "Usar esta configuración" para cargarla en el formulario.</p>
   <div class="device-search-wrap">
-    <input type="text" id="device-search" autocomplete="off" data-i18n-placeholder="deviceSearchPlaceholder" placeholder="🔍 Buscar dispositivo (marca, modelo, función…)">
-    <button type="button" id="device-search-clear" class="device-search-clear" aria-label="Limpiar" hidden>✕</button>
+    <input type="text" id="device-search" autocomplete="off" data-i18n-placeholder="deviceSearchPlaceholder" data-i18n-aria="searchAria" aria-label="Buscar dispositivo" placeholder="🔍 Buscar dispositivo (marca, modelo, función…)">
+    <button type="button" id="device-search-clear" class="device-search-clear" data-i18n-aria="clearSearchAria" aria-label="Limpiar búsqueda" hidden>✕</button>
     <div id="device-search-results" class="device-search-results" hidden></div>
   </div>
   <div class="device-picker-row">
@@ -102,11 +102,11 @@
           </select>
         </label>
         <label data-i18n="ledGpioLabel">GPIO del LED de estado
-          <input type="number" id="gen-led-gpio" placeholder="ej: 13">
+          <input type="number" id="gen-led-gpio" data-i18n-placeholder="ledGpioPlaceholder" placeholder="ej: 13">
         </label>
         <label class="checkbox-label"><input type="checkbox" id="gen-led-invert" checked> <span data-i18n="ledInvertLabel">Invertir señal del LED</span></label>
         <label data-i18n="setupButtonsLabel">Botón(es) de modo configuración (GPIO:tipo, coma) <span class="hint">ej: 0:5</span>
-          <input type="text" id="gen-setup-buttons" placeholder="ej: 0:5">
+          <input type="text" id="gen-setup-buttons" data-i18n-placeholder="setupButtonsPlaceholder" placeholder="ej: 0:5">
         </label>
       </div>
       <label style="margin-top:10px" data-i18n="rawExtraGeneralLabel">JSON avanzado general (I2C "ic", expansores "mc", UART "r", horarios "tt", acciones de sistema...)
@@ -146,6 +146,7 @@
         </div>
       </div>
       <pre id="json-output" class="json-output"></pre>
+      <p class="hint install-hint" data-i18n="wizInstallHint">Copia este JSON y pégalo en el portal de configuración de HAA (el campo del script del dispositivo) para dejarlo funcionando.</p>
       <div id="warnings" class="warnings"></div>
     </div>
 
@@ -203,8 +204,8 @@
 <script src="blakref.js?v=7"></script>
 <script src="devices.js?v=53"></script>
 <script src="typeInfo.js?v=8"></script>
-<script src="i18n.js?v=26"></script>
-<script src="app.js?v=64"></script>
-<script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+<script src="i18n.js?v=27"></script>
+<script src="app.js?v=65"></script>
+<script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>

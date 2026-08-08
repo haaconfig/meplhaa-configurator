@@ -1,3 +1,41 @@
+Configurador MEPLHAA — v2.6
+Fecha: 2026-08-08
+
+Cambios desde v2.5 (auditoría de 8 agentes: seguridad, fiabilidad, UX, a11y):
+
+CRÍTICO
+- Seguridad (XSS): se escapan TODOS los campos que faltaban al cargar un JSON
+  (GPIOs y parámetros del "io", relayGpio, inching, tipo t y el título del
+  accesorio). Antes, pegar una config maliciosa podía ejecutar código. Prueba de
+  regresión añadida al tester (payload en "io").
+- Fiabilidad: el conversor v11->v12 ahora declara en el "io" central los GPIOs
+  que van en la clave "g" (sensores t:22-24 -> entrada; bombillas PWM t:30 ->
+  salida modo 7). Antes esas migraciones generaban un "io" incompleto. Prueba de
+  regresión añadida.
+- Documentación: ambos README enlazan ya la web en vivo como camino recomendado.
+
+IMPORTANTE
+- Accesibilidad/marca: botones con contraste WCAG AA (oro oscuro), se eliminan
+  restos de color lavanda del tema antiguo, aria-pressed en pestañas de modo e
+  idioma, aria-label/label en el buscador, foco visible en el buscador.
+- Producto: la app arranca en el ASISTENTE por defecto (público sin
+  conocimientos); guía de instalación ("último kilómetro") junto al JSON; el
+  formulario avisa si un accesorio se queda sin GPIO (no haría nada).
+- Textos: los avisos de validación dicen ahora CÓMO arreglarlo y llevan título;
+  el error de JSON inválido se muestra traducido (no el mensaje inglés del
+  navegador); placeholders "ej:" del LED y botones de setup traducidos.
+- Rendimiento: el logo pasa de 680 KB (PNG) a ~44 KB (WebP); el panel de foto ya
+  no se reconstruye en cada tecla; buscador con debounce.
+
+SUGERENCIAS aplicadas: aviso de separación de servicios "es" al cargar; textos
+del remapeo en impersonal; puntuación coherente del aviso LED; analítica por
+https explícito; regex de claves de botón unificada (f\d+); opción "500" del
+conversor IR corregida (tenía value 250).
+
+Pendiente (no incluido, planificado): ampliar el asistente a sensores/termostato
+(funcionalidad, no arreglo); Content-Security-Policy (requiere refactor de un par
+de manejadores inline para no romper nada).
+
 Configurador MEPLHAA — v2.5
 Fecha: 2026-08-08
 

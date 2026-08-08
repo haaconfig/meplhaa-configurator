@@ -1,3 +1,16 @@
+Configurador MEPLHAA — v2.5
+Fecha: 2026-08-08
+
+Cambios desde v2.4 (correcciones de idioma en el selector y el conversor IR):
+- Selector de dispositivo: en inglés, la opción "Empezar desde cero" (modelo de
+  la categoría Custom) salía en español. Ahora se traduce a "Start from scratch"
+  vía modelLabel() (el valor real no cambia). Guard añadido al tester.
+- Conversor IR (ir/index.html): el recuadro de crédito "HAA IR Toolkit" salía
+  solo en español con la web en inglés; ahora es bilingüe ES/EN.
+- Conversor IR: las cajas "IR Captured Packets" (estándar y Pronto) venían
+  RELLENAS con la captura de ejemplo (LG TV MUTE). Ahora se abren VACÍAS, con el
+  formato de ejemplo como placeholder y en la nota, para no confundir al abrir.
+
 Configurador MEPLHAA — v2.4
 Fecha: 2026-08-07
 

@@ -2146,6 +2146,13 @@ function categoryLabel(c) {
   if (c === "__saved__") return currentLang === "en" ? "⭐ My saved" : "⭐ Mis guardados";
   return currentLang === "en" && CATEGORY_LABEL_EN[c] ? CATEGORY_LABEL_EN[c] : c;
 }
+// Igual que las categorías: algunos "modelos" son texto (no un código de
+// fabricante) y hay que traducirlos al mostrarlos. El VALOR real no cambia
+// (se sigue usando "Empezar desde cero" para casar con el catálogo).
+const MODEL_LABEL_EN = { "Empezar desde cero": "Start from scratch" };
+function modelLabel(m) {
+  return currentLang === "en" && MODEL_LABEL_EN[m] ? MODEL_LABEL_EN[m] : m;
+}
 
 function populateDevicePicker() {
   const categorySelect = document.getElementById("device-category");
@@ -2170,7 +2177,7 @@ function populateModelSelect() {
   } else {
     models = [...new Set(DEVICE_CATALOG.filter((d) => d.category === category).map((d) => d.model))];
   }
-  modelSelect.innerHTML = models.map((m) => `<option value="${escapeHtmlSaved(m)}">${escapeHtmlSaved(m)}</option>`).join("");
+  modelSelect.innerHTML = models.map((m) => `<option value="${escapeHtmlSaved(m)}">${escapeHtmlSaved(modelLabel(m))}</option>`).join("");
   populateExampleSelect();
 }
 

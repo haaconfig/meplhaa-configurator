@@ -28,11 +28,14 @@
     <div class="haa-credit">
         🛰️ <b>HAA IR Toolkit</b> — herramienta oficial de RavenSystem, creada por
         Antonio García (<a href="https://github.com/GarzaCon/HAA-IR-Toolkit" target="_blank" rel="noopener">@GarzaCon</a>),
-        licencia Apache 2.0. Integrada aquí sin modificar su lógica.
-        Convierte una captura IR (timings en crudo o Pronto hex) en el
-        <b>protocolo</b> y <b>comando</b> que usa HAA. Pégalos luego en tu accesorio
-        (por ejemplo un HeaterCooler/aire por IR) en los campos <code>"p"</code> y <code>"c"</code>.
-        Fuente: <a href="https://ravensystem.github.io/haairtoolkit/" target="_blank" rel="noopener">ravensystem.github.io/haairtoolkit</a>.
+        licencia Apache 2.0, integrada sin modificar su lógica. Convierte una captura IR
+        (timings en crudo o Pronto hex) en el <b>protocolo</b> y <b>comando</b> de HAA;
+        pégalos en los campos <code>"p"</code> y <code>"c"</code> de tu accesorio.
+        <br>🛰️ <b>HAA IR Toolkit</b> — official RavenSystem tool by Antonio García
+        (@GarzaCon), Apache 2.0, embedded unmodified. Converts an IR capture (raw timings
+        or Pronto hex) into HAA's <b>protocol</b> and <b>command</b>; paste them into your
+        accessory's <code>"p"</code> and <code>"c"</code> fields.
+        <br>Fuente / Source: <a href="https://ravensystem.github.io/haairtoolkit/" target="_blank" rel="noopener">ravensystem.github.io/haairtoolkit</a>.
     </div>
     <div class="container">
         <div class="wrapper">
@@ -48,10 +51,10 @@
                                 <td>
                                     <b>Paste your captured HAA IR Packets, including header and footer,
                                         then click button "Decode HAA IR Protocol"</b>
-                                    <br/>Note: the code assumes (and ignores) a header pair (e.g. + 9050 - 4524 below) and a
-                                    footer single value (e.g. + 540 below). If your capture does not contain header/footer,
+                                    <br/>Note: the code assumes (and ignores) a header pair (e.g. + 9050 - 4524) and a
+                                    footer single value (e.g. + 540). If your capture does not contain header/footer,
                                     check the appropriate checkboxes.
-                                    <br/>Sample captured packets below are for an LG TV "MUTE" button (bAeBaFbAeBaD)
+                                    <br/>The box starts empty — paste your own capture. Format example (an LG TV "MUTE", result bAeBaFbAeBaD): + 9050 - 4524 + 540 - 585 + 540 - 584 + 539 - 1709 …
                                 </td>
                             </tr>
                             <tr>
@@ -86,13 +89,7 @@
 
                                     <br/>
                                     <b>IR Captured Packets</b>
-                                    <textarea id="inputIR" cols="150" rows="16">
-    + 9050 - 4524 +  540 -  585 +  540 -  584 +  539 - 1709 +  540 -  585 +  539 -  585 +  539 -  585 +  539 -  586
-    +  539 -  585 +  538 - 1710 +  539 - 1709 +  540 -  584 +  540 - 1709 +  540 - 1708 +  540 - 1709 +  539 - 1709
-    +  539 - 1709 +  541 - 1708 +  539 -  585 +  539 -  586 +  539 - 1709 +  539 -  585 +  539 -  585 +  539 -  585
-    +  539 -  585 +  540 -  584 +  540 - 1709 +  540 - 1709 +  539 -  585 +  539 - 1709 +  540 - 1709 +  539 - 1710
-    +  538 - 1709 +  540
-                                  </textarea>
+                                    <textarea id="inputIR" cols="150" rows="16" placeholder="Pega aquí tu captura IR / Paste your IR capture here    (ej.: + 9050 - 4524 +  540 -  585 +  540 -  584 +  539 - 1709 ...)"></textarea>
                                 </td>
                             </tr>
                             <tr>
@@ -156,9 +153,7 @@
                                     <br/>
                                     <b>IR Captured Packets</b>
 
-                                    <textarea id="inputIRPronto" cols="150" rows="16">
-    0000 006D 0000 0022 00AC 00AC 0015 0040 0015 0040 0015 0040 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0040 0015 0040 0015 0040 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0040 0015 0015 0015 0015 0015 0040 0015 0015 0015 0040 0015 0040 0015 0040 0015 0015 0015 0040 0015 0040 0015 0015 0015 0040 0015 0015 0015 0015 0015 0015 0015 0689
-                              </textarea>
+                                    <textarea id="inputIRPronto" cols="150" rows="16" placeholder="Pega aquí tu código Pronto hex / Paste your Pronto hex code here    (ej.: 0000 006D 0000 0022 00AC 00AC 0015 0040 ...)"></textarea>
                                 </td>
                             </tr>
                             <tr>

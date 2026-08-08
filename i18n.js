@@ -13,7 +13,7 @@ const T = {
   es: {
     appTitle: "Configurador MEPLHAA",
     appSubtitle: 'Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"',
-    feedbackIntro: "Sugerencias y errores:",
+    feedbackIntro: "¿Un fallo o una idea? Cuéntanoslo:",
     feedbackForm: "rellenar formulario",
     feedbackGithub: "ver en GitHub",
     modeWizard: "🧙 Ir al asistente",
@@ -206,7 +206,7 @@ const T = {
   en: {
     appTitle: "MEPLHAA Configurator",
     appSubtitle: 'Generate the JSON configuration (MEPLHAA script) for devices running HAA v12 "Merlin" firmware',
-    feedbackIntro: "Suggestions & bugs:",
+    feedbackIntro: "Found a bug or have an idea? Tell us:",
     feedbackForm: "fill in the form",
     feedbackGithub: "view on GitHub",
     modeWizard: "🧙 Go to wizard",

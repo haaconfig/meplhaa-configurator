@@ -1,3 +1,12 @@
+Configurador MEPLHAA — v2.4
+Fecha: 2026-08-07
+
+Cambios desde v2.3 (texto del feedback):
+- El aviso del formulario de feedback pasa de "Sugerencias y errores:" a un texto
+  más cercano e invitador: "¿Un fallo o una idea? Cuéntanoslo:" / "Found a bug or
+  have an idea? Tell us:". Acompaña al rediseño del formulario de Google (6
+  preguntas, ver formulario-feedback-meplhaa.md).
+
 Configurador MEPLHAA — v2.3
 Fecha: 2026-08-07
 

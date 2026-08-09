@@ -1,3 +1,18 @@
+Configurador MEPLHAA — v2.9
+Fecha: 2026-08-08
+
+Cambios desde v2.8 (últimos hallazgos de la auditoría: seguridad + pulido):
+- Content-Security-Policy (CSP): añadida una política estricta como defensa en
+  profundidad (solo se permite código y conexiones de la propia web y de la
+  analítica goatcounter; sin scripts inline). Para ello, el único manejador inline
+  (onerror de la foto del dispositivo, que la oculta si no carga) se movió a JS.
+- Buscador: el texto de búsqueda de cada dispositivo se calcula una sola vez
+  (memoización), no en cada tecla.
+- El botón "Adaptar mis GPIOs a este" se oculta hasta que hay una configuración
+  cargada/construida (antes salía siempre y confundía).
+- Pestañas de modo: forma de "control segmentado" (esquinas completas) y estado
+  activo reforzado con negrita (no solo color) para accesibilidad.
+
 Configurador MEPLHAA — v2.8
 Fecha: 2026-08-08
 

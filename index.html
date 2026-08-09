@@ -3,6 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Content-Security-Policy: defensa en profundidad. Solo se permite código y
+     conexiones de esta web y de la analítica (goatcounter). Sin scripts inline
+     (todos los manejadores van en app.js). Se permite estilo inline por los
+     muchos style="..." del maquetado; e imágenes propias + data: (logos SVG). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://gc.zgo.at; connect-src 'self' https://meplhaa.goatcounter.com; img-src 'self' data: https://meplhaa.goatcounter.com; style-src 'self' 'unsafe-inline'; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <!-- Anti-caché: fuerza al navegador a revalidar el index (los .js/.css se
      versionan con ?v=N). Evita quedarse con una versión antigua tras actualizar. -->
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -10,7 +15,7 @@
 <meta http-equiv="Expires" content="0">
 <title>Configurador MEPLHAA</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg?v=3">
-<link rel="stylesheet" href="style.css?v=31">
+<link rel="stylesheet" href="style.css?v=32">
 </head>
 <body>
 <header>
@@ -25,7 +30,7 @@
     </div>
   </div>
   <span class="badge">v12</span>
-  <span class="app-version-badge">v2.8</span>
+  <span class="app-version-badge">v2.9</span>
   <p class="subtitle" data-i18n="appSubtitle">Genera la configuración JSON (script MEPLHAA) para dispositivos con firmware HAA v12 "Merlin"</p>
   <p class="github-link">💡 <span data-i18n="feedbackIntro">Sugerencias y errores:</span> <a href="https://docs.google.com/forms/d/e/1FAIpQLSfO5kJFTOnqMvyDNCk1mXBWeOM2BfvpMesBLq3p9S3YpGg-xA/viewform" target="_blank" rel="noopener"><span data-i18n="feedbackForm">rellenar formulario</span> ↗</a> · <a href="https://github.com/haaconfig/meplhaa-configurator" target="_blank" rel="noopener"><span data-i18n="feedbackGithub">ver en GitHub</span> ↗</a></p>
 </header>
@@ -49,7 +54,7 @@
     <select id="device-model"></select>
     <select id="device-example"></select>
     <button class="btn-primary" id="btn-use-device" data-i18n="useDeviceBtn">Usar esta configuración</button>
-    <button class="btn-secondary" id="btn-adapt-device" data-i18n="adaptDeviceBtn" data-i18n-title="adaptDeviceHint" title="Tras pegar tu JSON: adapta los GPIOs de tu config a este dispositivo (sin reemplazarla).">Adaptar mis GPIOs a este</button>
+    <button class="btn-secondary" id="btn-adapt-device" style="display:none" data-i18n="adaptDeviceBtn" data-i18n-title="adaptDeviceHint" title="Tras pegar tu JSON: adapta los GPIOs de tu config a este dispositivo (sin reemplazarla).">Adaptar mis GPIOs a este</button>
   </div>
   <div id="device-description" class="device-description-box"></div>
 </div>
@@ -205,7 +210,7 @@
 <script src="devices.js?v=53"></script>
 <script src="typeInfo.js?v=8"></script>
 <script src="i18n.js?v=27"></script>
-<script src="app.js?v=67"></script>
+<script src="app.js?v=68"></script>
 <script data-goatcounter="https://meplhaa.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
 </body>
 </html>

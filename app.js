@@ -898,6 +898,17 @@ function render() {
   renderDeviceHint("device-hint-box");
   renderJson();
   renderDeviceGpioPanel();
+  // "Adaptar mis GPIOs a este" solo tiene sentido si ya hay una config con GPIOs
+  // (pegada o construida); se oculta en el primer contacto para no confundir.
+  const adaptBtn = document.getElementById("btn-adapt-device");
+  if (adaptBtn) {
+    const hasConfig = state.io.some((g) => parseGpioList(g.gpios).length > 0)
+      || state.accessories.some((a) => (a.relayGpio !== null && a.relayGpio !== "")
+        || (a.typeData && a.typeData.gpio !== undefined && a.typeData.gpio !== "")
+        || (a.buttons || []).some((b) => b.gpio !== null && b.gpio !== "")
+        || (a.rawExtra && a.rawExtra.trim()));
+    adaptBtn.style.display = hasConfig ? "" : "none";
+  }
 }
 
 // Detecta para qué se usa un GPIO (relé, LED, botón) cruzando los
@@ -1362,15 +1373,18 @@ function renderDeviceGpioPanel() {
     gpioBlock = `<p class="hint" style="margin-top:0">${note}</p><table class="gpio-table"><thead><tr><th>${th[0]}</th><th>${th[1]}</th></tr></thead><tbody>${trs}</tbody></table>`;
   }
 
-  // 3) Foto del dispositivo (imagen local del repo). onerror: se oculta sola.
+  // 3) Foto del dispositivo (imagen local del repo). Si no carga, se oculta sola
+  //    mediante un listener JS (sin onerror inline, para poder aplicar CSP).
   const photo = entry && entry.i
-    ? `<div class="device-photo-wrap"><img class="device-photo" src="${entry.i}" alt="${hint ? `${hint.category} ${hint.model}` : ""}" onerror="this.parentNode.style.display='none'"></div>`
+    ? `<div class="device-photo-wrap"><img class="device-photo" src="${escapeHtmlSaved(entry.i)}" alt="${escapeHtmlSaved(hint ? `${hint.category} ${hint.model}` : "")}"></div>`
     : "";
 
   // Sin nada que mostrar -> ocultar la tarjeta.
   if (!photo && !gpioBlock) { card.style.display = "none"; body.innerHTML = ""; return; }
   body.innerHTML = `<div class="device-gpio-layout">${photo}<div class="gpio-table-wrap">${gpioBlock}</div></div>`;
   card.style.display = "";
+  const img = body.querySelector(".device-photo");
+  if (img) img.addEventListener("error", () => { const w = img.closest(".device-photo-wrap"); if (w) w.style.display = "none"; });
 }
 
 // Recorre el texto (ignorando el contenido de las cadenas) llevando una pila
@@ -2740,7 +2754,9 @@ document.getElementById("btn-adapt-device").addEventListener("click", () => {
   if (!input || !results || typeof DEVICE_CATALOG === "undefined") return;
 
   const norm = (s) => (s || "").toString().normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
-  const haystack = (d) => norm([d.category, d.model, d.example, d.exampleEn, d.description, d.descriptionEn].join(" "));
+  // Memoización: el texto normalizado de cada dispositivo se calcula UNA vez
+  // (no en cada tecla) y se guarda en la propia entrada del catálogo.
+  const haystack = (d) => (d.__hay !== undefined ? d.__hay : (d.__hay = norm([d.category, d.model, d.example, d.exampleEn, d.description, d.descriptionEn].join(" "))));
 
   function search(q) {
     const terms = norm(q).split(/\s+/).filter(Boolean);

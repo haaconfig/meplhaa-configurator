@@ -315,12 +315,14 @@ button {
   background: #eee;
   color: #444;
   padding: 8px 16px;
-  border-radius: 8px 8px 0 0;
+  border-radius: 8px;
+  font-weight: 600;
 }
 
 .mode-btn.active {
-  background: var(--purple);
+  background: var(--purple-dark); /* oro oscuro: blanco encima cumple AA */
   color: white;
+  font-weight: 800; /* refuerzo no cromático del estado activo (accesibilidad) */
 }
 
 #wizard-panel.hidden, #advanced-form.hidden {

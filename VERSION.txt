@@ -1,3 +1,35 @@
+Configurador MEPLHAA — v2.8
+Fecha: 2026-08-08
+
+Cambios desde v2.7 (asistente: termostato y ventilador):
+- El asistente y el formulario avanzado cubren ya, sin escribir JSON:
+    · Ventilador (t:65) on/off por relé.
+    · Termostato / HeaterCooler (t:21) por relé + sensor de temperatura, en modo
+      Calienta o Enfría. Formulario: GPIO del relé, modo, GPIO del sensor y tipo
+      de sensor (DHT22/DHT11/DS18B20/Si7021).
+- Esquema verificado contra la wiki oficial de RavenSystem: HeaterCooler t:21
+  (w=1 calienta / 2 enfría; estados 0/idle -> relé OFF; 3 calienta / 4 enfría ->
+  relé ON; 5 error -> OFF) y Fan t:65 (0=off, 1=on). El relé se declara en "io"
+  modo 2; el GPIO del sensor de temperatura NO se declara en "io" (driver propio).
+- El parseo de vuelta es conservador: solo reconoce la forma canónica de relé, y
+  cualquier variante del catálogo se conserva intacta en el JSON avanzado.
+- Pruebas nuevas en el tester (ventilador y termostato por el asistente).
+
+Configurador MEPLHAA — v2.7
+Fecha: 2026-08-08
+
+Cambios desde v2.6 (asistente para sensores binarios):
+- El asistente y el formulario avanzado ya cubren los SENSORES BINARIOS de
+  principio a fin, sin tener que escribir JSON: Contacto (t:5), Ocupación (6),
+  Fuga (7), Humo (8), CO (9), CO2 (10) y Movimiento (12). Formulario simple:
+  GPIO + "se activa cuando el pin está" a masa/bajo (recomendado, con pull-up) o
+  alto.
+- Genera el esquema correcto verificado contra la wiki oficial de RavenSystem:
+  f1 = activar (estado 1), f0 = desactivar (estado 0), con el tipo 0/1 según el
+  nivel; y auto-declara la entrada en "io" como modo 6, con pull-up (1) cuando es
+  activa en bajo.
+- Nueva prueba en el tester: construir un sensor de contacto desde cero y round-trip.
+
 Configurador MEPLHAA — v2.6
 Fecha: 2026-08-08
 

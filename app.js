@@ -56,6 +56,24 @@ function typeLabel(id) {
 // potencia, Termostato, Sistema de seguridad...) usan el editor "JSON
 // avanzado" porque tienen esquemas más complejos que no están confirmados
 // con suficiente detalle como para construir un formulario fiable.
+// Sensores binarios (misma forma: un GPIO de entrada + nivel activo).
+// Contacto=5, Ocupación=6, Fuga=7, Humo=8, CO=9, CO2=10, Movimiento=12.
+// (Filtro=11 se omite: la wiki dice que debe ir como servicio extra, no principal.)
+const BINARY_SENSORS = [5, 6, 7, 8, 9, 10, 12];
+const BINARY_SENSOR_FIELDS = [
+  { key: "gpio", label: "GPIO del sensor", labelEn: "Sensor GPIO", type: "number" },
+  {
+    key: "activeLevel",
+    label: "Se activa cuando el pin está",
+    labelEn: "Triggers when the pin is",
+    type: "select",
+    options: [
+      { value: 0, label: "A masa / bajo — con pull-up (recomendado) / LOW (to ground)" },
+      { value: 1, label: "A positivo / alto / HIGH" },
+    ],
+  },
+];
+
 const TYPE_FIELD_DEFS = {
   3: [{ key: "gpio", label: "GPIO del botón", labelEn: "Button GPIO", type: "number" }],
   4: [
@@ -213,6 +231,27 @@ const TYPE_FIELD_DEFS = {
     { key: "m", label: "Margen recalibración (%)", labelEn: "Recalibration margin (%)", type: "number", hint: "0-100, por defecto 5", hintEn: "0-100, default 5" },
   ],
 };
+// Todos los sensores binarios comparten el mismo formulario.
+BINARY_SENSORS.forEach((tt) => { TYPE_FIELD_DEFS[tt] = BINARY_SENSOR_FIELDS; });
+
+// Ventilador on/off por relé.
+TYPE_FIELD_DEFS[65] = [{ key: "gpio", label: "GPIO del relé del ventilador", labelEn: "Fan relay GPIO", type: "number" }];
+
+// Termostato (HeaterCooler) por relé + sensor de temperatura.
+TYPE_FIELD_DEFS[21] = [
+  { key: "gpio", label: "GPIO del relé (calefactor/refrigerador)", labelEn: "Relay GPIO (heater/cooler)", type: "number" },
+  { key: "w", label: "Modo", labelEn: "Mode", type: "select", options: [
+    { value: 1, label: "Calienta / Heat" },
+    { value: 2, label: "Enfría / Cool" },
+  ] },
+  { key: "sensorGpio", label: "GPIO del sensor de temperatura", labelEn: "Temperature sensor GPIO", type: "number", hint: "no se declara en io", hintEn: "not declared in io" },
+  { key: "sensorType", label: "Tipo de sensor", labelEn: "Sensor type", type: "select", options: [
+    { value: 2, label: "DHT22 / AM2301 (por defecto)" },
+    { value: 1, label: "DHT11" },
+    { value: 3, label: "DS18B20" },
+    { value: 4, label: "Si7021" },
+  ] },
+];
 
 function tfLabel(f) {
   return currentLang === "en" ? f.labelEn : f.label;
@@ -231,6 +270,15 @@ function buildTypeFields(acc) {
     extra.f0 = [[g]];
     extra.f1 = [[g, 2]];
     extra.f2 = [[g, 3]];
+  } else if (BINARY_SENSORS.includes(t) && hasGpio) {
+    // Sensor binario (contacto/ocupación/fuga/humo/CO/CO2/movimiento). Entrada
+    // digital: f1 = activar (estado 1), f0 = desactivar (estado 0). El "tipo"
+    // (2º valor) 0 = activa con el pin en BAJO (a masa), 1 = en ALTO. Verificado
+    // contra la wiki oficial (Sensors / Accessory-Configuration).
+    const g = Number(d.gpio);
+    const activeLow = Number(d.activeLevel) !== 1; // por defecto activo en bajo
+    extra.f1 = [[g, activeLow ? 0 : 1]];
+    extra.f0 = [[g, activeLow ? 1 : 0]];
   } else if (t === 4 && hasGpio) {
     const g = Number(d.gpio);
     extra["1"] = { r: [[g]] };
@@ -244,6 +292,25 @@ function buildTypeFields(acc) {
     if (d.w !== undefined && d.w !== "" && Number(d.w) !== 0) extra.w = Number(d.w);
     extra["0"] = { r: [[g]] };
     extra["1"] = { r: [[g, 1]] };
+  } else if (t === 65 && hasGpio) {
+    // Ventilador on/off por relé: "0"=off, "1"=on.
+    const g = Number(d.gpio);
+    extra["0"] = { r: [[g, 0]] };
+    extra["1"] = { r: [[g, 1]] };
+  } else if (t === 21 && hasGpio) {
+    // Termostato (HeaterCooler) por relé + sensor de temperatura. w: 1=calienta,
+    // 2=enfría. Estados: 0/idle -> relé OFF; 3 (calienta activo) o 4 (enfría
+    // activo) -> relé ON; 5 (error de sensor) -> OFF por seguridad.
+    // El GPIO del sensor (g) NO se declara en "io" (driver propio del firmware).
+    const relay = Number(d.gpio);
+    const mode = Number(d.w) === 2 ? 2 : 1;
+    extra.w = mode;
+    if (d.sensorGpio !== undefined && d.sensorGpio !== "" && !Number.isNaN(Number(d.sensorGpio))) extra.g = Number(d.sensorGpio);
+    if (d.sensorType !== undefined && d.sensorType !== "") extra.n = Number(d.sensorType);
+    extra["0"] = { r: [[relay, 0]] };
+    extra["5"] = { r: [[relay, 0]] };
+    if (mode === 1) { extra["1"] = { r: [[relay, 0]] }; extra["3"] = { r: [[relay, 1]] }; }
+    else { extra["2"] = { r: [[relay, 0]] }; extra["4"] = { r: [[relay, 1]] }; }
   } else if (t === 22 || t === 23 || t === 24) {
     if (hasGpio) extra.g = Number(d.gpio);
     if (d.sensorType !== undefined && d.sensorType !== "") extra.n = Number(d.sensorType);
@@ -276,6 +343,44 @@ function parseTypeFields(t, accObj) {
       delete rest.f0;
       delete rest.f1;
       delete rest.f2;
+    }
+  } else if (BINARY_SENSORS.includes(t)) {
+    // Sensor binario: recuperar GPIO y nivel activo desde f1 (activar). tipo 0 =
+    // activa en bajo; cualquier otro (u omitido) = alto. Solo se extrae la forma
+    // simple [[gpio, tipo]]; lo demás se deja en el JSON avanzado.
+    const f1 = rest.f1;
+    const simple = Array.isArray(f1) && f1.length === 1 && Array.isArray(f1[0]) && typeof f1[0][0] === "number"
+      && (f1[0][1] === undefined || Number(f1[0][1]) === 0 || Number(f1[0][1]) === 1);
+    if (simple) {
+      data.gpio = f1[0][0];
+      data.activeLevel = Number(f1[0][1]) === 0 ? 0 : 1;
+      delete rest.f1;
+      if (Array.isArray(rest.f0) && rest.f0.length === 1 && Array.isArray(rest.f0[0]) && rest.f0[0][0] === data.gpio) delete rest.f0;
+    }
+  } else if (t === 65) {
+    // Ventilador on/off por relé: solo se extrae si TODAS las acciones son relé
+    // simples y no hay velocidad (y0). Cualquier otra forma queda en JSON avanzado.
+    const numKeys = Object.keys(rest).filter((k) => /^\d+$/.test(k));
+    const onlyRelay = numKeys.length && numKeys.every((k) => rest[k] && rest[k].r && Object.keys(rest[k]).length === 1);
+    const on = rest["1"] && rest["1"].r;
+    if (onlyRelay && !rest.y0 && Array.isArray(on) && on.length === 1 && Array.isArray(on[0]) && typeof on[0][0] === "number") {
+      data.gpio = on[0][0];
+      numKeys.forEach((k) => delete rest[k]);
+    }
+  } else if (t === 21) {
+    // Termostato relé+sensor: solo la forma canónica (acciones = relé simple, sin
+    // botones ni velocidad); si no, se conserva en JSON avanzado sin tocar.
+    const numKeys = Object.keys(rest).filter((k) => /^\d+$/.test(k));
+    const onlyRelay = numKeys.length && numKeys.every((k) => rest[k] && rest[k].r && Object.keys(rest[k]).length === 1);
+    const w = Number(rest.w) === 2 ? 2 : 1;
+    const active = w === 2 ? (rest["4"] && rest["4"].r) : (rest["3"] && rest["3"].r);
+    if (onlyRelay && !rest.b && !rest.y0 && Array.isArray(active) && active.length === 1 && Array.isArray(active[0]) && typeof active[0][0] === "number") {
+      data.gpio = active[0][0];
+      data.w = w;
+      if (rest.g !== undefined && !Array.isArray(rest.g)) { data.sensorGpio = rest.g; delete rest.g; }
+      if (rest.n !== undefined) { data.sensorType = rest.n; delete rest.n; }
+      if (rest.w !== undefined) delete rest.w;
+      numKeys.forEach((k) => delete rest[k]);
     }
   } else if (t === 4) {
     if (rest["1"] && rest["1"].r && rest["1"].r[0]) {
@@ -672,7 +777,7 @@ function validate() {
         ? `${label}: switch/outlet without a relay GPIO — it won't do anything. Fill in "Relay GPIO".`
         : `${label}: interruptor/enchufe sin GPIO de relé — no hará nada. Indica el "GPIO del relé".`);
     }
-    if (noRaw && [3, 4, 20, 22, 23, 24].includes(tt) && (td0.gpio === undefined || td0.gpio === "")) {
+    if (noRaw && [3, 4, 20, 22, 23, 24].concat(BINARY_SENSORS).includes(tt) && (td0.gpio === undefined || td0.gpio === "")) {
       warnings.push(currentLang === "en"
         ? `${label}: this accessory has no GPIO assigned — it won't work. Fill in its GPIO.`
         : `${label}: este accesorio no tiene GPIO asignado — no funcionará. Indica su GPIO.`);
@@ -1786,7 +1891,8 @@ document.getElementById("btn-convert-load").addEventListener("click", () => {
 // así, si cambias o borras el valor, no se queda un GPIO declarado
 // para siempre sin usarse (bug reportado por RavenSystem: escribir y
 // luego borrar/cambiar un GPIO en el asistente dejaba una fila fantasma).
-function ensureIoDeclaration(gpio, mode, source) {
+function ensureIoDeclaration(gpio, mode, source, pull) {
+  pull = pull === undefined ? "0" : String(pull);
   if (source) {
     state.io = state.io.filter((g) => g.autoSource !== source);
   }
@@ -1803,7 +1909,7 @@ function ensureIoDeclaration(gpio, mode, source) {
   state.io = state.io.filter((g) => parseGpioList(g.gpios).length > 0);
   const already = state.io.some((g) => Number(g.mode) === mode && parseGpioList(g.gpios).includes(gpio));
   if (!already) {
-    state.io.push({ id: nextId(), gpios: String(gpio), mode, pull: "0", params: "", autoSource: source });
+    state.io.push({ id: nextId(), gpios: String(gpio), mode, pull, params: "", autoSource: source });
   }
 }
 
@@ -1990,7 +2096,14 @@ function renderWizard() {
         acc.typeData[e.target.dataset.typefield] = e.target.value;
         if (e.target.dataset.typefield === "gpio") {
           if (Number(acc.t) === 3) ensureIoDeclaration(e.target.value, 6, `acc-${acc.id}-typefield-gpio`);
-          if (Number(acc.t) === 4 || Number(acc.t) === 20) ensureIoDeclaration(e.target.value, 2, `acc-${acc.id}-typefield-gpio`);
+          if ([4, 20, 21, 65].includes(Number(acc.t))) ensureIoDeclaration(e.target.value, 2, `acc-${acc.id}-typefield-gpio`);
+          // Nota: el GPIO del sensor de temperatura (t:21, campo sensorGpio) NO se declara en "io".
+        }
+        // Sensor binario: declara la entrada modo 6 con pull-up si es activo en bajo.
+        // Se re-declara ante cualquier cambio (GPIO o nivel) para mantener el pull en sync.
+        if (BINARY_SENSORS.includes(Number(acc.t))) {
+          const pull = Number(acc.typeData.activeLevel) === 1 ? "0" : "1";
+          ensureIoDeclaration(acc.typeData.gpio, 6, `acc-${acc.id}-typefield-gpio`, pull);
         }
         renderJson();
       };
